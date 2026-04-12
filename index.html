@@ -10,8 +10,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Caveat:wght@400;600&display=swap" rel="stylesheet"/>
 <style>
 /* ── LO-FI THEME ── */
@@ -838,277 +836,120 @@ function TB({title,children}){
 
 // ─── TIMETABLE COMPONENT ───
 
-function generatePlanningPDF(cours,users,filtres){
-  const {jsPDF}=window.jspdf;
-  const doc=new jsPDF({unit:'mm',format:'a4',orientation:'landscape'});
-  const W=297,blue=[26,58,140],blue2=[42,91,212],lightBlue=[232,240,255],grey=[107,122,181],dark=[26,35,64],lineG=[224,232,245];
+function generatePlanningPDF(cours, users, filtres){
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({unit:'mm', format:'a4', orientation:'landscape'});
+  const W=297, H=210, M=12;
+  const blue=[26,58,140], blue2=[42,91,212], lightBlue=[232,240,255];
+  const grey=[107,122,181], dark=[26,35,64], lineG=[224,232,245];
 
-  // Header
-  doc.setFillColor(...blue);
-  doc.rect(0,0,W,28,'F');
-  doc.setTextColor(255,255,255);
-  doc.setFont('helvetica','bold');
-  doc.setFontSize(16);
-  doc.text('Plus de bonnes notes — Emploi du Temps',14,13);
-  doc.setFontSize(8);
-  doc.setFont('helvetica','normal');
-  doc.setTextColor(200,215,255);
+  // Apply filters
+  let filtered = [...cours];
+  if(filtres.prof && filtres.prof!=='tous')    filtered=filtered.filter(c=>c.profId===filtres.prof);
+  if(filtres.matiere && filtres.matiere!=='toutes') filtered=filtered.filter(c=>c.matiere===filtres.matiere);
+  if(filtres.niveau && filtres.niveau!=='tous') filtered=filtered.filter(c=>c.niveau===filtres.niveau);
+  const sorted = filtered.sort((a,b)=>
+    ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'].indexOf(a.jour)-
+    ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'].indexOf(b.jour)||a.debut-b.debut
+  );
+  const today = new Date().toLocaleDateString('fr-FR');
   const filterDesc=[];
   if(filtres.prof&&filtres.prof!=='tous'){const p=users.find(u=>u.id===filtres.prof);if(p)filterDesc.push('Prof : '+p.name);}
   if(filtres.matiere&&filtres.matiere!=='toutes')filterDesc.push('Matière : '+filtres.matiere);
   if(filtres.niveau&&filtres.niveau!=='tous')filterDesc.push('Niveau : '+filtres.niveau);
-  doc.text((filterDesc.length?filterDesc.join(' · '):'Tous les cours')+ '  ·  Généré le '+new Date().toLocaleDateString('fr-FR'),14,21);
-  doc.setTextColor(200,215,255);
-  doc.text(`${cours.length} cours`,W-14,21,{align:'right'});
+  const subtitle = filterDesc.length ? filterDesc.join('  ·  ') : 'Tous les cours — Semaine type';
 
-  // Table
-  const rows=[];
-  const sorted=[...cours].sort((a,b)=>['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'].indexOf(a.jour)-['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'].indexOf(b.jour)||a.debut-b.debut);
-  sorted.forEach(c=>{
-    const p=users.find(u=>u.id===c.profId);
+  // Header
+  doc.setFillColor(...blue); doc.rect(0,0,W,26,'F');
+  doc.setDrawColor(255,255,255); doc.setLineWidth(0.4); doc.circle(M+6,13,6,'S');
+  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(255,255,255);
+  doc.text('PBN',M+3.5,15);
+  doc.setFontSize(16); doc.text('Plus de bonnes notes',M+16,12);
+  doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(200,215,255);
+  doc.text(subtitle,M+16,20);
+  doc.setTextColor(255,255,255); doc.setFontSize(20); doc.setFont('helvetica','bold');
+  doc.text(String(sorted.length),W-M,14,{align:'right'});
+  doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(200,215,255);
+  doc.text('cours',W-M,19,{align:'right'});
+  doc.text('Généré le '+today,W-M,24,{align:'right'});
+
+  // Matière color map
+  const matColorMap={'Mathématiques':[26,79,196],'Français':[16,185,129],'Physique':[217,119,6],'Histoire':[147,51,234],'Anglais':[14,165,233],'SVT':[34,197,94],'Philosophie':[234,88,12],'Informatique':[59,130,246]};
+  const getMatColor=mat=>{for(const[k,v] of Object.entries(matColorMap)){if(mat.includes(k.split(' ')[0]))return v;}return[100,110,160];};
+
+  // Rows
+  const rows=sorted.map(c=>{
+    const prof=users.find(u=>u.id===c.profId);
     const eleves=users.filter(u=>c.eleveIds.includes(u.id));
-    const hDebut=`${Math.floor(c.debut)}h${c.debut%1===0?'00':'30'}`;
-    const hFin=`${Math.floor(c.fin)}h${c.fin%1===0?'00':'30'}`;
-    rows.push([c.jour,`${hDebut} – ${hFin}`,c.matiere,c.niveau,p?.name||'—',eleves.map(e=>e.name).join(', ')||'—',c.salle||'—']);
+    const hD=`${Math.floor(c.debut)}h${c.debut%1===0?'00':'30'}`;
+    const hF=`${Math.floor(c.fin)}h${c.fin%1===0?'00':'30'}`;
+    return[c.jour,`${hD} – ${hF}`,c.matiere,c.niveau,prof?.name||'—',eleves.map(e=>e.name.split(' ').map((w,i)=>i===0?w[0]+'.':w).join(' ')).join(', ')||'—',c.salle||'—'];
   });
 
+  const tableW=W-2*M; // 273mm
   doc.autoTable({
-    startY:33,
-    head:[['Jour','Horaire','Matière','Niveau','Professeur','Élèves','Salle']],
+    startY:31,
+    head:[['Jour','Horaire','Matière','Groupe','Professeur','Élèves','Salle']],
     body:rows,
-    margin:{left:14,right:14},
-    headStyles:{fillColor:blue,textColor:255,fontSize:9,fontStyle:'bold',cellPadding:{top:4,bottom:4,left:5,right:5}},
+    margin:{left:M,right:M},
+    tableWidth:tableW,
+    headStyles:{fillColor:blue,textColor:255,fontSize:8,fontStyle:'bold',cellPadding:{top:4,bottom:4,left:5,right:5}},
     bodyStyles:{fontSize:9,textColor:dark,cellPadding:{top:4,bottom:4,left:5,right:5}},
-    columnStyles:{
-      0:{cellWidth:22,fontStyle:'bold'},
-      1:{cellWidth:26},
-      2:{cellWidth:36,fontStyle:'bold'},
-      3:{cellWidth:26},
-      4:{cellWidth:38},
-      5:{cellWidth:'auto'},
-      6:{cellWidth:22},
-    },
+    columnStyles:{0:{cellWidth:22},1:{cellWidth:25},2:{cellWidth:40},3:{cellWidth:25},4:{cellWidth:42},5:{cellWidth:'auto'},6:{cellWidth:20}},
     alternateRowStyles:{fillColor:[248,250,255]},
-    tableLineColor:lineG,tableLineWidth:0.3,
+    tableLineColor:lineG,tableLineWidth:0.25,
+    showHead:'everyPage',rowPageBreak:'avoid',
+    didParseCell:(data)=>{
+      if(data.section==='body'&&data.column.index===0){data.cell.styles.fontStyle='bold';data.cell.styles.textColor=blue;}
+      if(data.section==='body'&&data.column.index===2){const row=sorted[data.row.index];if(row)data.cell.styles.textColor=getMatColor(row.matiere);data.cell.styles.fontStyle='bold';data.cell.styles.paddingLeft=9;}
+    },
     didDrawCell:(data)=>{
-      // Color left border by matière
-      if(data.section==='body'&&data.column.index===0){
-        const matColors={Mathematiques:[26,79,196],Francais:[16,185,129],Physique:[217,119,6],Histoire:[147,51,234],Anglais:[14,165,233],SVT:[34,197,94]};
+      if(data.section==='body'&&data.column.index===2){
         const row=sorted[data.row.index];
-        if(row){
-          const mat=row.matiere.replace('é','e').replace('è','e').replace('ê','e').split(' ')[0];
-          const col=matColors[mat]||[100,100,150];
-          doc.setFillColor(...col);
-          doc.rect(data.cell.x,data.cell.y,1.5,data.cell.height,'F');
+        if(row){doc.setFillColor(...getMatColor(row.matiere));doc.rect(data.cell.x,data.cell.y,2,data.cell.height,'F');}
+      }
+      if(data.section==='body'&&data.column.index===0&&data.row.index>0){
+        const prev=sorted[data.row.index-1];const curr=sorted[data.row.index];
+        if(prev&&curr&&prev.jour!==curr.jour){
+          doc.setDrawColor(...blue2);doc.setLineWidth(0.5);
+          doc.line(data.cell.x,data.cell.y,data.cell.x+tableW,data.cell.y);
         }
       }
-    },
+    }
   });
 
-  // Stats footer
-  const afterTable=doc.lastAutoTable.finalY+8;
-  if(afterTable<180){
-    const profs=[...new Set(cours.map(c=>c.profId))];
-    const mats=[...new Set(cours.map(c=>c.matiere))];
-    const niveaux=[...new Set(cours.map(c=>c.niveau))];
-    doc.setFillColor(...lightBlue);
-    doc.roundedRect(14,afterTable,W-28,22,2,2,'F');
-    doc.setTextColor(...grey);
-    doc.setFontSize(8);
-    doc.setFont('helvetica','bold');
-    doc.text(`${cours.length} cours  ·  ${profs.length} professeurs  ·  ${mats.length} matières  ·  ${niveaux.length} niveaux`,W/2,afterTable+9,{align:'center'});
-    doc.setFont('helvetica','normal');
-    doc.text('Plus de bonnes notes — Soutien scolaire La Courneuve — admin@educenter.fr',W/2,afterTable+17,{align:'center'});
+  // Summary box
+  const afterTable=doc.lastAutoTable.finalY+5;
+  const footH=16;
+  if(afterTable+footH<H-10){
+    doc.setFillColor(...lightBlue);doc.roundedRect(M,afterTable,tableW,footH,2,2,'F');
+    doc.setDrawColor(...blue2);doc.setLineWidth(0.3);doc.roundedRect(M,afterTable,tableW,footH,2,2,'S');
+    const profs=[...new Set(filtered.map(c=>c.profId))];
+    const mats=[...new Set(filtered.map(c=>c.matiere))];
+    const niveaux=[...new Set(filtered.map(c=>c.niveau))];
+    const elevesIds=[...new Set(filtered.flatMap(c=>c.eleveIds))];
+    const stats=[{l:'COURS',v:String(sorted.length)},{l:'PROFS',v:String(profs.length)},{l:'MATIÈRES',v:String(mats.length)},{l:'NIVEAUX',v:String(niveaux.length)},{l:'ÉLÈVES',v:String(elevesIds.length)}];
+    const segW=tableW/stats.length;
+    stats.forEach((s,i)=>{
+      const x=M+i*segW+segW/2;
+      doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(...blue);doc.text(s.v,x,afterTable+8,{align:'center'});
+      doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(...grey);doc.text(s.l,x,afterTable+13,{align:'center'});
+      if(i>0){doc.setDrawColor(...lineG);doc.setLineWidth(0.3);doc.line(M+i*segW,afterTable+3,M+i*segW,afterTable+footH-3);}
+    });
+  }
+
+  // Page footers
+  const totalPages=doc.getNumberOfPages();
+  for(let p=1;p<=totalPages;p++){
+    doc.setPage(p);
+    doc.setFillColor(...lightBlue);doc.rect(0,H-8,W,8,'F');
+    doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(...grey);
+    doc.text('Plus de bonnes notes — Soutien scolaire — La Courneuve — admin@educenter.fr',M,H-3);
+    doc.text('Page '+p+'/'+totalPages,W-M,H-3,{align:'right'});
   }
 
   doc.save('planning-educenter.pdf');
 }
-
-const PDF_BLUE='#1a3a8c';const PDF_BLUE2='#2a5bd4';const PDF_BGL='#e8f0ff';const PDF_GREY='#6b7ab5';const PDF_DARK='#1a2340';
-
-function buildInvoicePDF(facture,eleve,cours,users,asso){
-  const sessions=cours.filter(c=>c.eleveIds.includes(eleve?.id||''));
-  const matieres=[...new Set(sessions.map(c=>c.matiere))];
-  const today=new Date().toLocaleDateString('fr-FR');
-  const num=facture.id.toUpperCase();
-  const sLabel={paye:'PAYÉ',attente:'EN ATTENTE',retard:'EN RETARD'}[facture.statut]||facture.statut;
-  const sColor={paye:'#1a7a4a',attente:'#c47a00',retard:'#b02020'}[facture.statut]||'#555';
-  const sBg={paye:'#e8f8ee',attente:'#fff8e0',retard:'#fff0f0'}[facture.statut]||'#f5f5f5';
-  const nomAsso=asso?.nom||'Plus de bonnes notes';
-  const adrAsso=asso?.adresse||'La Courneuve';
-  const emailAsso=asso?.email||'admin@educenter.fr';
-  const telAsso=asso?.tel||'';
-  const rows=sessions.map(c=>[
-    {text:c.matiere,bold:true,color:PDF_BLUE2,margin:[6,6,6,6]},
-    {text:c.jour+' · '+hs(c.debut)+'–'+hs(c.fin),margin:[6,6,6,6]},
-    {text:c.salle||'—',color:PDF_GREY,margin:[6,6,6,6]},
-    {text:'55€',alignment:'right',margin:[6,6,6,6]},
-  ]);
-  return {
-    pageSize:'A4',pageMargins:[40,40,40,50],
-    defaultStyle:{font:'Roboto',fontSize:10,color:PDF_DARK},
-    styles:{
-      h:{fontSize:9,bold:true,characterSpacing:1.5,color:'rgba(255,255,255,0.65)',textTransform:'uppercase'},
-      lbl:{fontSize:8,bold:true,characterSpacing:1,color:PDF_GREY},
-      th:{fontSize:8,bold:true,characterSpacing:0.8,color:PDF_GREY,margin:[8,6,8,6]},
-      td:{fontSize:10,color:PDF_DARK,margin:[8,7,8,7]},
-    },
-    content:[
-      // Header band
-      {canvas:[{type:'rect',x:0,y:0,w:515,h:88,color:PDF_BLUE,r:6}]},
-      {columns:[
-        {stack:[{text:nomAsso,fontSize:16,bold:true,color:'white',margin:[0,0,0,4]},{text:adrAsso,fontSize:10,color:'rgba(255,255,255,0.7)'},{text:emailAsso+(telAsso?' · '+telAsso:''),fontSize:9,color:'rgba(255,255,255,0.55)',margin:[0,2,0,0]}]},
-        {stack:[{text:'FACTURE',style:'h',alignment:'right'},{text:num,fontSize:20,bold:true,color:'white',alignment:'right',margin:[0,2,0,4]},{text:'Émise le '+today,fontSize:9,color:'rgba(255,255,255,0.55)',alignment:'right'},...(facture.echeance?[{text:'Échéance : '+facture.echeance,fontSize:9,color:'rgba(255,255,255,0.55)',alignment:'right'}]:[])]}
-        ]
-      },{margin:[16,-76,16,0]},
-      {text:'',margin:[0,18,0,0]},
-      // Élève + montant
-      ...(eleve?[{
-        columns:[
-          {stack:[{text:'ÉLÈVE',style:'lbl',margin:[0,0,0,5]},{canvas:[{type:'rect',x:0,y:0,w:230,h:68,color:PDF_BGL,r:4}]},{stack:[{text:eleve.name,bold:true,fontSize:13,color:PDF_BLUE,margin:[0,0,0,2]},{text:eleve.niveau||'',color:PDF_GREY,fontSize:9},{text:matieres.join(' · '),color:PDF_BLUE2,fontSize:9,bold:true,margin:[0,4,0,0]}],margin:[12,-57,12,0]}],width:'*'},
-          {stack:[{text:'FACTURATION',style:'lbl',margin:[0,0,0,5]},{canvas:[{type:'rect',x:0,y:0,w:230,h:68,color:PDF_BGL,r:4}]},{stack:[{text:facture.montant+'€',bold:true,fontSize:22,color:PDF_BLUE,margin:[0,0,0,2]},{text:(facture.type||'Forfait')+' · '+(facture.echeance||today),color:PDF_GREY,fontSize:9},...(facture.nbCreneaux>0?[{text:facture.nbCreneaux+' créneau'+(facture.nbCreneaux>1?'x':'')+'/mois',color:PDF_GREY,fontSize:9}]:[])],margin:[12,-57,12,0]}],width:'*'}
-        ],columnGap:16,margin:[0,0,0,20]
-      }]:[]),
-      // Table
-      {text:'DÉTAIL DE LA PRESTATION',style:'lbl',margin:[0,0,0,8]},
-      {table:{widths:['*','auto','auto','auto'],headerRows:1,body:[
-        [{text:'Matière',style:'th'},{text:'Créneau',style:'th'},{text:'Salle',style:'th'},{text:'Tarif',style:'th'}],
-        ...(rows.length>0?rows:[[{text:facture.libelle,style:'td',colSpan:4,italics:true},{},{},{}]])
-      ]},layout:{hLineWidth:(i,n)=>i===0||i===1||i===n.table.body.length?1:0.5,hLineColor:(i,n)=>i===0||i===1||i===n.table.body.length?'#c0ccee':'#e8ecf5',vLineWidth:()=>0,fillColor:i=>i===0?'#f4f7ff':i%2===0?'#fafbff':'white'},margin:[0,0,0,8]},
-      {text:facture.libelle,color:PDF_GREY,fontSize:9,italics:true,margin:[0,0,0,16]},
-      // Total
-      {columns:[{text:'',width:'*'},{stack:[
-        {canvas:[{type:'rect',x:0,y:0,w:210,h:54,color:PDF_BLUE,r:6}]},
-        {columns:[{text:'TOTAL À RÉGLER',color:'rgba(255,255,255,0.7)',fontSize:8,bold:true,characterSpacing:1},{text:facture.montant+'€',bold:true,fontSize:20,color:'white',alignment:'right'}],margin:[14,-42,14,0],columnGap:6},
-        {text:sLabel,bold:true,fontSize:9,characterSpacing:1,color:sColor,background:sBg,margin:[0,8,0,0],alignment:'right'},
-        ...(facture.datePaiement?[{text:'Payé le '+facture.datePaiement,color:'#1a7a4a',fontSize:9,alignment:'right',margin:[0,4,0,0]}]:[]),
-      ],width:210}],margin:[0,0,0,16]},
-      // Notes
-      ...(facture.notes?[{canvas:[{type:'rect',x:0,y:0,w:515,h:2,color:'#e0e8f5'}],margin:[0,0,0,10]},{text:'NOTES',style:'lbl',margin:[0,0,0,4]},{text:facture.notes,fontSize:10,italics:true,color:PDF_DARK}]:[]),
-      // Footer
-      {canvas:[{type:'line',x1:0,y1:0,x2:515,y2:0,lineWidth:1,lineColor:'#e0e8f5'}],margin:[0,12,0,8]},
-      {columns:[{text:nomAsso+' · '+adrAsso+'\n'+emailAsso+(telAsso?' · '+telAsso:''),fontSize:9,color:PDF_GREY},{text:num+' · '+today,fontSize:9,color:PDF_GREY,alignment:'right'}]}
-    ]
-  };
-}
-
-function buildPlanningPDF(cours,users,filters){
-  const {filterProf,filterMatiere,filterGroupe,title}=filters||{};
-  let filtered=cours;
-  if(filterProf)filtered=filtered.filter(c=>c.profId===filterProf);
-  if(filterMatiere)filtered=filtered.filter(c=>c.matiere===filterMatiere);
-  if(filterGroupe)filtered=filtered.filter(c=>c.niveau===filterGroupe);
-  const sorted=[...filtered].sort((a,b)=>DAYS.indexOf(a.jour)-DAYS.indexOf(b.jour)||a.debut-b.debut);
-  const today=new Date().toLocaleDateString('fr-FR');
-  const rows=sorted.map(c=>{
-    const prof=users.find(u=>u.id===c.profId);
-    const eleves=users.filter(u=>c.eleveIds.includes(u.id));
-    return[
-      {text:c.jour,bold:true,fontSize:10,margin:[6,6,6,6]},
-      {text:hs(c.debut)+'–'+hs(c.fin),fontSize:10,margin:[6,6,6,6]},
-      {text:c.matiere,bold:true,color:PDF_BLUE2,fontSize:10,margin:[6,6,6,6]},
-      {text:c.niveau,fontSize:10,margin:[6,6,6,6]},
-      {text:prof?.name||'—',fontSize:10,margin:[6,6,6,6]},
-      {text:c.salle||'—',color:PDF_GREY,fontSize:10,margin:[6,6,6,6]},
-      {text:eleves.map(e=>e.name.split(' ')[0]).join(', ')||'—',fontSize:9,color:PDF_GREY,margin:[6,6,6,6]},
-    ];
-  });
-  return {
-    pageSize:'A4',pageOrientation:filtered.length>8?'landscape':'portrait',pageMargins:[32,60,32,40],
-    defaultStyle:{font:'Roboto',fontSize:10,color:PDF_DARK},
-    styles:{th:{fontSize:8,bold:true,characterSpacing:0.8,color:PDF_GREY,margin:[6,6,6,6]}},
-    header:{columns:[{stack:[{canvas:[{type:'rect',x:0,y:0,w:800,h:40,color:PDF_BLUE}]},{columns:[{text:title||'Planning des cours',color:'white',fontSize:13,bold:true},{text:'Plus de bonnes notes · '+today,color:'rgba(255,255,255,0.65)',fontSize:9,alignment:'right'}],margin:[16,-28,16,0]}]}],margin:[32,10,32,0]},
-    content:[
-      {text:'',margin:[0,12,0,0]},
-      ...(filterProf||filterMatiere||filterGroupe?[{stack:[
-        ...(filterProf?[{text:'Professeur : '+users.find(u=>u.id===filterProf)?.name,fontSize:9,color:PDF_BLUE,background:PDF_BGL,margin:[0,0,0,4]}]:[]),
-        ...(filterMatiere?[{text:'Matière : '+filterMatiere,fontSize:9,color:PDF_BLUE,background:PDF_BGL,margin:[0,0,0,4]}]:[]),
-        ...(filterGroupe?[{text:'Groupe : '+filterGroupe,fontSize:9,color:PDF_BLUE,background:PDF_BGL,margin:[0,0,0,4]}]:[]),
-      ],margin:[0,0,0,8]}]:[]),
-      {text:filtered.length+' cours planifié'+(filtered.length>1?'s':''),fontSize:9,color:PDF_GREY,margin:[0,0,0,10]},
-      filtered.length===0?{text:'Aucun cours pour les filtres sélectionnés.',color:PDF_GREY,italics:true}:{
-        table:{widths:['auto','auto','*','auto','*','auto','*'],headerRows:1,body:[
-          [{text:'JOUR',style:'th'},{text:'HORAIRE',style:'th'},{text:'MATIÈRE',style:'th'},{text:'GROUPE',style:'th'},{text:'PROFESSEUR',style:'th'},{text:'SALLE',style:'th'},{text:'ÉLÈVES',style:'th'}],
-          ...rows
-        ]},
-        layout:{hLineWidth:(i,n)=>i===0||i===1||i===n.table.body.length?1:0.5,hLineColor:(i,n)=>i===0||i===1?'#c0ccee':'#e8ecf5',vLineWidth:()=>0,fillColor:i=>i===0?'#f4f7ff':i%2===0?'#fafbff':'white'}
-      }
-    ],
-    footer:(pg,pgs)=>({columns:[{text:'Plus de bonnes notes · La Courneuve',fontSize:8,color:PDF_GREY},{text:'Page '+pg+'/'+pgs,fontSize:8,color:PDF_GREY,alignment:'right'}],margin:[32,8,32,0]})
-  };
-}
-
-function downloadPDF(docDef,filename){pdfMake.createPdf(docDef).download(filename);}
-
-
-function PlanningExportBtn({cours, users}){
-  const [filterProf, setFilterProf] = useState('');
-  const [filterMatiere, setFilterMatiere] = useState('');
-  const [filterGroupe, setFilterGroupe] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
-  const [generating, setGenerating] = useState(false);
-
-  const profs = users.filter(u=>u.role==='prof');
-  const matieres = [...new Set(cours.map(c=>c.matiere))].sort();
-  const groupes = [...new Set(cours.map(c=>c.niveau))].sort();
-
-  const nbFilters = (filterProf?1:0)+(filterMatiere?1:0)+(filterGroupe?1:0);
-
-  const filtered = useMemo(()=>{
-    let c = cours;
-    if(filterProf) c = c.filter(x=>x.profId===filterProf);
-    if(filterMatiere) c = c.filter(x=>x.matiere===filterMatiere);
-    if(filterGroupe) c = c.filter(x=>x.niveau===filterGroupe);
-    return c;
-  },[cours,filterProf,filterMatiere,filterGroupe]);
-
-  const handleExport = ()=>{
-    setGenerating(true);
-    const profName = filterProf ? users.find(u=>u.id===filterProf)?.name : null;
-    const title = [profName, filterMatiere, filterGroupe].filter(Boolean).join(' · ') || 'Planning complet';
-    try {
-      const docDef = buildPlanningPDF(cours, users, {filterProf, filterMatiere, filterGroupe, title});
-      downloadPDF(docDef, 'planning-educenter.pdf');
-    } catch(e){ alert('Erreur PDF: '+e.message); }
-    setTimeout(()=>setGenerating(false), 1200);
-  };
-
-  return <div style={{position:'relative',display:'flex',alignItems:'center',gap:8}}>
-    {showFilters&&<div style={{position:'absolute',top:36,right:0,background:'white',border:'1.5px solid #c0d0f0',borderRadius:6,padding:'16px',zIndex:100,width:320,boxShadow:'0 8px 32px rgba(26,79,196,.15)'}}>
-      <div style={{fontSize:11,fontWeight:700,color:'#6b7ab5',textTransform:'uppercase',letterSpacing:1,marginBottom:10}}>Filtrer le planning</div>
-      <div className="fg" style={{marginBottom:8}}>
-        <label className="fl">Professeur</label>
-        <select className="fi" value={filterProf} onChange={e=>setFilterProf(e.target.value)}>
-          <option value="">Tous les professeurs</option>
-          {profs.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
-        </select>
-      </div>
-      <div className="fg" style={{marginBottom:8}}>
-        <label className="fl">Matière</label>
-        <select className="fi" value={filterMatiere} onChange={e=>setFilterMatiere(e.target.value)}>
-          <option value="">Toutes les matières</option>
-          {matieres.map(m=><option key={m} value={m}>{m}</option>)}
-        </select>
-      </div>
-      <div className="fg" style={{marginBottom:12}}>
-        <label className="fl">Groupe / Niveau</label>
-        <select className="fi" value={filterGroupe} onChange={e=>setFilterGroupe(e.target.value)}>
-          <option value="">Tous les groupes</option>
-          {groupes.map(g=><option key={g} value={g}>{g}</option>)}
-        </select>
-      </div>
-      {nbFilters>0&&<button className="btn btn-sm" style={{width:'100%',marginBottom:8,fontSize:11,color:'#b02020',border:'1.5px solid #f5b8b8',background:'#fff0f0'}} onClick={()=>{setFilterProf('');setFilterMatiere('');setFilterGroupe('');}}>✕ Effacer les filtres</button>}
-      <div style={{fontSize:11,color:'#6b7ab5',textAlign:'center'}}>{filtered.length} cours · {[...new Set(filtered.map(c=>c.profId))].length} prof{[...new Set(filtered.map(c=>c.profId))].length>1?'s':''}</div>
-    </div>}
-    <button className="btn btn-sm" style={{position:'relative',background:nbFilters>0?'#EEF5FF':'white',border:`1.5px solid ${nbFilters>0?'#1a4fc4':'#dde3f0'}`,color:nbFilters>0?'#1a4fc4':'#6b7ab5',fontSize:11}} onClick={()=>setShowFilters(p=>!p)}>
-      🔽 Filtres {nbFilters>0&&<span style={{background:'#1a4fc4',color:'white',borderRadius:10,padding:'1px 6px',fontSize:9,marginLeft:4}}>{nbFilters}</span>}
-    </button>
-    <button className="btn btn-p btn-sm" style={{background:'#1a3a8c',border:'none',fontSize:11,padding:'6px 14px'}} onClick={handleExport} disabled={generating}>
-      {generating?'⏳…':'⬇️ PDF Planning'}
-    </button>
-  </div>;
-}
-
 
 function EmploiDuTemps({user,users,cours,setCours,modules,enrollments,dispos=[]}){
   const myCours=user.role==='eleve'?cours.filter(c=>c.eleveIds.includes(user.id)):user.role==='admin'?cours:cours.filter(c=>c.profId===user.id);
@@ -1156,11 +997,8 @@ function EmploiDuTemps({user,users,cours,setCours,modules,enrollments,dispos=[]}
 
   const doExportPDF=()=>{
     try{
-      const profName=filterProf!=='tous'?users.find(u=>u.id===filterProf)?.name:null;
-      const title=[profName,filterMat!=='toutes'?filterMat:null,filterNiv!=='tous'?filterNiv:null].filter(Boolean).join(' · ')||'Planning complet';
-      const docDef=buildPlanningPDF(cours,users,{filterProf:filterProf!=='tous'?filterProf:null,filterMatiere:filterMat!=='toutes'?filterMat:null,filterGroupe:filterNiv!=='tous'?filterNiv:null,title});
-      downloadPDF(docDef,'planning-educenter.pdf');
-    }catch(e){alert('Erreur PDF: '+e.message);}
+      generatePlanningPDF(filteredCours,users,{prof:filterProf,matiere:filterMat,niveau:filterNiv});
+    }catch(e){alert('Erreur PDF: '+e.message);console.error(e);}
   };
 
   const Legend=()=><div style={{display:'flex',gap:10,flexWrap:'wrap',marginBottom:14,alignItems:'center'}}>
@@ -3737,192 +3575,241 @@ function CoursParticuliers({user,users,dispos,setDispos,demandes,setDemandes}){
 
 // ─── FACTURATION ───
 // ═══════════════════════════════════════════════════════════════
-// PDF INVOICE — jsPDF
+// PDF INVOICE — jsPDF  (version professionnelle / devis)
 // ═══════════════════════════════════════════════════════════════
 function generateInvoicePDF(data){
   const {jsPDF}=window.jspdf;
   const doc=new jsPDF({unit:'mm',format:'a4'});
   const W=210,H=297;
-  const blue=[26,58,140],blue2=[42,91,212],lightBlue=[232,240,255],grey=[107,122,181],darkText=[26,35,64],lineGrey=[224,232,245];
 
-  // ── Header band ──
-  doc.setFillColor(...blue);
-  doc.rect(0,0,W,42,'F');
+  // Palette strictement sobre
+  const BLACK  =[20,20,20];
+  const DARK   =[50,50,50];
+  const MID    =[120,120,120];
+  const LIGHT  =[200,200,200];
+  const XLIGHT =[240,240,240];
+  const WHITE  =[255,255,255];
 
-  // Logo hexagon
-  doc.setFillColor(255,255,255,40);
-  doc.setDrawColor(255,255,255);
-  doc.setLineWidth(0.5);
-  // Simple circle as logo bg
-  doc.setFillColor(255,255,255,30);
-  doc.circle(20,21,10,'S');
-  // P letter
-  doc.setTextColor(255,255,255);
+  const M=18; // marge gauche/droite
+
+  // ── BANDE HAUTE (filet fin + entête) ──
+  // Ligne déco haut de page
+  doc.setFillColor(...BLACK);
+  doc.rect(0,0,W,3,'F');
+
+  // Nom de l'association — haut gauche
   doc.setFont('helvetica','bold');
-  doc.setFontSize(13);
-  doc.text('PBN',15,24);
-
-  // School name
   doc.setFontSize(15);
-  doc.setFont('helvetica','bold');
-  doc.text('Plus de bonnes notes',33,18);
-  doc.setFontSize(8);
-  doc.setFont('helvetica','normal');
-  doc.setTextColor(200,215,255);
-  doc.text('Soutien scolaire — La Courneuve',33,24);
-  doc.text('admin@educenter.fr',33,29);
+  doc.setTextColor(...BLACK);
+  doc.text(data.assocNom||'Plus de bonnes notes',M,18);
 
-  // Invoice number + date (right)
-  doc.setTextColor(200,215,255);
+  doc.setFont('helvetica','normal');
   doc.setFontSize(8);
+  doc.setTextColor(...MID);
+  doc.text(data.assocAdresse||'Soutien scolaire — La Courneuve',M,24);
+  const contact=[(data.assocTel||''),(data.assocEmail||'admin@educenter.fr')].filter(Boolean).join('  ·  ');
+  doc.text(contact,M,29);
+
+  // Numéro de facture — haut droite
   doc.setFont('helvetica','normal');
-  doc.text('FACTURE',W-15,14,{align:'right'});
-  doc.setTextColor(255,255,255);
-  doc.setFontSize(18);
-  doc.setFont('helvetica','bold');
-  doc.text(data.id.toUpperCase(),W-15,23,{align:'right'});
   doc.setFontSize(8);
+  doc.setTextColor(...MID);
+  doc.text('FACTURE N°',W-M,12,{align:'right'});
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(20);
+  doc.setTextColor(...BLACK);
+  doc.text(data.id.toUpperCase(),W-M,22,{align:'right'});
   doc.setFont('helvetica','normal');
-  doc.setTextColor(200,215,255);
-  doc.text(`Émise le ${data.dateEmission}`,W-15,30,{align:'right'});
-  if(data.echeance) doc.text(`Échéance : ${data.echeance}`,W-15,35,{align:'right'});
-
-  // ── Two info cards ──
-  const cardY=50;
-  // Card élève
-  doc.setFillColor(...lightBlue);
-  doc.roundedRect(15,cardY,82,38,2,2,'F');
-  doc.setDrawColor(...blue2);
-  doc.setLineWidth(0.8);
-  doc.line(15,cardY,15,cardY+38);
-  doc.setTextColor(...grey);
-  doc.setFontSize(7);
-  doc.setFont('helvetica','bold');
-  doc.text('ÉLÈVE',19,cardY+7);
-  doc.setTextColor(...darkText);
-  doc.setFontSize(13);
-  doc.setFont('helvetica','bold');
-  doc.text(data.eleveName||'—',19,cardY+16);
-  doc.setFontSize(9);
-  doc.setFont('helvetica','normal');
-  doc.setTextColor(...grey);
-  doc.text(data.eleveNiveau||'',19,cardY+23);
-  if(data.matieres&&data.matieres.length){
-    doc.setFontSize(8);
-    doc.text(data.matieres.join(' · '),19,cardY+30);
-  }
-  if(data.parentNom){
-    doc.setFontSize(8);
-    doc.text('👤 '+data.parentNom+(data.parentTel?' · '+data.parentTel:''),19,cardY+36);
-  }
-
-  // Card facturation
-  doc.setFillColor(...lightBlue);
-  doc.roundedRect(103,cardY,92,38,2,2,'F');
-  doc.setDrawColor(...blue2);
-  doc.line(103,cardY,103,cardY+38);
-  doc.setTextColor(...grey);
-  doc.setFontSize(7);
-  doc.setFont('helvetica','bold');
-  doc.text('FACTURATION',107,cardY+7);
-  doc.setTextColor(...darkText);
-  doc.setFontSize(18);
-  doc.setFont('helvetica','bold');
-  doc.text(`${data.montant}€`,107,cardY+20);
   doc.setFontSize(8);
-  doc.setFont('helvetica','normal');
-  doc.setTextColor(...grey);
-  doc.text(data.type||'Forfait mensuel',107,cardY+27);
-  doc.text(data.echeance?`Échéance : ${data.echeance}`:data.dateEmission,107,cardY+33);
+  doc.setTextColor(...MID);
+  doc.text('Émise le '+data.dateEmission,W-M,28,{align:'right'});
+  if(data.echeance) doc.text('Échéance : '+data.echeance,W-M,33,{align:'right'});
 
-  // ── Section title ──
-  const tableY=96;
-  doc.setTextColor(...grey);
-  doc.setFontSize(7);
-  doc.setFont('helvetica','bold');
-  doc.text('DÉTAIL DE LA PRESTATION',15,tableY);
-  doc.setDrawColor(...lineGrey);
+  // Filet séparateur
+  doc.setDrawColor(...LIGHT);
   doc.setLineWidth(0.3);
-  doc.line(15,tableY+2,W-15,tableY+2);
+  doc.line(M,36,W-M,36);
 
-  // ── Table ──
+  // ── BLOC DESTINATAIRE (à gauche) ──
+  const blkY=42;
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(7);
+  doc.setTextColor(...MID);
+  doc.text('DESTINATAIRE',M,blkY);
+
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(12);
+  doc.setTextColor(...BLACK);
+  doc.text(data.eleveName||'—',M,blkY+8);
+
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(9);
+  doc.setTextColor(...DARK);
+  const detLines=[];
+  if(data.eleveNiveau) detLines.push('Niveau : '+data.eleveNiveau);
+  if(data.matieres&&data.matieres.length) detLines.push('Matières : '+data.matieres.join(', '));
+  if(data.parentNom) detLines.push('Responsable : '+data.parentNom+(data.parentTel?' — '+data.parentTel:''));
+  detLines.forEach((l,i)=>doc.text(l,M,blkY+14+i*5));
+
+  // ── RÉCAPITULATIF FINANCIER (à droite) ──
+  const rX=115;
+  doc.setFillColor(...XLIGHT);
+  doc.rect(rX,blkY-4,W-M-rX,Math.max(detLines.length*5+26,30),'F');
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(7);
+  doc.setTextColor(...MID);
+  doc.text('RÉCAPITULATIF',rX+5,blkY+2);
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(9);
+  doc.setTextColor(...DARK);
+  doc.text('Type :',rX+5,blkY+10);
+  doc.setFont('helvetica','bold');
+  doc.text(data.type||'Forfait mensuel',rX+30,blkY+10);
+  doc.setFont('helvetica','normal');
+  if(data.nbCreneaux>0){
+    doc.text('Créneaux :',rX+5,blkY+16);
+    doc.setFont('helvetica','bold');
+    doc.text(String(data.nbCreneaux)+' / mois',rX+30,blkY+16);
+    doc.setFont('helvetica','normal');
+  }
+  doc.text('Montant :',rX+5,blkY+22);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(13);
+  doc.setTextColor(...BLACK);
+  doc.text(data.montant+'€',rX+30,blkY+22);
+
+  // Filet
+  const tableStartY=blkY+detLines.length*5+26;
+  doc.setDrawColor(...LIGHT);
+  doc.setLineWidth(0.3);
+  doc.line(M,tableStartY,W-M,tableStartY);
+
+  // ── TABLEAU DÉTAIL ──
+  const tY=tableStartY+6;
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(7);
+  doc.setTextColor(...MID);
+  doc.text('DÉTAIL DE LA PRESTATION',M,tY);
+
   const rows=[];
-  rows.push([data.libelle, data.echeance||data.dateEmission, data.nbCreneaux>0?data.nbCreneaux+' créneau'+(data.nbCreneaux>1?'x':''):' — ', `${data.montant}€`]);
-  // Sessions detail
+  rows.push([
+    data.libelle||'Forfait soutien scolaire',
+    data.echeance||data.dateEmission,
+    data.nbCreneaux>0 ? data.nbCreneaux+' créneau'+(data.nbCreneaux>1?'x':'') : '—',
+    data.montant+'€'
+  ]);
   if(data.sessions&&data.sessions.length){
     data.sessions.forEach(s=>{
-      rows.push([`  → ${s.matiere} · ${s.jour} ${s.debut}–${s.fin}`,s.salle||'','','']);
+      rows.push(['    '+s.matiere+' · '+s.jour+' '+s.debut+'–'+s.fin, s.salle||'','','']);
     });
   }
-  if(data.notes) rows.push([`Note : ${data.notes}`,'','','']);
+  if(data.notes) rows.push(['Note : '+data.notes,'','','']);
 
   doc.autoTable({
-    startY:tableY+5,
-    head:[['Prestation','Période','Créneaux','Montant']],
+    startY:tY+4,
+    head:[['Désignation','Période','Créneaux','Montant']],
     body:rows,
-    margin:{left:15,right:15},
-    headStyles:{fillColor:blue,textColor:255,fontSize:8,fontStyle:'bold',cellPadding:4},
-    bodyStyles:{fontSize:9,textColor:darkText,cellPadding:4},
-    columnStyles:{0:{cellWidth:'auto'},1:{cellWidth:32},2:{cellWidth:24},3:{cellWidth:22,halign:'right',fontStyle:'bold'}},
-    alternateRowStyles:{fillColor:[248,250,255]},
-    tableLineColor:lineGrey,tableLineWidth:0.3,
+    margin:{left:M,right:M},
+    headStyles:{
+      fillColor:BLACK,
+      textColor:WHITE,
+      fontSize:8,
+      fontStyle:'bold',
+      cellPadding:{top:4,bottom:4,left:4,right:4},
+    },
+    bodyStyles:{
+      fontSize:9,
+      textColor:DARK,
+      cellPadding:{top:4,bottom:4,left:4,right:4},
+    },
+    columnStyles:{
+      0:{cellWidth:'auto'},
+      1:{cellWidth:30},
+      2:{cellWidth:22,halign:'center'},
+      3:{cellWidth:22,halign:'right',fontStyle:'bold'},
+    },
+    alternateRowStyles:{fillColor:XLIGHT},
+    tableLineColor:LIGHT,
+    tableLineWidth:0.2,
   });
 
-  const afterTable=doc.lastAutoTable.finalY+8;
+  const afterTable=doc.lastAutoTable.finalY;
 
-  // ── Total band ──
-  doc.setFillColor(...blue);
-  doc.roundedRect(15,afterTable,W-30,14,2,2,'F');
-  doc.setTextColor(255,255,255);
-  doc.setFontSize(9);
+  // ── TOTAL ──
+  // Filet double avant total
+  doc.setDrawColor(...LIGHT);
+  doc.setLineWidth(0.3);
+  doc.line(M,afterTable+4,W-M,afterTable+4);
+  doc.setDrawColor(...BLACK);
+  doc.setLineWidth(0.6);
+  doc.line(M,afterTable+6,W-M,afterTable+6);
+
   doc.setFont('helvetica','bold');
-  doc.text('TOTAL À RÉGLER',19,afterTable+9);
+  doc.setFontSize(10);
+  doc.setTextColor(...BLACK);
+  doc.text('TOTAL À RÉGLER',M,afterTable+14);
   doc.setFontSize(16);
-  doc.text(`${data.montant}€`,W-19,afterTable+9.5,{align:'right'});
+  doc.text(data.montant+'€',W-M,afterTable+14,{align:'right'});
 
-  // ── Statut badge ──
-  const sY=afterTable+22;
-  const sColors={paye:[26,122,74,232,248,238,'PAYÉ ✓'],attente:[196,122,0,255,248,224,'EN ATTENTE ⏳'],retard:[176,32,32,255,240,240,'EN RETARD ⚠']}[data.statut]||[100,100,100,240,240,240,'—'];
-  doc.setFillColor(sColors[3],sColors[4],sColors[5]);
-  doc.roundedRect(15,sY,50,9,4,4,'F');
-  doc.setTextColor(sColors[0],sColors[1],sColors[2]);
-  doc.setFontSize(8);
+  // ── STATUT ──
+  const sY=afterTable+24;
+  // Cadre statut sobre (juste un filet coloré à gauche)
+  const sMap={
+    paye:   {label:'PAYÉ',     r:26, g:110, b:60},
+    attente:{label:'EN ATTENTE',r:140,g:100,b:0},
+    retard: {label:'EN RETARD', r:160,g:30, b:30},
+  };
+  const sm=sMap[data.statut]||{label:'—',r:100,g:100,b:100};
+  doc.setFillColor(sm.r,sm.g,sm.b);
+  doc.rect(M,sY,2,10,'F');
   doc.setFont('helvetica','bold');
-  doc.text(sColors[6],19,sY+6);
+  doc.setFontSize(9);
+  doc.setTextColor(sm.r,sm.g,sm.b);
+  doc.text(sm.label,M+5,sY+7);
   if(data.datePaiement){
+    doc.setFont('helvetica','normal');
     doc.setFontSize(8);
-    doc.setFont('helvetica','normal');
-    doc.setTextColor(...grey);
-    doc.text(`Payé le ${data.datePaiement}`,70,sY+6);
+    doc.setTextColor(...MID);
+    doc.text('Règlement reçu le '+data.datePaiement,M+40,sY+7);
   }
 
-  // ── Notes libres ──
+  // ── NOTES LIBRES ──
+  let noteY=sY+18;
   if(data.notesLibres){
-    doc.setFillColor(255,248,220);
-    doc.roundedRect(15,sY+16,W-30,18,2,2,'F');
-    doc.setTextColor(...grey);
-    doc.setFontSize(7);
+    doc.setDrawColor(...LIGHT);
+    doc.setLineWidth(0.3);
+    doc.rect(M,noteY,W-M*2,18,'S');
     doc.setFont('helvetica','bold');
-    doc.text('NOTES',19,sY+22);
+    doc.setFontSize(7);
+    doc.setTextColor(...MID);
+    doc.text('OBSERVATIONS',M+4,noteY+5);
     doc.setFont('helvetica','normal');
-    doc.setFontSize(9);
-    doc.setTextColor(...darkText);
-    const lines=doc.splitTextToSize(data.notesLibres,W-40);
-    doc.text(lines,19,sY+28);
+    doc.setFontSize(8.5);
+    doc.setTextColor(...DARK);
+    const lines=doc.splitTextToSize(data.notesLibres,W-M*2-10);
+    doc.text(lines,M+4,noteY+11);
+    noteY+=22;
   }
 
-  // ── Footer ──
-  doc.setFillColor(...lightBlue);
-  doc.rect(0,H-18,W,18,'F');
-  doc.setTextColor(...grey);
-  doc.setFontSize(8);
+  // ── PIED DE PAGE ──
+  // Filet noir fin
+  doc.setFillColor(...BLACK);
+  doc.rect(0,H-14,W,1,'F');
   doc.setFont('helvetica','normal');
-  doc.text('Plus de bonnes notes · Soutien scolaire · La Courneuve · admin@educenter.fr',W/2,H-10,{align:'center'});
+  doc.setFontSize(7.5);
+  doc.setTextColor(...MID);
+  doc.text(
+    (data.assocNom||'Plus de bonnes notes')+
+    '  ·  '+(data.assocAdresse||'La Courneuve')+
+    '  ·  '+(data.assocEmail||'admin@educenter.fr'),
+    W/2,H-8,{align:'center'}
+  );
   doc.setFontSize(7);
-  doc.text(`${data.id.toUpperCase()} · Généré le ${data.dateEmission}`,W/2,H-5,{align:'center'});
+  doc.text(data.id.toUpperCase()+' — Généré le '+data.dateEmission,W/2,H-4,{align:'center'});
 
-  doc.save(`facture-${data.id}.pdf`);
+  doc.save('facture-'+data.id+'.pdf');
 }
+
 
 // ═══════════════════════════════════════════════════════════════
 // FACTURATION COMPONENT
@@ -3948,12 +3835,32 @@ function InvoiceEditor({facture, eleve, cours, users, onSave, onClose}){
 
   const handleDownload = ()=>{
     setGenerating(true);
-    const merged = {...facture, ...form, montant:parseFloat(form.montant)||0};
     try {
-      const docDef = buildInvoicePDF(merged, eleve, cours, users, assoc);
-      downloadPDF(docDef, `facture-${merged.id}.pdf`);
-    } catch(e){ alert('Erreur PDF: '+e.message); }
-    setTimeout(()=>setGenerating(false), 1200);
+      const sessions=cours.filter(c=>c.eleveIds.includes(eleve?.id||''));
+      const matieres=[...new Set(sessions.map(c=>c.matiere))];
+      const data={
+        id:facture.id,
+        libelle:form.libelle,
+        montant:parseFloat(form.montant)||0,
+        echeance:form.echeance,
+        statut:form.statut,
+        nbCreneaux:form.nbCreneaux||0,
+        type:form.type,
+        notes:form.notes,
+        notesLibres:form.notes,
+        dateEmission:new Date().toLocaleDateString('fr-FR'),
+        datePaiement:facture.datePaiement||null,
+        eleveName:eleve?.name||'',
+        eleveNiveau:eleve?.niveau||'',
+        matieres,
+        parentNom:eleve?.parentNom||'',
+        parentTel:eleve?.parentTel||'',
+        sessions:sessions.map(c=>({matiere:c.matiere,jour:c.jour,debut:hs(c.debut),fin:hs(c.fin),salle:c.salle})),
+        assocNom:assoc.nom, assocAdresse:assoc.adresse, assocEmail:assoc.email, assocTel:assoc.tel,
+      };
+      generateInvoicePDF(data);
+    }catch(e){alert('Erreur PDF : '+e.message);console.error(e);}
+    setTimeout(()=>setGenerating(false),1200);
   };
 
   const handleSave = ()=>{
