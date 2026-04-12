@@ -1590,156 +1590,7 @@ function Bibliotheque({user,users,resources,setResources,cours=[],compEtats={}})
         </div>
       )}
     </div>
-
-      {tab==='inscriptions'&&<div style={{display:'grid',gridTemplateColumns:'300px 1fr',gap:20,minHeight:400}}>
-        {/* Panel gauche — liste */}
-        <div>
-          <div style={{display:'flex',gap:8,marginBottom:10,alignItems:'center'}}>
-            <input className="fi" placeholder="Rechercher..." value={searchIns} onChange={e=>setSearchIns(e.target.value)} style={{flex:1,fontSize:12,padding:'7px 10px'}}/>
-            <button className="btn btn-p btn-sm" onClick={()=>{setInsForm({prenom:'',nom:'',dateNaissance:'',niveau:'3ème',matieres:[],parentNom:'',parentTel:'',parentEmail:'',adresse:'',notes:'',statut:'nouveau'});setShowIns(true);}}>＋</button>
-          </div>
-          <div style={{fontSize:11,color:'var(--muted)',marginBottom:8}}>{filteredIns.length} fiche{filteredIns.length!==1?'s':''} · {inscriptions.filter(i=>i.statut==='nouveau').length} nouvelles</div>
-          <div style={{display:'flex',flexDirection:'column',gap:6,maxHeight:500,overflowY:'auto'}}>
-            {filteredIns.length===0&&<div style={{textAlign:'center',padding:'30px 0',color:'var(--muted)',fontSize:13}}>Aucune inscription</div>}
-            {filteredIns.map(ins=>{
-              const st=insStatutStyle(ins.statut);
-              const isSel=selIns?.id===ins.id;
-              return <div key={ins.id} onClick={()=>setSelIns(ins)}
-                style={{padding:'10px 12px',border:`2px solid ${isSel?'var(--gold)':'var(--cream2)'}`,background:isSel?'linear-gradient(90deg,#FFF8EE,white)':'white',cursor:'pointer',transition:'all .15s'}}>
-                <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
-                  <div>
-                    <div style={{fontWeight:600,fontSize:13,color:isSel?'var(--navy)':'var(--text)'}}>{ins.prenom} {ins.nom}</div>
-                    <div style={{fontSize:11,color:'var(--muted)',marginTop:2}}>{ins.niveau} · {ins.dateInscription}</div>
-                  </div>
-                  <span style={{fontSize:10,padding:'2px 7px',background:st.bg,color:st.color,fontWeight:700,whiteSpace:'nowrap'}}>{st.label}</span>
-                </div>
-                {ins.matieres?.length>0&&<div style={{marginTop:5,display:'flex',gap:4,flexWrap:'wrap'}}>{ins.matieres.map(m=><span key={m} style={{...getCoursBadge(m),fontSize:9,padding:'1px 5px'}}>{m}</span>)}</div>}
-              </div>;
-            })}
-          </div>
-        </div>
-
-        {/* Panel droit — détails */}
-        <div>
-          {!selIns?<div className="emp"><div className="emp-icon">📝</div><h3>Sélectionnez une fiche</h3><p>Cliquez sur une inscription pour voir les détails et agir.</p></div>:(
-            <div style={{background:'white',border:'1.5px solid var(--cream2)',padding:'20px 24px'}}>
-              {/* Header fiche */}
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:18,borderBottom:'2px solid var(--cream2)',paddingBottom:14}}>
-                <div>
-                  <div style={{fontSize:20,fontWeight:700,color:'var(--navy)',fontFamily:'var(--ff-serif)'}}>{selIns.prenom} {selIns.nom}</div>
-                  <div style={{fontSize:13,color:'var(--muted)',marginTop:3}}>{selIns.niveau} · Inscrit le {selIns.dateInscription}</div>
-                  {selIns.matieres?.length>0&&<div style={{display:'flex',gap:6,marginTop:6,flexWrap:'wrap'}}>{selIns.matieres.map(m=><span key={m} style={{...getCoursBadge(m),fontSize:11}}>{m}</span>)}</div>}
-                </div>
-                <div style={{display:'flex',gap:7}}>
-                  <button className="btn btn-sm" style={{background:'#EEF3FF',border:'1.5px solid #C8D8F5',color:'var(--info)'}} onClick={()=>{setInsForm({prenom:selIns.prenom,nom:selIns.nom,dateNaissance:selIns.dateNaissance||'',niveau:selIns.niveau,matieres:selIns.matieres||[],parentNom:selIns.parentNom||'',parentTel:selIns.parentTel||'',parentEmail:selIns.parentEmail||'',adresse:selIns.adresse||'',notes:selIns.notes||'',statut:selIns.statut});setShowIns(true);}}>✏️ Modifier</button>
-                  {selIns.statut!=='archive'&&<button className="btn btn-sm" style={{background:'#f5f5f5',border:'1.5px solid #ddd',color:'#888'}} onClick={()=>archiverInscription(selIns.id)}>📦 Archiver</button>}
-                </div>
-              </div>
-
-              {/* Infos famille */}
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:18}}>
-                {[
-                  {icon:'👤',label:'Contact parent',val:selIns.parentNom||'—'},
-                  {icon:'📞',label:'Téléphone',val:selIns.parentTel||'—'},
-                  {icon:'📧',label:'Email parent',val:selIns.parentEmail||'—'},
-                  {icon:'📍',label:'Adresse',val:selIns.adresse||'—'},
-                  {icon:'🎂',label:'Date de naissance',val:selIns.dateNaissance||'—'},
-                ].map(({icon,label,val})=>(
-                  <div key={label} style={{background:'var(--cream2)',padding:'10px 13px'}}>
-                    <div style={{fontSize:10,color:'var(--muted)',marginBottom:3,textTransform:'uppercase',letterSpacing:.5}}>{icon} {label}</div>
-                    <div style={{fontSize:13,fontWeight:500,color:'var(--navy)',wordBreak:'break-all'}}>{val}</div>
-                  </div>
-                ))}
-              </div>
-
-              {selIns.notes&&<div style={{background:'#FFFBF0',border:'1px solid #f0e0a0',padding:'10px 14px',marginBottom:18,fontSize:13}}>
-                <div style={{fontSize:10,color:'var(--muted)',marginBottom:4,textTransform:'uppercase',letterSpacing:.5}}>📋 Notes</div>
-                {selIns.notes}
-              </div>}
-
-              {/* Actions */}
-              <div style={{borderTop:'2px solid var(--cream2)',paddingTop:14}}>
-                <div style={{fontSize:12,fontWeight:700,color:'var(--navy)',marginBottom:10,textTransform:'uppercase',letterSpacing:.5}}>Actions rapides</div>
-                <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-                  {selIns.statut!=='actif'&&<button className="btn btn-p" onClick={()=>activerInscription(selIns)}
-                    style={{display:'flex',alignItems:'center',gap:6}}>
-                    <span>✅</span><span>Ajouter à l'effectif</span>
-                  </button>}
-                  {selIns.userId&&<>
-                    <div style={{fontSize:12,color:'var(--ok)',padding:'8px 12px',background:'#EEFFF6',border:'1.5px solid #b8dbb8',display:'flex',alignItems:'center',gap:6}}>
-                      ✅ Actif — {users.find(u=>u.id===selIns.userId)?.name||'Lié'}
-                    </div>
-                    <button className="btn btn-sm" style={{background:'#EEF5FF',border:'1.5px solid #C8D8F5',color:'var(--info)'}} onClick={()=>setShowAssign(true)}>
-                      📋 Assigner à un groupe
-                    </button>
-                  </>}
-                </div>
-                {selIns.userId&&cours.filter(c=>c.eleveIds.includes(selIns.userId)).length>0&&<div style={{marginTop:12}}>
-                  <div style={{fontSize:11,color:'var(--muted)',marginBottom:6}}>Groupes actuels :</div>
-                  <div style={{display:'flex',gap:7,flexWrap:'wrap'}}>{cours.filter(c=>c.eleveIds.includes(selIns.userId)).map(c=><span key={c.id} style={{...getCoursBadge(c.matiere),fontSize:11}}>{c.matiere} · {c.niveau} · {c.jour}</span>)}</div>
-                </div>}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>}
-
-      {/* Modal fiche d'inscription */}
-      {showIns&&<Modal title={selIns?"Modifier la fiche":"Nouvelle fiche d'inscription"} onClose={()=>setShowIns(false)}>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
-          <div className="fg"><label className="fl">Prénom *</label><input className="fi" value={insForm.prenom} onChange={e=>setInsForm(p=>({...p,prenom:e.target.value}))} autoFocus/></div>
-          <div className="fg"><label className="fl">Nom *</label><input className="fi" value={insForm.nom} onChange={e=>setInsForm(p=>({...p,nom:e.target.value}))}/></div>
-          <div className="fg"><label className="fl">Date de naissance</label><input className="fi" type="date" value={insForm.dateNaissance} onChange={e=>setInsForm(p=>({...p,dateNaissance:e.target.value}))}/></div>
-          <div className="fg"><label className="fl">Niveau *</label>
-            <select className="fi" value={insForm.niveau} onChange={e=>setInsForm(p=>({...p,niveau:e.target.value}))}>
-              {NIVEAUX_INS.map(n=><option key={n} value={n}>{n}</option>)}
-            </select>
-          </div>
-        </div>
-        <div className="fg" style={{marginTop:4}}>
-          <label className="fl">Matières souhaitées</label>
-          <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:4}}>
-            {MATIERES_INS.map(m=>{
-              const on=insForm.matieres.includes(m);
-              return <span key={m} onClick={()=>setInsForm(p=>({...p,matieres:on?p.matieres.filter(x=>x!==m):[...p.matieres,m]}))}
-                style={{...getCoursBadge(m),fontSize:11,cursor:'pointer',opacity:on?1:.4,transition:'opacity .15s',border:on?'2px solid var(--gold)':'2px solid transparent',padding:'3px 9px'}}>{m}</span>;
-            })}
-          </div>
-        </div>
-        <div style={{borderTop:'1.5px solid var(--cream2)',marginTop:14,paddingTop:12,fontSize:11,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>Contact parent / tuteur</div>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
-          <div className="fg"><label className="fl">Nom du parent</label><input className="fi" value={insForm.parentNom} onChange={e=>setInsForm(p=>({...p,parentNom:e.target.value}))}/></div>
-          <div className="fg"><label className="fl">Téléphone</label><input className="fi" type="tel" value={insForm.parentTel} onChange={e=>setInsForm(p=>({...p,parentTel:e.target.value}))}/></div>
-          <div className="fg" style={{gridColumn:'1/-1'}}><label className="fl">Email</label><input className="fi" type="email" value={insForm.parentEmail} onChange={e=>setInsForm(p=>({...p,parentEmail:e.target.value}))}/></div>
-          <div className="fg" style={{gridColumn:'1/-1'}}><label className="fl">Adresse</label><input className="fi" value={insForm.adresse} onChange={e=>setInsForm(p=>({...p,adresse:e.target.value}))}/></div>
-        </div>
-        <div className="fg" style={{marginTop:4}}><label className="fl">Notes internes</label>
-          <textarea className="fi" rows={2} value={insForm.notes} onChange={e=>setInsForm(p=>({...p,notes:e.target.value}))} placeholder="Besoins particuliers, contexte..." style={{resize:'vertical',fontFamily:'var(--ff-mono)',fontSize:12}}/>
-        </div>
-        <div className="fa"><button className="btn btn-o" onClick={()=>setShowIns(false)}>Annuler</button><button className="btn btn-p" onClick={saveIns} disabled={!insForm.prenom.trim()||!insForm.nom.trim()}>Enregistrer la fiche</button></div>
-      </Modal>}
-
-      {/* Modal assignation groupe */}
-      {showAssign&&selIns?.userId&&<Modal title="Assigner à un groupe" onClose={()=>setShowAssign(false)}>
-        <div style={{fontSize:13,color:'var(--muted)',marginBottom:12}}>Sélectionnez les groupes pour <strong>{selIns.prenom} {selIns.nom}</strong> :</div>
-        <div style={{display:'flex',flexDirection:'column',gap:8,maxHeight:300,overflowY:'auto'}}>
-          {cours.map(c=>{
-            const inscrit=c.eleveIds.includes(selIns.userId);
-            const prof=users.find(u=>u.id===c.profId);
-            return <div key={c.id} onClick={()=>setCours(p=>p.map(x=>x.id===c.id?{...x,eleveIds:inscrit?x.eleveIds.filter(id=>id!==selIns.userId):[...x.eleveIds,selIns.userId]}:x))}
-              style={{padding:'10px 14px',border:`2px solid ${inscrit?'var(--gold)':'var(--cream2)'}`,background:inscrit?'linear-gradient(90deg,#FFF8EE,white)':'white',cursor:'pointer',display:'flex',alignItems:'center',gap:12,transition:'all .15s'}}>
-              <div style={{width:28,height:28,background:inscrit?'var(--navy)':'var(--cream2)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,flexShrink:0}}>{inscrit?'✓':'+'}</div>
-              <div>
-                <div style={{fontSize:13,fontWeight:600,color:inscrit?'var(--navy)':'var(--text)'}}>{c.matiere} — {c.niveau}</div>
-                <div style={{fontSize:11,color:'var(--muted)'}}>{c.jour} {hs(c.debut)}–{hs(c.fin)} · {prof?.name||'—'}</div>
-              </div>
-            </div>;
-          })}
-        </div>
-        <div className="fa"><button className="btn btn-p" onClick={()=>setShowAssign(false)}>✓ Terminé</button></div>
-      </Modal>}
-
-        {show&&<Modal title="Ajouter une ressource" onClose={()=>setShow(false)}>
+    {show&&<Modal title="Ajouter une ressource" onClose={()=>setShow(false)}>
       <div className="fg"><label className="fl">Titre *</label><input className="fi" value={form.title} onChange={e=>setForm({...form,title:e.target.value})} placeholder="Ex: Fiche — Les dérivées"/></div>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
         <div className="fg"><label className="fl">Type</label><select className="fi" value={form.type} onChange={e=>setForm({...form,type:e.target.value})}>{['fiche','exercice','trace','cours'].map(t=><option key={t} value={t}>{TL[t]}</option>)}</select></div>
@@ -2425,46 +2276,34 @@ function Admin({user,users,setUsers,resources,setResources,modules,setModules,co
   const [showIns,setShowIns]=useState(false);
   const [selIns,setSelIns]=useState(null);
   const [searchIns,setSearchIns]=useState('');
-  const [insForm,setInsForm]=useState({prenom:'',nom:'',dateNaissance:'',niveau:'3ème',matieres:[],parentNom:'',parentTel:'',parentEmail:'',adresse:'',notes:'',statut:'nouveau'});
   const [showAssign,setShowAssign]=useState(false);
-  const NIVEAUX_INS=['6ème','5ème','4ème','3ème','Seconde','Première','Terminale'];
-  const MATIERES_INS=['Mathématiques','Français','Physique','Histoire','Anglais','SVT','Philosophie','Informatique'];
-
+  const [insForm,setInsForm]=useState({prenom:'',nom:'',dateNaissance:'',niveau:'3eme',matieres:[],parentNom:'',parentTel:'',parentEmail:'',adresse:'',notes:'',statut:'nouveau'});
+  const NIVEAUX_INS=['6eme','5eme','4eme','3eme','Seconde','Premiere','Terminale'];
+  const MATIERES_INS=['Mathematiques','Francais','Physique','Histoire','Anglais','SVT','Philosophie','Informatique'];
+  const insStatutStyle=s=>({nouveau:{bg:'#EEF3FF',color:'var(--info)',label:'Nouveau'},actif:{bg:'#EEFFF6',color:'#2D9B6F',label:'Actif'},archive:{bg:'#f5f5f5',color:'#aaa',label:'Archive'}}[s]||{bg:'#f5f5f5',color:'#888',label:s});
+  const filteredIns=useMemo(()=>{const q=searchIns.toLowerCase();return inscriptions.filter(i=>q===''||(i.prenom+' '+i.nom).toLowerCase().includes(q)||(i.parentNom||'').toLowerCase().includes(q)||(i.niveau||'').toLowerCase().includes(q));},[inscriptions,searchIns]);
   const saveIns=()=>{
     if(!insForm.prenom.trim()||!insForm.nom.trim())return;
     if(selIns){
       setInscriptions(p=>p.map(i=>i.id===selIns.id?{...i,...insForm}:i));
-      setSelIns({...selIns,...insForm});
+      setSelIns(prev=>({...prev,...insForm}));
     } else {
-      const newIns={id:'ins'+Date.now(),...insForm,dateInscription:new Date().toISOString().split('T')[0],userId:null};
-      setInscriptions(p=>[...p,newIns]);
+      const n={id:'ins'+Date.now(),...insForm,dateInscription:new Date().toISOString().split('T')[0],userId:null};
+      setInscriptions(p=>[...p,n]);
     }
-    setShowIns(false);setInsForm({prenom:'',nom:'',dateNaissance:'',niveau:'3ème',matieres:[],parentNom:'',parentTel:'',parentEmail:'',adresse:'',notes:'',statut:'nouveau'});
+    setShowIns(false);
   };
-
-  const activerInscription=(ins)=>{
-    if(ins.userId)return alert('Cet élève est déjà dans l\'effectif.');
+  const activerIns=ins=>{
+    if(ins.userId){alert("Cet eleve est deja dans l'effectif.");return;}
     const fullName=ins.prenom+' '+ins.nom;
-    const initials=(ins.prenom[0]||''+(ins.nom[0]||'')).toUpperCase();
-    const newUser={id:'u'+Date.now(),name:fullName,role:'eleve',initials,matiere:ins.matieres.join(' · ')||null,niveau:ins.niveau,parentNom:ins.parentNom,parentTel:ins.parentTel,parentEmail:ins.parentEmail};
-    setUsers(p=>[...p,newUser]);
-    setInscriptions(p=>p.map(i=>i.id===ins.id?{...i,statut:'actif',userId:newUser.id}:i));
-    if(selIns?.id===ins.id)setSelIns({...selIns,statut:'actif',userId:newUser.id});
-    alert('✓ '+fullName+' ajouté(e) à l\'effectif !');
+    const initials=(ins.prenom[0]||'')+(ins.nom[0]||'');
+    const newU={id:'u'+Date.now(),name:fullName,role:'eleve',initials:initials.toUpperCase(),matiere:ins.matieres.join(' - ')||null,niveau:ins.niveau,parentNom:ins.parentNom,parentTel:ins.parentTel,parentEmail:ins.parentEmail};
+    setUsers(p=>[...p,newU]);
+    setInscriptions(p=>p.map(i=>i.id===ins.id?{...i,statut:'actif',userId:newU.id}:i));
+    setSelIns(prev=>prev?{...prev,statut:'actif',userId:newU.id}:prev);
+    alert(fullName+' ajoute(e) a l effectif !');
   };
-
-  const archiverInscription=(id)=>{setInscriptions(p=>p.map(i=>i.id===id?{...i,statut:'archive'}:i));if(selIns?.id===id)setSelIns(s=>({...s,statut:'archive'}));};
-
-  const filteredIns=useMemo(()=>{
-    const q=searchIns.toLowerCase();
-    return inscriptions.filter(i=>q===''|||(i.prenom+' '+i.nom).toLowerCase().includes(q)||(i.parentNom||'').toLowerCase().includes(q)||(i.niveau||'').toLowerCase().includes(q));
-  },[inscriptions,searchIns]);
-
-  const insStatutStyle=(s)=>({
-    nouveau:{bg:'#EEF3FF',color:'var(--info)',label:'🆕 Nouveau'},
-    actif:{bg:'#EEFFF6',color:'#2D9B6F',label:'✅ Actif'},
-    archive:{bg:'#f5f5f5',color:'#aaa',label:'📦 Archivé'},
-  }[s]||{bg:'#f5f5f5',color:'#888',label:s});
+  const archiverIns=id=>{setInscriptions(p=>p.map(i=>i.id===id?{...i,statut:'archive'}:i));setSelIns(prev=>prev?.id===id?{...prev,statut:'archive'}:prev);};
   // Trophée form state (hoisted — hooks cannot be called inside IIFE/nested functions)
   const [tf,setTf]=useState({icon:'⭐',name:'',desc:'',cat:'bonus'});
   const TROPHY_CATS=[{k:'debut',l:'Démarrage'},{k:'assiduite',l:'Assiduité'},{k:'module',l:'Modules'},{k:'notes',l:'Notes'},{k:'matiere',l:'Matières'},{k:'progression',l:'Progression'},{k:'comportement',l:'Comportement'},{k:'anciennete',l:'Ancienneté'},{k:'bonus',l:'Bonus'}];
@@ -2670,6 +2509,126 @@ function Admin({user,users,setUsers,resources,setResources,modules,setModules,co
           </div>
         </div>
       </>}
+
+    
+      {tab==='inscriptions'&&<div style={{display:'grid',gridTemplateColumns:'300px 1fr',gap:20,minHeight:400}}>
+        <div>
+          <div style={{display:'flex',gap:8,marginBottom:10}}>
+            <input className="fi" placeholder="Rechercher..." value={searchIns} onChange={e=>setSearchIns(e.target.value)} style={{flex:1,fontSize:12,padding:'7px 10px'}}/>
+            <button className="btn btn-p btn-sm" onClick={()=>{setInsForm({prenom:'',nom:'',dateNaissance:'',niveau:'3eme',matieres:[],parentNom:'',parentTel:'',parentEmail:'',adresse:'',notes:'',statut:'nouveau'});setSelIns(null);setShowIns(true);}}>+ Fiche</button>
+          </div>
+          <div style={{fontSize:11,color:'var(--muted)',marginBottom:8}}>{filteredIns.length} fiche{filteredIns.length!==1?'s':''} · {inscriptions.filter(i=>i.statut==='nouveau').length} nouvelle{inscriptions.filter(i=>i.statut==='nouveau').length!==1?'s':''}</div>
+          <div style={{display:'flex',flexDirection:'column',gap:6,maxHeight:480,overflowY:'auto'}}>
+            {filteredIns.length===0&&<div style={{textAlign:'center',padding:'24px 0',color:'var(--muted)',fontSize:13}}>Aucune inscription</div>}
+            {filteredIns.map(ins=>{
+              const st=insStatutStyle(ins.statut);const isSel=selIns?.id===ins.id;
+              return <div key={ins.id} onClick={()=>setSelIns(ins)} style={{padding:'10px 12px',border:`2px solid ${isSel?'var(--gold)':'var(--cream2)'}`,background:isSel?'#FFFBF0':'white',cursor:'pointer',transition:'all .15s'}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+                  <div>
+                    <div style={{fontWeight:600,fontSize:13}}>{ins.prenom} {ins.nom}</div>
+                    <div style={{fontSize:11,color:'var(--muted)',marginTop:2}}>{ins.niveau} · {ins.dateInscription}</div>
+                  </div>
+                  <span style={{fontSize:10,padding:'2px 7px',background:st.bg,color:st.color,fontWeight:700}}>{st.label}</span>
+                </div>
+                {ins.matieres?.length>0&&<div style={{marginTop:5,display:'flex',gap:4,flexWrap:'wrap'}}>{ins.matieres.map(m=><span key={m} style={{...getCoursBadge(m),fontSize:9,padding:'1px 5px'}}>{m}</span>)}</div>}
+              </div>;
+            })}
+          </div>
+        </div>
+
+        <div>
+          {!selIns
+            ?<div className="emp"><div className="emp-icon">📝</div><h3>Selectionnez une fiche</h3><p>Cliquez sur une inscription pour voir les details.</p></div>
+            :<div style={{background:'white',border:'1.5px solid var(--cream2)',padding:'20px 24px'}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:18,borderBottom:'2px solid var(--cream2)',paddingBottom:14}}>
+                <div>
+                  <div style={{fontSize:20,fontWeight:700,color:'var(--navy)',fontFamily:'var(--ff-serif)'}}>{selIns.prenom} {selIns.nom}</div>
+                  <div style={{fontSize:13,color:'var(--muted)',marginTop:3}}>{selIns.niveau} · {selIns.dateInscription}</div>
+                  {selIns.matieres?.length>0&&<div style={{display:'flex',gap:6,marginTop:6,flexWrap:'wrap'}}>{selIns.matieres.map(m=><span key={m} style={{...getCoursBadge(m),fontSize:11}}>{m}</span>)}</div>}
+                </div>
+                <div style={{display:'flex',gap:7}}>
+                  <button className="btn btn-sm" style={{background:'#EEF3FF',border:'1.5px solid #C8D8F5',color:'var(--info)'}} onClick={()=>{setInsForm({prenom:selIns.prenom,nom:selIns.nom,dateNaissance:selIns.dateNaissance||'',niveau:selIns.niveau,matieres:selIns.matieres||[],parentNom:selIns.parentNom||'',parentTel:selIns.parentTel||'',parentEmail:selIns.parentEmail||'',adresse:selIns.adresse||'',notes:selIns.notes||'',statut:selIns.statut});setShowIns(true);}}>Modifier</button>
+                  {selIns.statut!=='archive'&&<button className="btn btn-sm" style={{background:'#f5f5f5',border:'1.5px solid #ddd',color:'#888'}} onClick={()=>archiverIns(selIns.id)}>Archiver</button>}
+                </div>
+              </div>
+
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:16}}>
+                {[{label:'Contact parent',val:selIns.parentNom||'—'},{label:'Tel',val:selIns.parentTel||'—'},{label:'Email',val:selIns.parentEmail||'—'},{label:'Adresse',val:selIns.adresse||'—'},{label:'Date naissance',val:selIns.dateNaissance||'—'}].map(({label,val})=>(
+                  <div key={label} style={{background:'var(--cream2)',padding:'9px 12px'}}>
+                    <div style={{fontSize:10,color:'var(--muted)',marginBottom:2,textTransform:'uppercase',letterSpacing:.5}}>{label}</div>
+                    <div style={{fontSize:13,fontWeight:500,color:'var(--navy)',wordBreak:'break-all'}}>{val}</div>
+                  </div>
+                ))}
+              </div>
+
+              {selIns.notes&&<div style={{background:'#FFFBF0',border:'1px solid #f0e0a0',padding:'10px 14px',marginBottom:14,fontSize:13}}><div style={{fontSize:10,color:'var(--muted)',marginBottom:3,textTransform:'uppercase',letterSpacing:.5}}>Notes</div>{selIns.notes}</div>}
+
+              <div style={{borderTop:'2px solid var(--cream2)',paddingTop:12}}>
+                <div style={{fontSize:11,fontWeight:700,color:'var(--navy)',marginBottom:10,textTransform:'uppercase',letterSpacing:.5}}>Actions</div>
+                <div style={{display:'flex',gap:10,flexWrap:'wrap',alignItems:'center'}}>
+                  {!selIns.userId&&<button className="btn btn-p" onClick={()=>activerIns(selIns)}>+ Ajouter a l effectif</button>}
+                  {selIns.userId&&<span style={{fontSize:12,color:'var(--ok)',padding:'7px 12px',background:'#EEFFF6',border:'1.5px solid #b8dbb8'}}>Actif — {users.find(u=>u.id===selIns.userId)?.name||'lie'}</span>}
+                  {selIns.userId&&<button className="btn btn-sm" style={{background:'#EEF5FF',border:'1.5px solid #C8D8F5',color:'var(--info)'}} onClick={()=>setShowAssign(true)}>Assigner a un groupe</button>}
+                </div>
+                {selIns.userId&&cours.filter(c=>c.eleveIds.includes(selIns.userId)).length>0&&<div style={{marginTop:10}}>
+                  <div style={{fontSize:11,color:'var(--muted)',marginBottom:6}}>Groupes actuels :</div>
+                  <div style={{display:'flex',gap:7,flexWrap:'wrap'}}>{cours.filter(c=>c.eleveIds.includes(selIns.userId)).map(c=><span key={c.id} style={{...getCoursBadge(c.matiere),fontSize:11}}>{c.matiere} - {c.niveau} - {c.jour}</span>)}</div>
+                </div>}
+              </div>
+            </div>
+          }
+        </div>
+      </div>}
+
+      {showIns&&<Modal title="Fiche d inscription" onClose={()=>setShowIns(false)}>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+          <div className="fg"><label className="fl">Prenom *</label><input className="fi" value={insForm.prenom} onChange={e=>setInsForm(p=>({...p,prenom:e.target.value}))} autoFocus/></div>
+          <div className="fg"><label className="fl">Nom *</label><input className="fi" value={insForm.nom} onChange={e=>setInsForm(p=>({...p,nom:e.target.value}))}/></div>
+          <div className="fg"><label className="fl">Date de naissance</label><input className="fi" type="date" value={insForm.dateNaissance} onChange={e=>setInsForm(p=>({...p,dateNaissance:e.target.value}))}/></div>
+          <div className="fg"><label className="fl">Niveau *</label>
+            <select className="fi" value={insForm.niveau} onChange={e=>setInsForm(p=>({...p,niveau:e.target.value}))}>
+              {NIVEAUX_INS.map(n=><option key={n} value={n}>{n}</option>)}
+            </select>
+          </div>
+        </div>
+        <div className="fg" style={{marginTop:4}}>
+          <label className="fl">Matieres souhaitees</label>
+          <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:4}}>
+            {MATIERES_INS.map(m=>{
+              const on=insForm.matieres.includes(m);
+              return <span key={m} onClick={()=>setInsForm(p=>({...p,matieres:on?p.matieres.filter(x=>x!==m):[...p.matieres,m]}))}
+                style={{...getCoursBadge(m),fontSize:11,cursor:'pointer',opacity:on?1:.4,border:on?'2px solid var(--gold)':'2px solid transparent',padding:'3px 9px'}}>{m}</span>;
+            })}
+          </div>
+        </div>
+        <div style={{borderTop:'1.5px solid var(--cream2)',marginTop:12,paddingTop:10,fontSize:11,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>Contact parent</div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+          <div className="fg"><label className="fl">Nom du parent</label><input className="fi" value={insForm.parentNom} onChange={e=>setInsForm(p=>({...p,parentNom:e.target.value}))}/></div>
+          <div className="fg"><label className="fl">Telephone</label><input className="fi" type="tel" value={insForm.parentTel} onChange={e=>setInsForm(p=>({...p,parentTel:e.target.value}))}/></div>
+          <div className="fg" style={{gridColumn:'1/-1'}}><label className="fl">Email</label><input className="fi" type="email" value={insForm.parentEmail} onChange={e=>setInsForm(p=>({...p,parentEmail:e.target.value}))}/></div>
+          <div className="fg" style={{gridColumn:'1/-1'}}><label className="fl">Adresse</label><input className="fi" value={insForm.adresse} onChange={e=>setInsForm(p=>({...p,adresse:e.target.value}))}/></div>
+        </div>
+        <div className="fg" style={{marginTop:4}}><label className="fl">Notes internes</label>
+          <textarea className="fi" rows={2} value={insForm.notes} onChange={e=>setInsForm(p=>({...p,notes:e.target.value}))} placeholder="Besoins particuliers..." style={{resize:'vertical',fontFamily:'var(--ff-mono)',fontSize:12}}/>
+        </div>
+        <div className="fa"><button className="btn btn-o" onClick={()=>setShowIns(false)}>Annuler</button><button className="btn btn-p" onClick={saveIns} disabled={!insForm.prenom.trim()||!insForm.nom.trim()}>Enregistrer</button></div>
+      </Modal>}
+
+      {showAssign&&selIns?.userId&&<Modal title="Assigner a un groupe" onClose={()=>setShowAssign(false)}>
+        <div style={{fontSize:13,color:'var(--muted)',marginBottom:10}}>Groupes pour {selIns.prenom} {selIns.nom} :</div>
+        <div style={{display:'flex',flexDirection:'column',gap:7,maxHeight:280,overflowY:'auto'}}>
+          {cours.map(c=>{
+            const ins=c.eleveIds.includes(selIns.userId);const prof=users.find(u=>u.id===c.profId);
+            return <div key={c.id} onClick={()=>setCours(p=>p.map(x=>x.id===c.id?{...x,eleveIds:ins?x.eleveIds.filter(id=>id!==selIns.userId):[...x.eleveIds,selIns.userId]}:x))}
+              style={{padding:'10px 14px',border:`2px solid ${ins?'var(--gold)':'var(--cream2)'}`,background:ins?'#FFFBF0':'white',cursor:'pointer',display:'flex',alignItems:'center',gap:12}}>
+              <div style={{width:26,height:26,background:ins?'var(--navy)':'var(--cream2)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}>{ins?'v':'+'}</div>
+              <div><div style={{fontSize:13,fontWeight:600}}>{c.matiere} — {c.niveau}</div><div style={{fontSize:11,color:'var(--muted)'}}>{c.jour} {hs(c.debut)}–{hs(c.fin)} · {prof?.name||'—'}</div></div>
+            </div>;
+          })}
+        </div>
+        <div className="fa"><button className="btn btn-p" onClick={()=>setShowAssign(false)}>Termine</button></div>
+      </Modal>}
+
 
     {show&&<Modal title="Ajouter un utilisateur" onClose={()=>setShow(false)}>
       <div className="fg"><label className="fl">Nom complet *</label><input className="fi" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Ex: Lucas Moreau"/></div>
@@ -3530,91 +3489,47 @@ function CoursParticuliers({user,users,dispos,setDispos,demandes,setDemandes}){
 
 
 // ─── FACTURATION ───
-function printInvoice(facture, eleve, cours, users){
+function printInvoice(facture,eleve,cours,users){
   const sessions=cours.filter(c=>c.eleveIds.includes(eleve?.id||''));
   const matieres=[...new Set(sessions.map(c=>c.matiere))];
   const today=new Date().toLocaleDateString('fr-FR');
   const num=facture.id.toUpperCase();
-  const statutLabel={paye:'✓ PAYÉ',attente:'EN ATTENTE',retard:'⚠ EN RETARD'}[facture.statut]||facture.statut;
+  const statutLabel={paye:'PAYÉ',attente:'EN ATTENTE',retard:'EN RETARD'}[facture.statut]||facture.statut;
   const statutColor={paye:'#2D9B6F',attente:'#D97706',retard:'#C94A4A'}[facture.statut]||'#888';
-  const w=window.open('','_blank','width=800,height=600');
-  w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
-<title>Facture ${num}</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap');
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:'Courier Prime',monospace;color:#1a1a2e;background:#fff;padding:48px 56px;font-size:13px;}
-  .hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #C9A84C;padding-bottom:20px;margin-bottom:28px;}
-  .brand{display:flex;align-items:center;gap:12px;}
-  .brand svg{flex-shrink:0;}
-  .brand-name{font-size:17px;font-weight:700;color:#1a1a2e;letter-spacing:.5px;}
-  .brand-sub{font-size:11px;color:#888;margin-top:2px;}
-  .inv-meta{text-align:right;}
-  .inv-num{font-size:22px;font-weight:700;color:#C9A84C;letter-spacing:1px;}
-  .inv-date{font-size:11px;color:#888;margin-top:4px;}
-  .section{margin-bottom:24px;}
-  .section-title{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#888;margin-bottom:10px;font-weight:700;}
-  .card{background:#f9f7f2;border-left:3px solid #C9A84C;padding:12px 16px;border-radius:1px;}
-  .eleve-name{font-size:17px;font-weight:700;color:#1a1a2e;}
-  .eleve-niveau{font-size:12px;color:#888;margin-top:2px;}
-  .mat-list{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
-  .mat-tag{background:#1a1a2e;color:#C9A84C;padding:3px 10px;font-size:10px;font-weight:700;letter-spacing:.5px;}
-  .line-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #eee;}
-  .line-label{font-size:13px;font-weight:500;}
-  .line-sub{font-size:11px;color:#888;margin-top:2px;}
-  .line-price{font-size:15px;font-weight:700;color:#1a1a2e;}
-  .total-row{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:#1a1a2e;color:#fff;margin-top:16px;}
-  .total-label{font-size:12px;letter-spacing:1px;text-transform:uppercase;}
-  .total-amount{font-size:24px;font-weight:700;color:#C9A84C;}
-  .statut-badge{display:inline-block;padding:6px 14px;font-size:11px;font-weight:700;letter-spacing:1px;border:2px solid;margin-top:12px;}
-  .footer{margin-top:40px;padding-top:16px;border-top:1px solid #eee;font-size:10px;color:#aaa;display:flex;justify-content:space-between;}
-  @media print{body{padding:24px 32px;}button{display:none!important;}}
-</style></head><body>
+  const w=window.open('','_blank','width=820,height=700');
+  w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Facture ${num}</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Courier New',monospace;color:#1a1a2e;padding:48px 56px;font-size:13px}
+.hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #C9A84C;padding-bottom:20px;margin-bottom:28px}
+.brand-name{font-size:17px;font-weight:700;letter-spacing:.5px}.brand-sub{font-size:11px;color:#888;margin-top:3px}
+.inv-num{font-size:22px;font-weight:700;color:#C9A84C;letter-spacing:1px;text-align:right}.inv-date{font-size:11px;color:#888;margin-top:4px;text-align:right}
+.section-title{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#888;margin-bottom:10px;font-weight:700}
+.card{background:#f9f7f2;border-left:3px solid #C9A84C;padding:12px 16px;margin-bottom:20px}
+.eleve-name{font-size:17px;font-weight:700}.mat-tag{background:#1a1a2e;color:#C9A84C;padding:3px 10px;font-size:10px;font-weight:700;display:inline-block;margin:3px 4px 0 0}
+.line-item{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #eee}
+.total-row{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:#1a1a2e;color:#fff;margin-top:16px}
+.total-amount{font-size:24px;font-weight:700;color:#C9A84C}
+.statut{display:inline-block;padding:6px 14px;font-size:11px;font-weight:700;letter-spacing:1px;border:2px solid;margin-top:12px}
+.footer{margin-top:40px;padding-top:16px;border-top:1px solid #eee;font-size:10px;color:#aaa;display:flex;justify-content:space-between}
+.print-btn{display:block;margin:20px auto 0;padding:10px 28px;background:#1a1a2e;color:#C9A84C;border:none;cursor:pointer;font-size:13px;letter-spacing:1px;font-weight:700}
+@media print{.print-btn{display:none}}</style></head><body>
 <div class="hd">
-  <div class="brand">
-    <svg width="42" height="42" viewBox="0 0 52 52" fill="none"><circle cx="26" cy="26" r="24" fill="#C9A84C" opacity="0.15"/><path d="M26 8 L38 18 L38 34 L26 42 L14 34 L14 18 Z" fill="#C9A84C" opacity="0.9"/><path d="M20 24 L26 18 L32 24 L26 30 Z" fill="white"/></svg>
-    <div><div class="brand-name">Plus de bonnes notes</div><div class="brand-sub">Soutien scolaire — La Courneuve</div><div class="brand-sub">admin@educenter.fr</div></div>
+  <div>
+    <svg width="36" height="36" viewBox="0 0 52 52" fill="none" style="margin-bottom:8px"><circle cx="26" cy="26" r="24" fill="#C9A84C" opacity="0.15"/><path d="M26 8 L38 18 L38 34 L26 42 L14 34 L14 18 Z" fill="#C9A84C"/><path d="M20 24 L26 18 L32 24 L26 30 Z" fill="white"/></svg>
+    <div class="brand-name">Plus de bonnes notes</div>
+    <div class="brand-sub">Soutien scolaire — La Courneuve</div>
+    <div class="brand-sub">admin@educenter.fr</div>
   </div>
-  <div class="inv-meta">
-    <div class="inv-num">FACTURE ${num}</div>
-    <div class="inv-date">Émise le ${today}</div>
-    ${facture.echeance?`<div class="inv-date">Échéance : ${facture.echeance}</div>`:''}
-  </div>
+  <div><div class="inv-num">FACTURE ${num}</div><div class="inv-date">Émise le ${today}</div>${facture.echeance?`<div class="inv-date">Échéance : ${facture.echeance}</div>`:''}</div>
 </div>
-
-${eleve?`<div class="section">
-  <div class="section-title">Élève</div>
-  <div class="card">
-    <div class="eleve-name">${eleve.name}</div>
-    <div class="eleve-niveau">${eleve.niveau||''}</div>
-    ${matieres.length>0?`<div class="mat-list">${matieres.map(m=>`<span class="mat-tag">${m}</span>`).join('')}</div>`:''}
-  </div>
-</div>`:''}
-
-<div class="section">
-  <div class="section-title">Prestation</div>
-  <div class="line-item">
-    <div><div class="line-label">${facture.libelle}</div>
-    ${facture.nbCreneaux>0?`<div class="line-sub">${facture.nbCreneaux} créneau${facture.nbCreneaux>1?'x':''} / mois</div>`:''}
-    ${sessions.map(c=>`<div class="line-sub">→ ${c.matiere} · ${c.jour} ${Math.floor(c.debut)}h${c.debut%1===0?'00':'30'}–${Math.floor(c.fin)}h${c.fin%1===0?'00':'30'}</div>`).join('')}
-    </div>
-    <div class="line-price">${facture.montant}€</div>
-  </div>
-  <div class="total-row">
-    <span class="total-label">Total à régler</span>
-    <span class="total-amount">${facture.montant}€</span>
-  </div>
-  <div><span class="statut-badge" style="color:${statutColor};border-color:${statutColor}">${statutLabel}</span></div>
-</div>
-
-<div class="footer">
-  <span>Plus de bonnes notes · La Courneuve · admin@educenter.fr</span>
-  <span>${num} · ${today}</span>
-</div>
-<br/><div style="text-align:center"><button onclick="window.print()" style="padding:10px 28px;background:#1a1a2e;color:#C9A84C;border:none;cursor:pointer;font-size:13px;letter-spacing:1px;font-weight:700;">🖨 IMPRIMER / ENREGISTRER PDF</button></div>
+${eleve?`<div class="section-title">Élève</div><div class="card"><div class="eleve-name">${eleve.name}</div><div style="font-size:12px;color:#888;margin-top:2px">${eleve.niveau||''}</div>${matieres.map(m=>`<span class="mat-tag">${m}</span>`).join('')}</div>`:''}
+<div class="section-title">Prestation</div>
+<div class="line-item"><div><strong>${facture.libelle}</strong>${facture.nbCreneaux>0?`<br><small style="color:#888">${facture.nbCreneaux} créneau${facture.nbCreneaux>1?'x':''}/mois</small>`:''}<br>${sessions.map(c=>`<small style="color:#888">→ ${c.matiere} · ${c.jour} ${Math.floor(c.debut)}h${c.debut%1===0?'00':'30'}–${Math.floor(c.fin)}h${c.fin%1===0?'00':'30'}</small>`).join('<br>')}</div><strong style="font-size:18px">${facture.montant}€</strong></div>
+<div class="total-row"><span style="letter-spacing:1px;text-transform:uppercase;font-size:12px">Total à régler</span><span class="total-amount">${facture.montant}€</span></div>
+<span class="statut" style="color:${statutColor};border-color:${statutColor}">${statutLabel}</span>
+<div class="footer"><span>Plus de bonnes notes · La Courneuve · admin@educenter.fr</span><span>${num} · ${today}</span></div>
+<button class="print-btn" onclick="window.print()">🖨  IMPRIMER / ENREGISTRER EN PDF</button>
 </body></html>`);
-  w.document.close();
-  w.focus();
+  w.document.close();w.focus();
 }
 
 function Facturation({user,users,factures,setFactures,cours}){
@@ -3630,56 +3545,45 @@ function Facturation({user,users,factures,setFactures,cours}){
     const eleves=users.filter(u=>u.role==='eleve');
     const map={};
     eleves.forEach(e=>{
-      const lastName=e.name.trim().split(/\s+/).slice(-1)[0];
-      const id='fam_'+lastName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-      if(!map[id]){map[id]={id,nom:'Famille '+lastName,lastName,eleveIds:[e.id]};}
+      const ln=e.name.trim().split(/\s+/).slice(-1)[0];
+      const id='fam_'+ln.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+      if(!map[id]){map[id]={id,nom:'Famille '+ln,lastName:ln,eleveIds:[e.id]};}
       else if(!map[id].eleveIds.includes(e.id)){map[id].eleveIds.push(e.id);}
     });
     return Object.values(map).sort((a,b)=>a.lastName.localeCompare(b.lastName));
   },[users]);
 
-  const TARIF=55;
-  const getEleveSessions=(eleveId)=>cours.filter(c=>c.eleveIds.includes(eleveId));
-  const getEleveCreneaux=(eleveId)=>getEleveSessions(eleveId).length;
-  const getEleveMontant=(eleveId)=>{const mats=new Set(getEleveSessions(eleveId).map(c=>c.matiere));return mats.size*TARIF;};
-  const getEleveLabel=(eleveId)=>{
-    const e=users.find(u=>u.id===eleveId);
-    const sessions=getEleveSessions(eleveId);
-    const mats=[...new Set(sessions.map(c=>c.matiere))];
-    const month=new Date().toLocaleString('fr-FR',{month:'long',year:'numeric'});
-    return e?`Forfait ${mats.join(' + ')} — ${e.name} — ${month}`:'';
-  };
-  const getFamTarif=(fam)=>{const matieres=new Set(cours.filter(c=>c.eleveIds.some(eid=>fam.eleveIds.includes(eid))).map(c=>c.matiere));return matieres.size*55;};
-  const getFamMatieres=(fam)=>[...new Set(cours.filter(c=>c.eleveIds.some(eid=>fam.eleveIds.includes(eid))).map(c=>c.matiere))];
-  const famFacts=(fid)=>factures.filter(f=>f.familleId===fid);
-  const totalFam=(fid)=>famFacts(fid).reduce((a,f)=>a+f.montant,0);
-  const payeFam=(fid)=>famFacts(fid).filter(f=>f.statut==='paye').reduce((a,f)=>a+f.montant,0);
-  const pendingFam=(fid)=>famFacts(fid).filter(f=>f.statut!=='paye').length;
-  const toggle=(id)=>setOpen(p=>({...p,[id]:!p[id]}));
-
-  const setStatut=(id,statut)=>setFactures(p=>p.map(f=>f.id===id?{...f,statut,datePaiement:statut==='paye'?new Date().toISOString().split('T')[0]:null}:f));
-  const delFact=(id)=>{if(window.confirm('Supprimer cette facture ?'))setFactures(p=>p.filter(f=>f.id!==id));};
+  const getSessions=eid=>cours.filter(c=>c.eleveIds.includes(eid));
+  const getMontant=eid=>{const mats=new Set(getSessions(eid).map(c=>c.matiere));return mats.size*55;};
+  const getLabel=eid=>{const e=users.find(u=>u.id===eid);const mats=[...new Set(getSessions(eid).map(c=>c.matiere))];const mo=new Date().toLocaleString('fr-FR',{month:'long',year:'numeric'});return e?`Forfait ${mats.join(' + ')} — ${e.name} — ${mo}`:'';}; 
+  const getFamMats=fam=>[...new Set(cours.filter(c=>c.eleveIds.some(id=>fam.eleveIds.includes(id))).map(c=>c.matiere))];
+  const getFamTarif=fam=>getFamMats(fam).length*55;
+  const famFacts=fid=>factures.filter(f=>f.familleId===fid);
+  const totalFam=fid=>famFacts(fid).reduce((a,f)=>a+f.montant,0);
+  const payeFam=fid=>famFacts(fid).filter(f=>f.statut==='paye').reduce((a,f)=>a+f.montant,0);
+  const pendingFam=fid=>famFacts(fid).filter(f=>f.statut!=='paye').length;
+  const toggle=id=>setOpen(p=>({...p,[id]:!p[id]}));
+  const setStatut=(id,s)=>setFactures(p=>p.map(f=>f.id===id?{...f,statut:s,datePaiement:s==='paye'?new Date().toISOString().split('T')[0]:null}:f));
+  const delFact=id=>{if(window.confirm('Supprimer cette facture ?'))setFactures(p=>p.filter(f=>f.id!==id));};
   const addFact=()=>{
     if(!factForm.libelle||!factForm.montant||!factForm.familleId)return;
     setFactures(p=>[...p,{id:'fc'+Date.now(),...factForm,montant:parseFloat(factForm.montant),eleveId:factForm.eleveId||null,nbCreneaux:factForm.nbCreneaux||0,datePaiement:factForm.statut==='paye'?new Date().toISOString().split('T')[0]:null}]);
     setShowFact(false);setFactForm({familleId:'',eleveId:'',libelle:'',type:'mensuel',montant:'',echeance:'',statut:'attente',nbCreneaux:0});setSearchEleve('');
   };
-  const startEdit=(f)=>{setEditId(f.id);setEditRow({libelle:f.libelle,montant:String(f.montant),echeance:f.echeance,statut:f.statut});};
-  const saveEdit=(id)=>{setFactures(p=>p.map(f=>f.id===id?{...f,...editRow,montant:parseFloat(editRow.montant),datePaiement:editRow.statut==='paye'&&f.statut!=='paye'?new Date().toISOString().split('T')[0]:f.datePaiement}:f));setEditId(null);};
+  const startEdit=f=>{setEditId(f.id);setEditRow({libelle:f.libelle,montant:String(f.montant),echeance:f.echeance||'',statut:f.statut});};
+  const saveEdit=id=>{setFactures(p=>p.map(f=>f.id===id?{...f,...editRow,montant:parseFloat(editRow.montant),datePaiement:editRow.statut==='paye'&&f.statut!=='paye'?new Date().toISOString().split('T')[0]:f.datePaiement}:f));setEditId(null);};
 
   const totalGlobal=factures.reduce((a,f)=>a+f.montant,0);
   const totalPaye=factures.filter(f=>f.statut==='paye').reduce((a,f)=>a+f.montant,0);
   const totalAttente=factures.filter(f=>f.statut==='attente').reduce((a,f)=>a+f.montant,0);
   const totalRetard=factures.filter(f=>f.statut==='retard').reduce((a,f)=>a+f.montant,0);
   const nbRetard=factures.filter(f=>f.statut==='retard').length;
-
-  const filteredEleves=useMemo(()=>users.filter(u=>u.role==='eleve'&&(searchEleve===''||u.name.toLowerCase().includes(searchEleve.toLowerCase())||( u.niveau||'').toLowerCase().includes(searchEleve.toLowerCase()))),[users,searchEleve]);
-
-  const SBadge=({s})=>{const map={paye:{cls:'s-paye',icon:'✓',label:'Payé'},attente:{cls:'s-attente',icon:'⏳',label:'En attente'},retard:{cls:'s-retard',icon:'⚠️',label:'En retard'}};const m=map[s]||map['attente'];return <span className={`stat-badge ${m.cls}`}>{m.icon} {m.label}</span>;};
+  const filteredEleves=useMemo(()=>users.filter(u=>u.role==='eleve'&&(searchEleve===''||u.name.toLowerCase().includes(searchEleve.toLowerCase())||(u.niveau||'').toLowerCase().includes(searchEleve.toLowerCase()))),[users,searchEleve]);
+  const SBadge=({s})=>{const m={paye:{c:'s-paye',i:'✓',l:'Payé'},attente:{c:'s-attente',i:'⏳',l:'En attente'},retard:{c:'s-retard',i:'⚠️',l:'En retard'}}[s]||{c:'s-attente',i:'⏳',l:'En attente'};return <span className={`stat-badge ${m.c}`}>{m.i} {m.l}</span>;};
 
   return <>
     <TB title="Facturation">
-      <button className="btn btn-sm" style={{background:'var(--cream2)',border:'none',color:'var(--muted)',fontSize:11}} onClick={()=>{if(window.confirm('Remettre les factures de démonstration ?'))setFactures(SEED_FACTURES);}}>↺ Reset démo</button>
+      <button className="btn btn-sm" style={{background:'var(--cream2)',border:'none',color:'var(--muted)',fontSize:11}} onClick={()=>{if(window.confirm('Remettre les factures de démonstration ?'))setFactures(SEED_FACTURES);}}>↺ Reset</button>
       <button className="btn btn-p btn-sm" onClick={()=>setShowFact(true)}>＋ Facture</button>
     </TB>
     <div className="pg">
@@ -3689,18 +3593,15 @@ function Facturation({user,users,factures,setFactures,cours}){
         <div className="sc c-gold"><div className="sc-ic">⏳</div><div className="sc-v">{totalAttente}€</div><div className="sc-l">En attente</div></div>
         <div className="sc"><div className="sc-ic">⚠️</div><div className="sc-v" style={{color:'var(--err)'}}>{totalRetard}€</div><div className="sc-l">{nbRetard} en retard</div></div>
       </div>
-
       <div className="tabs" style={{maxWidth:340}}>
         <button className={`tab ${tab==='vue'?'on':''}`} onClick={()=>setTab('vue')}>👨‍👩‍👧 Par famille</button>
-        <button className={`tab ${tab==='liste'?'on':''}`} onClick={()=>setTab('liste')}>📋 Toutes les factures</button>
+        <button className={`tab ${tab==='liste'?'on':''}`} onClick={()=>setTab('liste')}>📋 Liste</button>
       </div>
 
       {tab==='vue'&&<div style={{display:'flex',flexDirection:'column',gap:12}}>
         {familles.length===0&&<div className="emp"><div className="emp-icon">👨‍👩‍👧</div><h3>Aucun élève inscrit</h3></div>}
         {familles.map(fam=>{
-          const facts=famFacts(fam.id);
-          const tp=totalFam(fam.id);const pp=payeFam(fam.id);const pend=pendingFam(fam.id);
-          const pct=tp>0?Math.round((pp/tp)*100):0;
+          const facts=famFacts(fam.id);const tp=totalFam(fam.id);const pp=payeFam(fam.id);const pend=pendingFam(fam.id);const pct=tp>0?Math.round((pp/tp)*100):0;
           const famEleves=users.filter(u=>fam.eleveIds.includes(u.id));
           return <div key={fam.id} className="fam-card">
             <div className="fam-hd" onClick={()=>toggle(fam.id)}>
@@ -3709,7 +3610,7 @@ function Facturation({user,users,factures,setFactures,cours}){
                 <div>
                   <div className="fam-name">{fam.nom}</div>
                   <div className="fam-sub">{famEleves.map(e=><span key={e.id} style={{marginRight:8}}>🎓 {e.name} <span style={{opacity:.6,fontSize:10}}>({e.niveau})</span></span>)}</div>
-                  {getFamMatieres(fam).length>0&&<div style={{marginTop:4,display:'flex',gap:5,flexWrap:'wrap'}}>{getFamMatieres(fam).map(m=><span key={m} style={{...getCoursBadge(m),fontSize:10}}>{m}</span>)}<span style={{fontSize:11,fontWeight:700,color:'var(--navy)',marginLeft:4}}>= {getFamTarif(fam)}€/mois</span></div>}
+                  {getFamMats(fam).length>0&&<div style={{marginTop:4,display:'flex',gap:5,flexWrap:'wrap'}}>{getFamMats(fam).map(m=><span key={m} style={{...getCoursBadge(m),fontSize:10}}>{m}</span>)}<span style={{fontSize:11,fontWeight:700,color:'var(--navy)',marginLeft:4}}>{getFamTarif(fam)}€/mois</span></div>}
                 </div>
               </div>
               <div style={{display:'flex',alignItems:'center',gap:14}}>
@@ -3720,43 +3621,34 @@ function Facturation({user,users,factures,setFactures,cours}){
             </div>
             {tp>0&&<div className="pb" style={{height:3}}><div className="pbf" style={{width:`${pct}%`,background:pct===100?'var(--ok)':pct>50?'#D97706':'var(--err)'}}/></div>}
             {open[fam.id]&&<div className="fam-bd">
-              <div style={{display:'flex',justifyContent:'flex-end',marginBottom:12}}>
+              <div style={{display:'flex',justifyContent:'flex-end',marginBottom:10}}>
                 <button className="btn btn-p btn-sm" onClick={()=>{setFactForm(p=>({...p,familleId:fam.id}));setShowFact(true);}}>＋ Facture</button>
               </div>
               {facts.length===0
-                ?<div style={{textAlign:'center',padding:'16px 0',color:'var(--muted)',fontSize:13}}>Aucune facture pour cette famille.</div>
+                ?<div style={{textAlign:'center',padding:'12px 0',color:'var(--muted)',fontSize:12}}>Aucune facture.</div>
                 :facts.map(f=>{
                   const eleveF=users.find(u=>u.id===f.eleveId);
-                  const isEditing=editId===f.id;
+                  const isEd=editId===f.id;
                   return <div key={f.id} className="fact-row" style={{flexDirection:'column',gap:6}}>
-                    {isEditing?(
+                    {isEd?(
                       <div style={{display:'flex',flexDirection:'column',gap:8,width:'100%'}}>
                         <input className="fi" style={{fontSize:13}} value={editRow.libelle} onChange={e=>setEditRow(r=>({...r,libelle:e.target.value}))} placeholder="Libellé"/>
                         <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
-                          <input className="fi" type="number" style={{width:90,fontSize:12}} value={editRow.montant} onChange={e=>setEditRow(r=>({...r,montant:e.target.value}))} placeholder="Montant €"/>
+                          <input className="fi" type="number" style={{width:90,fontSize:12}} value={editRow.montant} onChange={e=>setEditRow(r=>({...r,montant:e.target.value}))}/>
                           <input className="fi" type="date" style={{fontSize:12}} value={editRow.echeance} onChange={e=>setEditRow(r=>({...r,echeance:e.target.value}))}/>
-                          <select className="fi" style={{fontSize:12,flex:1}} value={editRow.statut} onChange={e=>setEditRow(r=>({...r,statut:e.target.value}))}>
-                            <option value="paye">✓ Payé</option><option value="attente">⏳ En attente</option><option value="retard">⚠️ En retard</option>
-                          </select>
+                          <select className="fi" style={{fontSize:12,flex:1}} value={editRow.statut} onChange={e=>setEditRow(r=>({...r,statut:e.target.value}))}><option value="paye">✓ Payé</option><option value="attente">⏳ Attente</option><option value="retard">⚠️ Retard</option></select>
                         </div>
-                        <div style={{display:'flex',gap:6,justifyContent:'flex-end'}}>
-                          <button className="btn btn-o btn-sm" onClick={()=>setEditId(null)}>Annuler</button>
-                          <button className="btn btn-p btn-sm" onClick={()=>saveEdit(f.id)}>✓ Sauvegarder</button>
-                        </div>
+                        <div style={{display:'flex',gap:6,justifyContent:'flex-end'}}><button className="btn btn-o btn-sm" onClick={()=>setEditId(null)}>Annuler</button><button className="btn btn-p btn-sm" onClick={()=>saveEdit(f.id)}>✓ Sauvegarder</button></div>
                       </div>
                     ):(
                       <div style={{display:'flex',alignItems:'center',width:'100%',gap:8}}>
                         <div style={{flex:1}}>
                           <div style={{fontSize:13,fontWeight:500}}>{f.libelle}</div>
-                          <div style={{fontSize:11,color:'var(--muted)',marginTop:2,display:'flex',gap:10}}>
-                            {f.echeance&&<span>Éch. {f.echeance}</span>}
-                            {f.nbCreneaux>0&&<span>· {f.nbCreneaux} créneau{f.nbCreneaux>1?'x':''}</span>}
-                            {f.datePaiement&&<span style={{color:'var(--ok)'}}>· Payé le {f.datePaiement}</span>}
-                          </div>
+                          <div style={{fontSize:11,color:'var(--muted)',marginTop:2,display:'flex',gap:8}}>{f.echeance&&<span>Éch. {f.echeance}</span>}{f.nbCreneaux>0&&<span>· {f.nbCreneaux} créneau{f.nbCreneaux>1?'x':''}</span>}{f.datePaiement&&<span style={{color:'var(--ok)'}}>· Payé le {f.datePaiement}</span>}</div>
                         </div>
                         <span style={{fontWeight:700,fontSize:14,minWidth:48,textAlign:'right'}}>{f.montant}€</span>
                         <SBadge s={f.statut}/>
-                        <button className="btn btn-sm" style={{background:'#f0f6f0',border:'1.5px solid #b8dbb8',color:'#2D9B6F',fontSize:11}} title="Générer PDF" onClick={()=>printInvoice(f,eleveF,cours,users)}>🖨 PDF</button>
+                        <button className="btn btn-sm" style={{background:'#f0f6f0',border:'1.5px solid #b8dbb8',color:'#2D9B6F',fontSize:11}} onClick={()=>printInvoice(f,eleveF,cours,users)}>🖨 PDF</button>
                         <button className="btn btn-sm" style={{background:'#f0f4ff',border:'1.5px solid #c8d8f5',color:'var(--info)'}} onClick={()=>startEdit(f)}>✏️</button>
                         <button className="btn btn-d btn-sm" onClick={()=>delFact(f.id)}>🗑️</button>
                       </div>
@@ -3764,14 +3656,7 @@ function Facturation({user,users,factures,setFactures,cours}){
                   </div>;
                 })
               }
-              {facts.length>0&&<div className="fact-total">
-                <span style={{fontSize:12,fontWeight:600}}>Total famille</span>
-                <div style={{display:'flex',gap:16,fontSize:13}}>
-                  <span style={{color:'var(--ok)',fontWeight:700}}>✓ {pp}€</span>
-                  {(tp-pp)>0&&<span style={{color:'var(--err)',fontWeight:700}}>✗ {tp-pp}€</span>}
-                  <span style={{fontWeight:700}}>{tp}€</span>
-                </div>
-              </div>}
+              {facts.length>0&&<div className="fact-total"><span style={{fontSize:12,fontWeight:600}}>Total</span><div style={{display:'flex',gap:16,fontSize:13}}><span style={{color:'var(--ok)',fontWeight:700}}>✓ {pp}€</span>{(tp-pp)>0&&<span style={{color:'var(--err)',fontWeight:700}}>✗ {tp-pp}€</span>}<span style={{fontWeight:700}}>{tp}€</span></div></div>}
             </div>}
           </div>;
         })}
@@ -3782,8 +3667,7 @@ function Facturation({user,users,factures,setFactures,cours}){
           <table className="tbl">
             <thead><tr><th>Famille</th><th>Libellé</th><th>Montant</th><th>Échéance</th><th>Statut</th><th></th></tr></thead>
             <tbody>{[...factures].sort((a,b)=>{const o={retard:0,attente:1,paye:2};return(o[a.statut]??1)-(o[b.statut]??1)||((a.echeance||'').localeCompare(b.echeance||''));}).map(f=>{
-              const fam=familles.find(x=>x.id===f.familleId);
-              const eleveF=users.find(u=>u.id===f.eleveId);
+              const fam=familles.find(x=>x.id===f.familleId);const eleveF=users.find(u=>u.id===f.eleveId);
               return <tr key={f.id}>
                 <td style={{fontWeight:600,fontSize:13}}>{fam?.nom||f.familleId}</td>
                 <td style={{fontSize:12}}>{f.libelle}</td>
@@ -3792,9 +3676,7 @@ function Facturation({user,users,factures,setFactures,cours}){
                 <td><SBadge s={f.statut}/></td>
                 <td style={{display:'flex',gap:5,alignItems:'center'}}>
                   <button className="btn btn-sm" style={{background:'#f0f6f0',border:'1.5px solid #b8dbb8',color:'#2D9B6F',fontSize:11}} onClick={()=>printInvoice(f,eleveF,cours,users)}>🖨 PDF</button>
-                  <select className="fi" style={{width:'auto',padding:'4px 8px',fontSize:11}} value={f.statut} onChange={e=>setStatut(f.id,e.target.value)}>
-                    <option value="paye">✓ Payé</option><option value="attente">⏳ Attente</option><option value="retard">⚠️ Retard</option>
-                  </select>
+                  <select className="fi" style={{width:'auto',padding:'4px 8px',fontSize:11}} value={f.statut} onChange={e=>setStatut(f.id,e.target.value)}><option value="paye">✓ Payé</option><option value="attente">⏳ Attente</option><option value="retard">⚠️ Retard</option></select>
                   <button className="btn btn-d btn-sm" onClick={()=>delFact(f.id)}>🗑️</button>
                 </td>
               </tr>;
@@ -3805,54 +3687,36 @@ function Facturation({user,users,factures,setFactures,cours}){
     </div>
 
     {showFact&&<Modal title="Nouvelle facture" onClose={()=>{setShowFact(false);setSearchEleve('');}}>
-      {/* Recherche élève live */}
       <div className="fg">
         <label className="fl">Rechercher un élève *</label>
         <input className="fi" placeholder="Nom, niveau..." value={searchEleve} onChange={e=>setSearchEleve(e.target.value)} autoFocus style={{fontSize:13,marginBottom:6}}/>
-        <div style={{border:'1.5px solid var(--cream2)',borderRadius:2,maxHeight:160,overflowY:'auto'}}>
+        <div style={{border:'1.5px solid var(--cream2)',borderRadius:2,maxHeight:150,overflowY:'auto'}}>
           {filteredEleves.length===0&&<div style={{padding:'10px 12px',color:'var(--muted)',fontSize:12,fontStyle:'italic'}}>Aucun élève trouvé</div>}
           {filteredEleves.map(e=>{
-            const nc=getEleveCreneaux(e.id);const mt=getEleveMontant(e.id);
-            const sel=factForm.eleveId===e.id;
+            const nc=getSessions(e.id).length;const mt=getMontant(e.id);const sel=factForm.eleveId===e.id;
             return <div key={e.id} onClick={()=>{
               const ln=e.name.trim().split(/\s+/).slice(-1)[0];
-              const famId='fam_'+ln.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-              const echDate=new Date();echDate.setDate(1);echDate.setMonth(echDate.getMonth()+1);
-              setFactForm({...factForm,eleveId:e.id,familleId:famId,libelle:getEleveLabel(e.id),montant:String(mt),nbCreneaux:nc,echeance:echDate.toISOString().split('T')[0]});
-            }} style={{padding:'9px 12px',cursor:'pointer',borderBottom:'1px solid var(--cream2)',background:sel?'linear-gradient(90deg,#EEF5FF,white)':'white',display:'flex',justifyContent:'space-between',alignItems:'center',transition:'background .1s'}}>
-              <div>
-                <div style={{fontSize:13,fontWeight:sel?700:500,color:sel?'var(--navy)':'var(--text)'}}>{sel?'✓ ':''}{e.name}</div>
-                <div style={{fontSize:11,color:'var(--muted)'}}>{e.niveau} · {nc} créneau{nc>1?'x':''}</div>
-              </div>
+              const fid='fam_'+ln.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+              const ed=new Date();ed.setDate(1);ed.setMonth(ed.getMonth()+1);
+              setFactForm({...factForm,eleveId:e.id,familleId:fid,libelle:getLabel(e.id),montant:String(mt),nbCreneaux:nc,echeance:ed.toISOString().split('T')[0]});
+            }} style={{padding:'9px 12px',cursor:'pointer',borderBottom:'1px solid var(--cream2)',background:sel?'linear-gradient(90deg,#EEF5FF,white)':'white',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+              <div><div style={{fontSize:13,fontWeight:sel?700:500,color:sel?'var(--navy)':'var(--text)'}}>{sel?'✓ ':''}{e.name}</div><div style={{fontSize:11,color:'var(--muted)'}}>{e.niveau} · {nc} créneau{nc>1?'x':''}</div></div>
               <span style={{fontWeight:700,fontSize:13,color:'var(--gold)'}}>{mt}€/mois</span>
             </div>;
           })}
         </div>
       </div>
-
       {factForm.eleveId&&<div style={{background:'#F0F6FF',border:'1px solid #C8D8F5',padding:'10px 14px',marginBottom:4,fontSize:12}}>
-        <div style={{fontWeight:600,marginBottom:6,color:'var(--navy)'}}>📅 Créneaux de {users.find(u=>u.id===factForm.eleveId)?.name}</div>
-        {getEleveSessions(factForm.eleveId).map(c=>(
-          <div key={c.id} style={{display:'flex',alignItems:'center',gap:8,marginBottom:3}}>
-            <span style={{...getCoursBadge(c.matiere),fontSize:10,padding:'1px 6px'}}>{c.matiere}</span>
-            <span style={{color:'var(--muted)'}}>{c.jour} {hs(c.debut)}–{hs(c.fin)}</span>
-          </div>
-        ))}
-        {getEleveSessions(factForm.eleveId).length===0&&<span style={{color:'var(--muted)',fontStyle:'italic'}}>Aucun créneau inscrit</span>}
+        <div style={{fontWeight:600,marginBottom:5,color:'var(--navy)'}}>📅 Créneaux</div>
+        {getSessions(factForm.eleveId).map(c=><div key={c.id} style={{display:'flex',alignItems:'center',gap:8,marginBottom:2}}><span style={{...getCoursBadge(c.matiere),fontSize:10,padding:'1px 6px'}}>{c.matiere}</span><span style={{color:'var(--muted)'}}>{c.jour} {hs(c.debut)}–{hs(c.fin)}</span></div>)}
+        {getSessions(factForm.eleveId).length===0&&<span style={{color:'var(--muted)',fontStyle:'italic'}}>Aucun créneau</span>}
       </div>}
-
-      <div className="fg"><label className="fl">Libellé *</label>
-        <input className="fi" value={factForm.libelle} onChange={e=>setFactForm({...factForm,libelle:e.target.value})} placeholder="Généré automatiquement"/>
-      </div>
+      <div className="fg"><label className="fl">Libellé *</label><input className="fi" value={factForm.libelle} onChange={e=>setFactForm({...factForm,libelle:e.target.value})} placeholder="Généré automatiquement"/></div>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
         <div className="fg"><label className="fl">Montant (€) *</label><input className="fi" type="number" value={factForm.montant} onChange={e=>setFactForm({...factForm,montant:e.target.value})}/></div>
         <div className="fg"><label className="fl">Créneaux/mois</label><input className="fi" type="number" value={factForm.nbCreneaux} onChange={e=>setFactForm({...factForm,nbCreneaux:parseInt(e.target.value)||0})}/></div>
         <div className="fg"><label className="fl">Échéance</label><input className="fi" type="date" value={factForm.echeance} onChange={e=>setFactForm({...factForm,echeance:e.target.value})}/></div>
-        <div className="fg"><label className="fl">Statut</label>
-          <select className="fi" value={factForm.statut} onChange={e=>setFactForm({...factForm,statut:e.target.value})}>
-            <option value="attente">⏳ En attente</option><option value="paye">✓ Payé</option><option value="retard">⚠️ En retard</option>
-          </select>
-        </div>
+        <div className="fg"><label className="fl">Statut</label><select className="fi" value={factForm.statut} onChange={e=>setFactForm({...factForm,statut:e.target.value})}><option value="attente">⏳ En attente</option><option value="paye">✓ Payé</option><option value="retard">⚠️ Retard</option></select></div>
       </div>
       <div className="fa"><button className="btn btn-o" onClick={()=>{setShowFact(false);setSearchEleve('');}}>Annuler</button><button className="btn btn-p" onClick={addFact} disabled={!factForm.libelle||!factForm.montant||!factForm.familleId}>Créer la facture</button></div>
     </Modal>}
@@ -3931,8 +3795,7 @@ function App(){
         sbLoadKV('custom_comps',    cu.id,    []),
       ]);
       // cours dans kv_store également (eleveIds est un tableau JSON)
-      const co = await sbLoadKV('cours', 'global', SEED_COURS);
-      const ins_data = await sbLoadKV('inscriptions','global',[]);
+      const [co,ins_data] = await Promise.all([sbLoadKV('cours','global',SEED_COURS),sbLoadKV('inscriptions','global',[])]);
       setUsers(u); setResources(r); setModules(mo); setFactures(fa);
       setDispos(di); setDemandes(de); setCustomTrophies(ct);
       setAppel(ap); setGrades(g); setEnrollments(en); setSalaires(sa);
