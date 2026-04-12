@@ -379,11 +379,20 @@ async function sbLoad(table, fallback = []) {
     return (data && data.length > 0) ? data : fallback;
   } catch(e) { console.warn('[sb] load', table, e); return fallback; }
 }
-// Helper : upsert un tableau de lignes
+// Helper : upsert un tableau de lignes + supprime les lignes retirées localement
 async function sbSave(table, rows) {
-  if (!rows || rows.length === 0) return;
-  try { await sb.from(table).upsert(rows, { onConflict: 'id' }); }
-  catch(e) { console.warn('[sb] save', table, e); }
+  if (!rows) return;
+  try {
+    if (rows.length > 0) {
+      await sb.from(table).upsert(rows, { onConflict: 'id' });
+      // Supprimer les lignes dont l'id n'est plus dans le tableau local
+      const ids = rows.map(r => r.id);
+      await sb.from(table).delete().not('id', 'in', `(${ids.join(',')})`);
+    } else {
+      // Tableau vide -> tout supprimer
+      await sb.from(table).delete().neq('id', '__sentinel__');
+    }
+  } catch(e) { console.warn('[sb] save', table, e); }
 }
 // Helper : upsert objet JSON (table kv_store avec colonnes key TEXT, value JSONB, user_id UUID)
 async function sbSaveKV(key, value, userId) {
