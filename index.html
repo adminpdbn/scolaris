@@ -411,99 +411,8 @@ const MC={
 const defMC={bg:'#F5F5F5',bd:'#9ca3af',tx:'#6B6B8A'};
 const mc=(m)=>MC[m]||defMC;
 
-// ─── SEED DATA ───
-const SEED_USERS=[
-  {id:'u1',name:'Youssef Admin',role:'admin',initials:'YA',matiere:null,niveau:null},
-  {id:'p1',name:'Ouassila',role:'prof',initials:'OU',matiere:'Mathématiques',niveau:null},
-  {id:'p2',name:'Amal',role:'prof',initials:'AM',matiere:'Français',niveau:null},
-  {id:'p3',name:'Youssef A.',role:'prof',initials:'YA',matiere:'Mathématiques · Physique',niveau:null},
-  {id:'p4',name:'Youssef S.',role:'prof',initials:'YS',matiere:'Physique · Chimie',niveau:null},
-  {id:'p5',name:'Jihad',role:'prof',initials:'JI',matiere:'Histoire · Géographie',niveau:null},
-  {id:'p6',name:'Richad',role:'prof',initials:'RI',matiere:'Mathématiques',niveau:null},
-  {id:'p7',name:'Rakash',role:'prof',initials:'RA',matiere:'Physique',niveau:null},
-  {id:'p8',name:'Yassine',role:'prof',initials:'YS',matiere:'Mathématiques · Informatique',niveau:null},
-  {id:'p9',name:'Sofiane',role:'prof',initials:'SO',matiere:'Français · Philosophie',niveau:null},
-  {id:'p10',name:'Anoya',role:'prof',initials:'AN',matiere:'Anglais',niveau:null},
-  {id:'p11',name:'Pariciga',role:'prof',initials:'PA',matiere:'SVT · Biologie',niveau:null},
-  {id:'p12',name:'Raja',role:'prof',initials:'RA',matiere:'Mathématiques · Physique',niveau:null},
-  {id:'u4',name:'Lucas Moreau',role:'eleve',initials:'LM',matiere:null,niveau:'3ème'},
-  {id:'u5',name:'Emma Petit',role:'eleve',initials:'EP',matiere:null,niveau:'Terminale'},
-  {id:'u6',name:'Théo Bernard',role:'eleve',initials:'TB',matiere:null,niveau:'5ème'},
-  {id:'u7',name:'Yasmine Kaci',role:'eleve',initials:'YK',matiere:null,niveau:'4ème'},
-];
-
-// cours hebdomadaires : debut/fin en heures décimales (14.5 = 14h30)
-const SEED_COURS=[
-  {id:'c1',profId:'p1',matiere:'Mathématiques',niveau:'3ème',jour:'Lundi',debut:14,fin:15.5,salle:'Salle A',eleveIds:['u4','u7']},
-  {id:'c2',profId:'p1',matiere:'Physique',niveau:'Terminale',jour:'Mercredi',debut:10,fin:11.5,salle:'Salle A',eleveIds:['u5']},
-  {id:'c3',profId:'p1',matiere:'Mathématiques',niveau:'5ème',jour:'Vendredi',debut:16,fin:17.5,salle:'Salle B',eleveIds:['u6']},
-  {id:'c4',profId:'p2',matiere:'Français',niveau:'4ème',jour:'Mardi',debut:15,fin:16.5,salle:'Salle C',eleveIds:['u7']},
-  {id:'c5',profId:'p2',matiere:'Français',niveau:'Terminale',jour:'Jeudi',debut:10,fin:11.5,salle:'Salle B',eleveIds:['u5']},
-  {id:'c6',profId:'p2',matiere:'Histoire',niveau:'Collège',jour:'Lundi',debut:17,fin:18.5,salle:'Salle C',eleveIds:['u4','u6','u7']},
-  {id:'c7',profId:'p1',matiere:'Physique',niveau:'3ème',jour:'Mercredi',debut:14,fin:15.5,salle:'Salle A',eleveIds:['u4']},
-  {id:'c8',profId:'p2',matiere:'Français',niveau:'Collège',jour:'Samedi',debut:10,fin:11.5,salle:'Salle B',eleveIds:['u4','u6']},
-];
-const SEED_APPEL={
-  'c1|2024-03-04':{u4:'present',u7:'absent'},
-  'c1|2024-03-11':{u4:'present',u7:'present'},
-  'c6|2024-03-04':{u4:'present',u6:'retard',u7:'absent'},
-  'c7|2024-03-06':{u4:'retard'},
-};
-const SEED_RES=[
-  {id:'r1',title:'Fiche — Fonctions dérivées',type:'fiche',matiere:'Mathématiques',niveau:'Terminale',auteurId:'p1',date:'2024-02-10',desc:'Révision complète sur les dérivées et leurs applications géométriques.',dl:12},
-  {id:'r2',title:'Exercices — Équations second degré',type:'exercice',matiere:'Mathématiques',niveau:'3ème',auteurId:'p1',date:'2024-02-08',desc:'15 exercices progressifs avec corrections détaillées.',dl:8},
-  {id:'r3',title:'Trace écrite — Les forces',type:'trace',matiere:'Physique',niveau:'5ème',auteurId:'p1',date:'2024-01-25',desc:'Résumé de séance sur les différentes forces et leurs représentations.',dl:5},
-  {id:'r4',title:'Cours — Le Romantisme français',type:'cours',matiere:'Français',niveau:'Lycée',auteurId:'p2',date:'2024-02-05',desc:'Introduction aux caractéristiques du Romantisme littéraire.',dl:7},
-  {id:'r5',title:'Exercices — Analyse grammaticale',type:'exercice',matiere:'Français',niveau:'4ème',auteurId:'p2',date:'2024-01-30',desc:'Entraînement sur la nature et la fonction des mots.',dl:6},
-  {id:'r6',title:'Fiche méthode — Dissertation',type:'fiche',matiere:'Français',niveau:'Terminale',auteurId:'p2',date:'2024-02-12',desc:'Méthode pas-à-pas pour rédiger une dissertation parfaite.',dl:15},
-  {id:'r7',title:'Trace écrite — Réactions chimiques',type:'trace',matiere:'Physique',niveau:'3ème',auteurId:'p1',date:'2024-02-01',desc:'Types de réactions chimiques et équations bilan.',dl:4},
-  {id:'r8',title:'Fiche — La Révolution française',type:'fiche',matiere:'Histoire',niveau:'Collège',auteurId:'p2',date:'2024-01-15',desc:"Résumé des causes, déroulement et conséquences de la Révolution.",dl:11},
-];
-const SEED_MOD=[
-  {id:'m1',title:'Stage Maths Brevet',emoji:'📐',desc:'Préparation intensive au Brevet en Mathématiques.',profId:'p1',niveau:'3ème',date:'2024-03-15',heure:'14h00–17h00',places:8,inscrits:5,lieu:'Salle A',matiere:'Mathématiques',bg:'#EEF3FF'},
-  {id:'m2',title:'Atelier Lecture Rapide',emoji:'📖',desc:'Techniques de lecture rapide et compréhension de textes complexes.',profId:'p2',niveau:'Collège',date:'2024-03-12',heure:'10h00–12h00',places:6,inscrits:6,lieu:'Salle B',matiere:'Français',bg:'#EEFFF6'},
-  {id:'m3',title:'Formule Bac Physique',emoji:'⚗️',desc:'Révision des chapitres clés pour le Bac Physique-Chimie.',profId:'p1',niveau:'Terminale',date:'2024-03-20',heure:'15h00–18h00',places:10,inscrits:3,lieu:'Salle A',matiere:'Physique',bg:'#FFF5EE'},
-  {id:'m4',title:'Expression Écrite',emoji:'✍️',desc:"Améliorer la rédaction, l'argumentation et le style.",profId:'p2',niveau:'Lycée',date:'2024-03-18',heure:'14h00–16h00',places:8,inscrits:2,lieu:'Salle C',matiere:'Français',bg:'#F5EEFF'},
-  {id:'m5',title:'Soutien Aide aux Devoirs',emoji:'🎒',desc:'Aide pluridisciplinaire pour collégiens en difficulté.',profId:'p2',niveau:'Collège',date:'2024-03-16',heure:'16h30–18h30',places:12,inscrits:8,lieu:'Salle B',matiere:'Multi',bg:'#FFF8EE'},
-  {id:'m6',title:'Prépa Concours Maths',emoji:'🏆',desc:'Entraînement aux concours régionaux et olympiades.',profId:'p1',niveau:'Lycée',date:'2024-03-22',heure:'09h00–12h00',places:6,inscrits:1,lieu:'Salle A',matiere:'Mathématiques',bg:'#FFFBF0'},
-];
-const SEED_GRADES={
-  'u4':[{id:'g1',matiere:'Mathématiques',note:14,max:20,date:'2024-02-08',commentaire:"Bon travail, attention aux équations.",profId:'p1'},{id:'g2',matiere:'Français',note:16,max:20,date:'2024-02-05',commentaire:'Excellente rédaction !',profId:'p2'},{id:'g3',matiere:'Physique',note:11,max:20,date:'2024-01-30',commentaire:'Efforts sur les formules.',profId:'p1'},{id:'g4',matiere:'Histoire',note:13,max:20,date:'2024-02-01',commentaire:'Bonne mémorisation.',profId:'p2'}],
-  'u5':[{id:'g5',matiere:'Mathématiques',note:18,max:20,date:'2024-02-10',commentaire:'Excellent niveau !',profId:'p1'},{id:'g6',matiere:'Physique',note:17,max:20,date:'2024-02-08',commentaire:'Très bon travail.',profId:'p1'},{id:'g7',matiere:'Français',note:12,max:20,date:'2024-02-05',commentaire:"Attention à l'argumentation.",profId:'p2'}],
-  'u6':[{id:'g8',matiere:'Mathématiques',note:9,max:20,date:'2024-02-03',commentaire:"On progresse, continuer !",profId:'p1'},{id:'g9',matiere:'Français',note:13,max:20,date:'2024-02-01',commentaire:'Bonne progression.',profId:'p2'}],
-  'u7':[{id:'g10',matiere:'Mathématiques',note:15,max:20,date:'2024-02-09',commentaire:'Très bon niveau.',profId:'p1'},{id:'g11',matiere:'Français',note:14,max:20,date:'2024-02-06',commentaire:'Bonne compréhension.',profId:'p2'},{id:'g12',matiere:'Histoire',note:16,max:20,date:'2024-02-02',commentaire:'Excellent !',profId:'p2'}],
-};
-const SEED_ENR={'u4':['m1'],'u5':['m3','m6'],'u6':['m5'],'u7':['m1','m5']};
-
-// ─── SEED FACTURES (familleId = 'fam_' + nom_de_famille_lowercase) ───
-// Les familles sont générées automatiquement depuis les élèves — pas de seed statique
-const SEED_FACTURES=[
-  {id:'fc1',familleId:'fam_moreau',libelle:'Forfait Mensuel — Janvier 2024',type:'mensuel',montant:120,echeance:'2024-01-05',statut:'paye',datePaiement:'2024-01-04'},
-  {id:'fc2',familleId:'fam_moreau',libelle:'Forfait Mensuel — Février 2024',type:'mensuel',montant:120,echeance:'2024-02-05',statut:'paye',datePaiement:'2024-02-03'},
-  {id:'fc3',familleId:'fam_moreau',libelle:'Forfait Mensuel — Mars 2024',type:'mensuel',montant:120,echeance:'2024-03-05',statut:'attente',datePaiement:null},
-  {id:'fc4',familleId:'fam_petit',libelle:'Forfait Trimestriel — T1 2024',type:'trimestriel',montant:320,echeance:'2024-01-10',statut:'paye',datePaiement:'2024-01-09'},
-  {id:'fc5',familleId:'fam_petit',libelle:'Forfait Trimestriel — T2 2024',type:'trimestriel',montant:320,echeance:'2024-04-10',statut:'attente',datePaiement:null},
-  {id:'fc6',familleId:'fam_bernard',libelle:'Forfait Mensuel — Janvier 2024',type:'mensuel',montant:90,echeance:'2024-01-05',statut:'paye',datePaiement:'2024-01-07'},
-  {id:'fc7',familleId:'fam_bernard',libelle:'Forfait Mensuel — Février 2024',type:'mensuel',montant:90,echeance:'2024-02-05',statut:'retard',datePaiement:null},
-  {id:'fc8',familleId:'fam_bernard',libelle:'Forfait Mensuel — Mars 2024',type:'mensuel',montant:90,echeance:'2024-03-05',statut:'retard',datePaiement:null},
-  {id:'fc9',familleId:'fam_kaci',libelle:'Forfait Trimestriel — T1 2024',type:'trimestriel',montant:280,echeance:'2024-01-10',statut:'paye',datePaiement:'2024-01-10'},
-  {id:'fc10',familleId:'fam_kaci',libelle:'Forfait Trimestriel — T2 2024',type:'trimestriel',montant:280,echeance:'2024-04-10',statut:'attente',datePaiement:null},
-];
-
-// ─── SEED SALAIRES PROFS ───
-const SEED_SALAIRES=[
-  {profId:'p1',tauxHoraire:35},
-  {profId:'p2',tauxHoraire:35},
-  {profId:'p3',tauxHoraire:35},
-  {profId:'p4',tauxHoraire:35},
-  {profId:'p5',tauxHoraire:35},
-  {profId:'p6',tauxHoraire:35},
-  {profId:'p7',tauxHoraire:35},
-  {profId:'p8',tauxHoraire:35},
-  {profId:'p9',tauxHoraire:35},
-  {profId:'p10',tauxHoraire:35},
-  {profId:'p11',tauxHoraire:35},
-];
+// ─── SEED DATA supprimé — base de données vierge ───
+// Toutes les données sont chargées depuis Supabase uniquement.
 
 // ─── CONSTANTS ───
 const MATIERES=['Toutes','Mathématiques','Physique','Français','Histoire','Multi'];
@@ -2813,6 +2722,122 @@ function Statistiques({users,cours,factures,salaires,setSalaires}){
 
 
 
+// ─── SUIVI COMPÉTENCES — composants auxiliaires (définis HORS du parent pour éviter le remontage) ───
+function TierPill({tier}){
+  const m={base:{l:'Base',c:'#6B7280',bg:'#F3F4F6'},intermediaire:{l:'Intermédiaire',c:'#D97706',bg:'#FFF8EE'},avance:{l:'Avancé',c:'#7C3AED',bg:'#F5F3FF'}}[tier]||{l:'Base',c:'#6B7280',bg:'#F3F4F6'};
+  return <span style={{fontSize:10,padding:'1px 6px',borderRadius:0,background:m.bg,color:m.c,fontWeight:600}}>{m.l}</span>;
+}
+function StatBadgeSuivi({st}){
+  const s=COMP_STATUTS[st]||COMP_STATUTS.non_commence;
+  return <span style={{display:'inline-flex',alignItems:'center',gap:3,padding:'2px 8px',borderRadius:20,fontSize:11,fontWeight:600,background:s.bg,color:s.color,border:`1px solid ${s.color}28`}}>{s.icon} {s.label}</span>;
+}
+function CompView({eid,canEdit,users,cours,compEtats,customComps,selMat,setSelMat,getEtat,allTemplates,getMatieres,getStats,openValidModal,requestWork,deleteCustomComp,setAddCompForm,setShowAddComp}){
+  const el=users.find(u=>u.id===eid);
+  const mats=getMatieres(eid);
+  const stats=getStats(eid);
+
+  // Group by matière > chapitre
+  const grouped={};
+  allTemplates(eid).forEach(t=>{
+    if(selMat!=='Toutes'&&t.matiere!==selMat)return;
+    if(!grouped[t.matiere])grouped[t.matiere]={};
+    if(!grouped[t.matiere][t.chapitre])grouped[t.matiere][t.chapitre]=[];
+    grouped[t.matiere][t.chapitre].push({...t,etat:getEtat(eid,t.id),isCustom:!!(customComps||[]).find(c=>c.id===t.id)});
+  });
+
+  return <div>
+    {/* Programme header */}
+    {el&&<div style={{display:'flex',alignItems:'center',gap:10,marginBottom:16}}>
+      <div style={{width:42,height:42,borderRadius:0,background:'var(--navy)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18}}>🎓</div>
+      <div>
+        <div style={{fontFamily:'Cormorant Garamond,serif',fontSize:18,fontWeight:600,color:'var(--navy)'}}>{el.name}</div>
+        <div style={{display:'flex',gap:5,marginTop:4,flexWrap:'wrap'}}>
+          <span style={{fontSize:11,padding:'1px 7px',borderRadius:0,background:'var(--cream2)',color:'var(--muted)',fontWeight:500}}>{el.niveau}</span>
+          {getMatieres(eid).map(m=><span key={m} style={{...getCoursBadge(m),fontSize:10}}>{m}</span>)}
+        </div>
+      </div>
+      {canEdit&&<button className="btn btn-p btn-sm" style={{marginLeft:'auto'}} onClick={()=>{setAddCompForm(f=>({...f,eleveId:eid}));setShowAddComp(true);}}>＋ Compétence</button>}
+    </div>}
+
+    {/* Stats + global bar */}
+    <div className="sg" style={{marginBottom:16}}>
+      <div className="sc c-ok"><div className="sc-v">{stats.valide}</div><div className="sc-l">Validées</div></div>
+      <div className="sc c-gold"><div className="sc-v">{stats.en_cours}</div><div className="sc-l">En cours</div></div>
+      <div className="sc" style={{borderColor:'#fecaca'}}><div className="sc-v" style={{color:'var(--err)'}}>{stats.a_revoir}</div><div className="sc-l">À revoir</div></div>
+      <div className="sc c-navy"><div className="sc-v">{stats.pct}%</div><div className="sc-l">Progression</div></div>
+    </div>
+    <div style={{height:8,background:'var(--cream2)',borderRadius:4,overflow:'hidden',marginBottom:20}}>
+      <div style={{height:'100%',width:`${stats.pct}%`,background:stats.pct===100?'var(--ok)':'linear-gradient(90deg,#1A6FD4,#4A90E2)',borderRadius:4,transition:'width .6s'}}/>
+    </div>
+
+    {/* Matière filter */}
+    <div className="tabs" style={{marginBottom:18,flexWrap:'wrap'}}>
+      {['Toutes',...mats].map(m=><button key={m} className={`tab ${selMat===m?'on':''}`} onClick={()=>setSelMat(m)} style={{fontSize:11}}>{m}</button>)}
+    </div>
+
+    {/* Matières > Chapitres > Compétences */}
+    {Object.entries(grouped).map(([mat,chaps])=>(
+      <div key={mat} style={{marginBottom:20}}>
+        <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:10}}>
+          <span style={{...getCoursBadge(mat)}}>{mat}</span>
+          {(()=>{const all=Object.values(chaps).flat();const v=all.filter(c=>c.etat.statut==='valide').length;return<span style={{fontSize:12,color:'var(--muted)'}}>{v}/{all.length}</span>})()}
+        </div>
+        {Object.entries(chaps).map(([chap,comps])=>{
+          const chapV=comps.filter(c=>c.etat.statut==='valide').length;
+          const chapPct=Math.round((chapV/comps.length)*100);
+          return <div key={chap} style={{background:'white',border:'1.5px solid var(--cream2)',borderRadius:0,marginBottom:8,overflow:'hidden'}}>
+            <div style={{padding:'10px 16px',background:chapPct===100?'#ECFDF5':'var(--cream)',display:'flex',alignItems:'center',gap:12,borderBottom:'1px solid var(--cream2)'}}>
+              <div style={{flex:1}}>
+                <div style={{fontWeight:700,fontSize:13,color:'var(--navy)'}}>{chap}</div>
+                <div style={{fontSize:11,color:'var(--muted)',marginTop:1}}>{chapV}/{comps.length} validée{chapV>1?'s':''}</div>
+              </div>
+              <div style={{width:72}}>
+                <div style={{height:5,background:'var(--cream2)',borderRadius:3,overflow:'hidden'}}>
+                  <div style={{height:'100%',width:`${chapPct}%`,background:chapPct===100?'var(--ok)':'var(--gold)',borderRadius:3}}/>
+                </div>
+                <div style={{fontSize:10,textAlign:'right',color:'var(--muted)',marginTop:2}}>{chapPct}%</div>
+              </div>
+              {chapPct===100&&<span style={{fontSize:16}}>🏆</span>}
+            </div>
+            {comps.map(c=>{
+              const prof=users.find(u=>u.id===c.etat.profId);
+              const st=COMP_STATUTS[c.etat.statut]||COMP_STATUTS.non_commence;
+              return <div key={c.id} style={{display:'flex',alignItems:'center',gap:10,padding:'9px 16px',borderBottom:'1px solid rgba(0,0,0,.035)'}}>
+                <div style={{width:24,height:24,borderRadius:2,background:st.bg,border:`2px solid ${st.color}50`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:700,color:st.color,flexShrink:0}}>{st.icon}</div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{display:'flex',alignItems:'center',gap:5,flexWrap:'wrap'}}>
+                    <span style={{fontSize:13,fontWeight:500}}>{c.nom}</span>
+                    <TierPill tier={c.tier}/>
+                    {c.isCustom&&<span style={{fontSize:10,padding:'1px 5px',background:'#EEF5FF',color:'var(--gold)',borderRadius:2,fontWeight:600}}>Custom</span>}
+                  </div>
+                  {c.etat.commentaire&&<div style={{fontSize:11,color:'var(--muted)',marginTop:2,fontStyle:'italic'}}>💬 {c.etat.commentaire}</div>}
+                  {c.etat.profId&&<div style={{fontSize:10,color:'var(--muted)',marginTop:1}}>par {prof?.name.split(' ').slice(-1)[0]} · {c.etat.date}</div>}
+                </div>
+                <div style={{display:'flex',gap:5,flexShrink:0}}>
+                  {canEdit&&(
+                    <button className="btn btn-sm" style={{fontSize:11,padding:'3px 9px',background:'#EEF5FF',border:'1.5px solid #C8D8F5',color:'var(--gold)'}}
+                      onClick={()=>openValidModal(eid,c.id)}>
+                      {c.etat.statut==='non_commence'?'Évaluer':'✏️'}
+                    </button>
+                  )}
+                  {canEdit&&c.isCustom&&(
+                    <button className="btn btn-d btn-sm" style={{fontSize:10,padding:'3px 7px'}} onClick={()=>deleteCustomComp(c.id)}>🗑️</button>
+                  )}
+                  {!canEdit&&c.etat.statut==='non_commence'&&(
+                    <button className="btn btn-sm" style={{fontSize:11,padding:'3px 9px',background:'#FFF8EE',border:'1.5px solid #F0C080',color:'#D97706'}}
+                      onClick={()=>requestWork(c.id)}>Je travaille ça</button>
+                  )}
+                </div>
+              </div>;
+            })}
+          </div>;
+        })}
+      </div>
+    ))}
+    {Object.keys(grouped).length===0&&<div className="emp"><div className="emp-icon">📋</div><h3>Aucune compétence</h3><p>Inscrivez l'élève à des cours pour voir ses compétences.</p></div>}
+  </div>;
+}
+
 // ─── SUIVI COMPÉTENCES ───
 function SuiviCompetences({user,users,cours,compEtats,setCompEtats,customComps=[],setCustomComps,awardedTrophies={},setAwardedTrophies}){
   const [selEleve,setSelEleve]=useState(null);
@@ -2872,129 +2897,14 @@ function SuiviCompetences({user,users,cours,compEtats,setCompEtats,customComps=[
   };
   const deleteCustomComp=(id)=>setCustomComps(p=>p.filter(c=>c.id!==id));
 
-  const StatBadge=({st})=>{
-    const s=COMP_STATUTS[st]||COMP_STATUTS.non_commence;
-    return <span style={{display:'inline-flex',alignItems:'center',gap:3,padding:'2px 8px',borderRadius:20,fontSize:11,fontWeight:600,background:s.bg,color:s.color,border:`1px solid ${s.color}28`}}>{s.icon} {s.label}</span>;
-  };
-  const TierPill=({tier})=>{
-    const m={base:{l:'Base',c:'#6B7280',bg:'#F3F4F6'},intermediaire:{l:'Intermédiaire',c:'#D97706',bg:'#FFF8EE'},avance:{l:'Avancé',c:'#7C3AED',bg:'#F5F3FF'}}[tier]||{l:'Base',c:'#6B7280',bg:'#F3F4F6'};
-    return <span style={{fontSize:10,padding:'1px 6px',borderRadius:0,background:m.bg,color:m.c,fontWeight:600}}>{m.l}</span>;
-  };
-
-  const CompView=({eid,canEdit})=>{
-    const el=users.find(u=>u.id===eid);
-    const mats=getMatieres(eid);
-    const visibleMats=selMat==='Toutes'?mats:[selMat].filter(m=>mats.includes(m));
-    const stats=getStats(eid);
-
-    // Group by matière > chapitre
-    const grouped={};
-    allTemplates(eid).forEach(t=>{
-      if(selMat!=='Toutes'&&t.matiere!==selMat)return;
-      if(!grouped[t.matiere])grouped[t.matiere]={};
-      if(!grouped[t.matiere][t.chapitre])grouped[t.matiere][t.chapitre]=[];
-      grouped[t.matiere][t.chapitre].push({...t,etat:getEtat(eid,t.id),isCustom:!!(customComps||[]).find(c=>c.id===t.id)});
-    });
-
-    return <div>
-      {/* Programme header */}
-      {el&&<div style={{display:'flex',alignItems:'center',gap:10,marginBottom:16}}>
-        <div style={{width:42,height:42,borderRadius:0,background:'var(--navy)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18}}>🎓</div>
-        <div>
-          <div style={{fontFamily:'Cormorant Garamond,serif',fontSize:18,fontWeight:600,color:'var(--navy)'}}>{el.name}</div>
-          <div style={{display:'flex',gap:5,marginTop:4,flexWrap:'wrap'}}>
-            <span style={{fontSize:11,padding:'1px 7px',borderRadius:0,background:'var(--cream2)',color:'var(--muted)',fontWeight:500}}>{el.niveau}</span>
-            {getMatieres(eid).map(m=><span key={m} style={{...getCoursBadge(m),fontSize:10}}>{m}</span>)}
-          </div>
-        </div>
-        {canEdit&&<button className="btn btn-p btn-sm" style={{marginLeft:'auto'}} onClick={()=>{setAddCompForm(f=>({...f,eleveId:eid}));setShowAddComp(true);}}>＋ Compétence</button>}
-      </div>}
-
-      {/* Stats + global bar */}
-      <div className="sg" style={{marginBottom:16}}>
-        <div className="sc c-ok"><div className="sc-v">{stats.valide}</div><div className="sc-l">Validées</div></div>
-        <div className="sc c-gold"><div className="sc-v">{stats.en_cours}</div><div className="sc-l">En cours</div></div>
-        <div className="sc" style={{borderColor:'#fecaca'}}><div className="sc-v" style={{color:'var(--err)'}}>{stats.a_revoir}</div><div className="sc-l">À revoir</div></div>
-        <div className="sc c-navy"><div className="sc-v">{stats.pct}%</div><div className="sc-l">Progression</div></div>
-      </div>
-      <div style={{height:8,background:'var(--cream2)',borderRadius:4,overflow:'hidden',marginBottom:20}}>
-        <div style={{height:'100%',width:`${stats.pct}%`,background:stats.pct===100?'var(--ok)':'linear-gradient(90deg,#1A6FD4,#4A90E2)',borderRadius:4,transition:'width .6s'}}/>
-      </div>
-
-      {/* Matière filter */}
-      <div className="tabs" style={{marginBottom:18,flexWrap:'wrap'}}>
-        {['Toutes',...mats].map(m=><button key={m} className={`tab ${selMat===m?'on':''}`} onClick={()=>setSelMat(m)} style={{fontSize:11}}>{m}</button>)}
-      </div>
-
-      {/* Matières > Chapitres > Compétences */}
-      {Object.entries(grouped).map(([mat,chaps])=>(
-        <div key={mat} style={{marginBottom:20}}>
-          <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:10}}>
-            <span style={{...getCoursBadge(mat)}}>{mat}</span>
-            {(()=>{const all=Object.values(chaps).flat();const v=all.filter(c=>c.etat.statut==='valide').length;return<span style={{fontSize:12,color:'var(--muted)'}}>{v}/{all.length}</span>})()}
-          </div>
-          {Object.entries(chaps).map(([chap,comps])=>{
-            const chapV=comps.filter(c=>c.etat.statut==='valide').length;
-            const chapPct=Math.round((chapV/comps.length)*100);
-            return <div key={chap} style={{background:'white',border:'1.5px solid var(--cream2)',borderRadius:0,marginBottom:8,overflow:'hidden'}}>
-              <div style={{padding:'10px 16px',background:chapPct===100?'#ECFDF5':'var(--cream)',display:'flex',alignItems:'center',gap:12,borderBottom:'1px solid var(--cream2)'}}>
-                <div style={{flex:1}}>
-                  <div style={{fontWeight:700,fontSize:13,color:'var(--navy)'}}>{chap}</div>
-                  <div style={{fontSize:11,color:'var(--muted)',marginTop:1}}>{chapV}/{comps.length} validée{chapV>1?'s':''}</div>
-                </div>
-                <div style={{width:72}}>
-                  <div style={{height:5,background:'var(--cream2)',borderRadius:3,overflow:'hidden'}}>
-                    <div style={{height:'100%',width:`${chapPct}%`,background:chapPct===100?'var(--ok)':'var(--gold)',borderRadius:3}}/>
-                  </div>
-                  <div style={{fontSize:10,textAlign:'right',color:'var(--muted)',marginTop:2}}>{chapPct}%</div>
-                </div>
-                {chapPct===100&&<span style={{fontSize:16}}>🏆</span>}
-              </div>
-              {comps.map(c=>{
-                const prof=users.find(u=>u.id===c.etat.profId);
-                const st=COMP_STATUTS[c.etat.statut]||COMP_STATUTS.non_commence;
-                return <div key={c.id} style={{display:'flex',alignItems:'center',gap:10,padding:'9px 16px',borderBottom:'1px solid rgba(0,0,0,.035)'}}>
-                  <div style={{width:24,height:24,borderRadius:2,background:st.bg,border:`2px solid ${st.color}50`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:700,color:st.color,flexShrink:0}}>{st.icon}</div>
-                  <div style={{flex:1,minWidth:0}}>
-                    <div style={{display:'flex',alignItems:'center',gap:5,flexWrap:'wrap'}}>
-                      <span style={{fontSize:13,fontWeight:500}}>{c.nom}</span>
-                      <TierPill tier={c.tier}/>
-                      {c.isCustom&&<span style={{fontSize:10,padding:'1px 5px',background:'#EEF5FF',color:'var(--gold)',borderRadius:2,fontWeight:600}}>Custom</span>}
-                    </div>
-                    {c.etat.commentaire&&<div style={{fontSize:11,color:'var(--muted)',marginTop:2,fontStyle:'italic'}}>💬 {c.etat.commentaire}</div>}
-                    {c.etat.profId&&<div style={{fontSize:10,color:'var(--muted)',marginTop:1}}>par {prof?.name.split(' ').slice(-1)[0]} · {c.etat.date}</div>}
-                  </div>
-                  <div style={{display:'flex',gap:5,flexShrink:0}}>
-                    {canEdit&&(
-                      <button className="btn btn-sm" style={{fontSize:11,padding:'3px 9px',background:'#EEF5FF',border:'1.5px solid #C8D8F5',color:'var(--gold)'}}
-                        onClick={()=>openValidModal(eid,c.id)}>
-                        {c.etat.statut==='non_commence'?'Évaluer':'✏️'}
-                      </button>
-                    )}
-                    {canEdit&&c.isCustom&&(
-                      <button className="btn btn-d btn-sm" style={{fontSize:10,padding:'3px 7px'}} onClick={()=>deleteCustomComp(c.id)}>🗑️</button>
-                    )}
-                    {user.role==='eleve'&&c.etat.statut==='non_commence'&&(
-                      <button className="btn btn-sm" style={{fontSize:11,padding:'3px 9px',background:'#FFF8EE',border:'1.5px solid #F0C080',color:'#D97706'}}
-                        onClick={()=>requestWork(c.id)}>Je travaille ça</button>
-                    )}
-                  </div>
-                </div>;
-              })}
-            </div>;
-          })}
-        </div>
-      ))}
-      {Object.keys(grouped).length===0&&<div className="emp"><div className="emp-icon">📋</div><h3>Aucune compétence</h3><p>Inscrivez l'élève à des cours pour voir ses compétences.</p></div>}
-    </div>;
-  };
+  const compViewProps={users,cours,compEtats,customComps,selMat,setSelMat,getEtat,allTemplates,getMatieres,getStats,openValidModal,requestWork,deleteCustomComp,setAddCompForm,setShowAddComp};
 
   return <>
     <TB title="Suivi Compétences">
       {(user.role==='prof'||user.role==='admin')&&viewedId&&<button className="btn btn-p btn-sm" onClick={()=>{setAddCompForm(f=>({...f,eleveId:viewedId}));setShowAddComp(true);}}>＋ Compétence</button>}
     </TB>
     <div className="pg">
-      {user.role==='eleve'&&<CompView eid={user.id} canEdit={false}/>}
+      {user.role==='eleve'&&<CompView eid={user.id} canEdit={false} {...compViewProps}/>}
       {(user.role==='prof'||user.role==='admin')&&<div style={{display:'grid',gridTemplateColumns:'220px 1fr',gap:20,alignItems:'start'}}>
         {/* Sidebar élèves */}
         <div>
@@ -3017,7 +2927,7 @@ function SuiviCompetences({user,users,cours,compEtats,setCompEtats,customComps=[
           })}
         </div>
         <div>
-          {!viewedId?<div className="emp"><div className="emp-icon">👆</div><h3>Sélectionnez un élève</h3></div>:<CompView eid={viewedId} canEdit={true}/>}
+          {!viewedId?<div className="emp"><div className="emp-icon">👆</div><h3>Sélectionnez un élève</h3></div>:<CompView eid={viewedId} canEdit={true} {...compViewProps}/>}
         </div>
       </div>}
     </div>
@@ -3583,7 +3493,6 @@ function Facturation({user,users,factures,setFactures,cours}){
 
   return <>
     <TB title="Facturation">
-      <button className="btn btn-sm" style={{background:'var(--cream2)',border:'none',color:'var(--muted)',fontSize:11}} onClick={()=>{if(window.confirm('Remettre les factures de démonstration ?'))setFactures(SEED_FACTURES);}}>↺ Reset</button>
       <button className="btn btn-p btn-sm" onClick={()=>setShowFact(true)}>＋ Facture</button>
     </TB>
     <div className="pg">
@@ -3732,15 +3641,15 @@ function App(){
   const [appReady,setAppReady]=useState(false); // true quand session vérifiée
   const [dataReady,setDataReady]=useState(false); // true quand données chargées
 
-  const [users,setUsers]=useState(SEED_USERS);
-  const [resources,setResources]=useState(SEED_RES);
-  const [modules,setModules]=useState(SEED_MOD);
-  const [grades,setGrades]=useState(SEED_GRADES);
-  const [enrollments,setEnrollments]=useState(SEED_ENR);
-  const [cours,setCours]=useState(SEED_COURS);
-  const [appel,setAppel]=useState(SEED_APPEL);
-  const [factures,setFactures]=useState(SEED_FACTURES);
-  const [salaires,setSalaires]=useState(SEED_SALAIRES);
+  const [users,setUsers]=useState([]);
+  const [resources,setResources]=useState([]);
+  const [modules,setModules]=useState([]);
+  const [grades,setGrades]=useState({});
+  const [enrollments,setEnrollments]=useState({});
+  const [cours,setCours]=useState([]);
+  const [appel,setAppel]=useState({});
+  const [factures,setFactures]=useState([]);
+  const [salaires,setSalaires]=useState([]);
   const [dispos,setDispos]=useState([]);
   const [demandes,setDemandes]=useState([]);
   const [inscriptions,setInscriptions]=useState([]);
@@ -3777,25 +3686,25 @@ function App(){
       const [u,r,mo,fa,di,de,ct,
              ap,g,en,sa,at,ce,cc] = await Promise.all([
         // tableaux normalisés
-        sbLoad('users',            SEED_USERS),
-        sbLoad('ressources',       SEED_RES),
-        sbLoad('modules',          SEED_MOD),
-        sbLoad('factures',         SEED_FACTURES),
+        sbLoad('users',            []),
+        sbLoad('ressources',       []),
+        sbLoad('modules',          []),
+        sbLoad('factures',         []),
         sbLoad('dispos',           []),
         sbLoad('demandes',         []),
         sbLoad('trophees_custom',  []),
         // objets JSON stockés dans kv_store
-        sbLoadKV('appel',           'global', SEED_APPEL),
-        sbLoadKV('grades',          'global', SEED_GRADES),
-        sbLoadKV('enrollments',     'global', SEED_ENR),
-        sbLoadKV('salaires',        'global', SEED_SALAIRES),
+        sbLoadKV('appel',           'global', {}),
+        sbLoadKV('grades',          'global', {}),
+        sbLoadKV('enrollments',     'global', {}),
+        sbLoadKV('salaires',        'global', []),
         sbLoadKV('trophees_awarded','global', {}),
         sbLoadKV('inscriptions',     'global', []),
         sbLoadKV('comp_etats',      cu.id,    {}),
         sbLoadKV('custom_comps',    cu.id,    []),
       ]);
       // cours dans kv_store également (eleveIds est un tableau JSON)
-      const [co,ins_data] = await Promise.all([sbLoadKV('cours','global',SEED_COURS),sbLoadKV('inscriptions','global',[])]);
+      const [co,ins_data] = await Promise.all([sbLoadKV('cours','global',[]),sbLoadKV('inscriptions','global',[])]);
       setUsers(u); setResources(r); setModules(mo); setFactures(fa);
       setDispos(di); setDemandes(de); setCustomTrophies(ct);
       setAppel(ap); setGrades(g); setEnrollments(en); setSalaires(sa);
