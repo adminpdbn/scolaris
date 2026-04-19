@@ -315,7 +315,7 @@ textarea.fi{resize:vertical;min-height:68px;}
 .preview-thumb{width:100%;max-height:160px;object-fit:contain;border-radius:0;margin-bottom:10px;border:1px solid var(--cream2);}
 
 /* PLANNING ADMIN */
-.plan-grid{display:grid;grid-template-columns:52px repeat(6,1fr);background:var(--white);border-radius:0;border:1.5px solid #bbb;overflow:hidden;margin-bottom:18px;}
+.plan-grid{display:grid;grid-template-columns:52px repeat(7,1fr);background:var(--white);border-radius:0;border:1.5px solid #bbb;overflow:hidden;margin-bottom:18px;}
 .plan-hd{padding:8px 5px;text-align:center;font-size:10px;font-family:var(--ff-mono);font-weight:700;color:var(--navy);background:var(--cream);border-bottom:2px solid var(--navy);border-right:1px solid var(--cream2);letter-spacing:.8px;}
 .plan-hd:last-child{border-right:none;}
 .plan-time-lbl{font-size:9px;color:var(--muted);font-family:var(--ff-mono);text-align:right;padding:0 4px 0 0;border-right:1px solid var(--cream2);display:flex;align-items:flex-start;justify-content:flex-end;padding-top:2px;}
@@ -741,7 +741,7 @@ const TC={fiche:'t-f',exercice:'t-e',trace:'t-t',cours:'t-c'};
 const TI={fiche:'📋',exercice:'📝',trace:'✏️',cours:'📚'};
 const RL={admin:'Administrateur',prof:'Professeur',eleve:'Élève'};
 const RI={admin:'👑',prof:'👨‍🏫',eleve:'🎓'};
-const DAYS=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+const DAYS=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
 const H_START=9, H_END=19, CH=58; // px per hour in timetable
 const HOURS=Array.from({length:H_END-H_START+1},(_,i)=>i+H_START);
 
@@ -1104,7 +1104,7 @@ function generatePlanningPDF(cours, users, filtres){
   const GRID_BOT=H-24;   // leave room for legend + footer
   const GRID_H=GRID_BOT-GRID_TOP;
   const MM_H=GRID_H/nHours;  // mm per hour
-  const DAYS=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  const DAYS=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
   const GRID_W=W-ML-MR-TIME_W;
   const DAY_W=GRID_W/DAYS.length;
 
@@ -1345,7 +1345,7 @@ function EmploiDuTemps({user,users,cours,setCours,modules,enrollments,dispos=[]}
   const weekStart=getWeekStart(weekOffset);
   const weekEnd=new Date(weekStart);weekEnd.setDate(weekStart.getDate()+6);
   const weekLabel=`${weekStart.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})} – ${weekEnd.toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'})}`;
-  const dayToDate=day=>{const idx=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'].indexOf(day);const d=new Date(weekStart);d.setDate(weekStart.getDate()+idx);return d.toISOString().split('T')[0];};
+  const dayToDate=day=>{const idx=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'].indexOf(day);const d=new Date(weekStart);d.setDate(weekStart.getDate()+(idx===6?6:idx));return d.toISOString().split('T')[0];};
 
   const visibleDispos=dispos.filter(d=>{
     if(d.date<weekStart.toISOString().split('T')[0]||d.date>weekEnd.toISOString().split('T')[0])return false;
@@ -1518,7 +1518,7 @@ function EmploiDuTemps({user,users,cours,setCours,modules,enrollments,dispos=[]}
 function getCoursBadge(matiere){const c=mc(matiere);return{background:c.bg,color:c.tx,padding:'2px 8px',borderRadius:2,fontSize:11,fontWeight:700};}
 
 // ─── DASHBOARD ───
-function Dashboard({user,users,resources,modules,grades,enrollments,cours}){
+function Dashboard({user,users,resources,modules,grades,enrollments,cours,factures=[],salaires=[]}){
   const eg=grades[user.id]||[];
   const ee=enrollments[user.id]||[];
   const m=moy(eg);
@@ -1728,34 +1728,134 @@ function Dashboard({user,users,resources,modules,grades,enrollments,cours}){
   </div>;
 
   // admin
+  const TARIF=55;
+  const now=new Date();
+  const moisCourant=now.getMonth();
+  const moisPrecedent=moisCourant===0?11:moisCourant-1;
+  // Finances ce mois
+  const factMois=factures.filter(f=>f.statut==='paye'&&f.datePaiement&&new Date(f.datePaiement).getMonth()===moisCourant);
+  const factPrevMois=factures.filter(f=>f.statut==='paye'&&f.datePaiement&&new Date(f.datePaiement).getMonth()===moisPrecedent);
+  const revMois=factMois.reduce((a,f)=>a+f.montant,0);
+  const revPrevMois=factPrevMois.reduce((a,f)=>a+f.montant,0);
+  const impayes=factures.filter(f=>f.statut==='retard'||f.statut==='attente');
+  const montantImpayes=impayes.reduce((a,f)=>a+(f.montant-(f.reduction||0)),0);
+  // MRR prévisionnel
+  const mrrTotal=eleves.reduce((a,e)=>{const mats=new Set(cours.filter(c=>c.eleveIds.includes(e.id)).map(c=>c.matiere));return a+mats.size*TARIF;},0);
+  // Salaires
+  const totalSal=salaires.reduce((a,s)=>{const h=cours.filter(c=>c.profId===s.profId).reduce((x,c)=>x+(c.fin-c.debut),0);return a+Math.round(s.tauxHoraire*h*4.33);},0);
+  const marge=mrrTotal-totalSal;
+  // Cours prochains (7 jours)
+  const dayNames=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  const todayName=dayNames[now.getDay()];
+  const todayIdx=DAYS.indexOf(todayName);
+  const prochainsCours=cours.filter(c=>{const idx=DAYS.indexOf(c.jour);return idx>=todayIdx||idx<todayIdx;}).sort((a,b)=>DAYS.indexOf(a.jour)-DAYS.indexOf(b.jour)||a.debut-b.debut).slice(0,5);
+  // Évolution revenus
+  const deltaRev=revPrevMois>0?Math.round(((revMois-revPrevMois)/revPrevMois)*100):null;
+
   return <div className="fa-in">
     <div style={{padding:'22px 26px 0'}}>
       <div className="wb">
         <h2>Bonjour, <span className="gold">{user.name.split(' ').slice(-1)[0]}</span> 👋</h2>
-        <p>Vue d'ensemble — EduCenter</p>
+        <p>Vue d'ensemble — {new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}</p>
       </div>
-      <div className="sg">
+      {/* KPIs financiers */}
+      <div className="sg" style={{gridTemplateColumns:'repeat(auto-fill,minmax(155px,1fr))'}}>
+        <div className="sc c-ok">
+          <div className="sc-ic">💶</div>
+          <div className="sc-v">{revMois}€</div>
+          <div className="sc-l">Encaissé ce mois</div>
+          {deltaRev!==null&&<div style={{fontSize:10,fontWeight:700,color:deltaRev>=0?'var(--ok)':'var(--err)',marginTop:2}}>{deltaRev>=0?'↑':'↓'} {Math.abs(deltaRev)}% vs mois préc.</div>}
+        </div>
+        <div className="sc c-mrr" style={{borderBottomColor:'#8B5CF6'}}>
+          <div className="sc-ic">📈</div>
+          <div className="sc-v">{mrrTotal}€</div>
+          <div className="sc-l">MRR prévisionnel</div>
+          <div style={{fontSize:10,color:'var(--muted)',marginTop:2}}>Marge {mrrTotal>0?Math.round((marge/mrrTotal)*100):0}%</div>
+        </div>
+        {montantImpayes>0&&<div className="sc" style={{borderBottom:'3px solid var(--err)'}}>
+          <div className="sc-ic">⚠️</div>
+          <div className="sc-v" style={{color:'var(--err)'}}>{montantImpayes}€</div>
+          <div className="sc-l">Impayés</div>
+          <div style={{fontSize:10,color:'var(--err)',marginTop:2}}>{impayes.length} facture{impayes.length>1?'s':''}</div>
+        </div>}
         <div className="sc c-info"><div className="sc-ic">🎓</div><div className="sc-v">{eleves.length}</div><div className="sc-l">Élèves</div></div>
-        <div className="sc c-navy"><div className="sc-ic">👨‍🏫</div><div className="sc-v">{profs.length}</div><div className="sc-l">Professeurs</div></div>
-        <div className="sc c-gold"><div className="sc-ic">📚</div><div className="sc-v">{resources.length}</div><div className="sc-l">Ressources</div></div>
-        <div className="sc c-ok"><div className="sc-ic">🗓️</div><div className="sc-v">{modules.length}</div><div className="sc-l">Modules</div></div>
+        <div className="sc c-navy"><div className="sc-ic">📅</div><div className="sc-v">{cours.length}</div><div className="sc-l">Cours/semaine</div></div>
+        <div className="sc c-gold"><div className="sc-ic">👨‍🏫</div><div className="sc-v">{profs.length}</div><div className="sc-l">Professeurs</div></div>
       </div>
     </div>
-    <div className="pg" style={{paddingTop:0,display:'grid',gridTemplateColumns:'1fr 1fr',gap:22}}>
-      <div>
-        <div className="sh"><h2 className="st">Élèves</h2></div>
-        <table className="tbl">
-          <thead><tr><th>Élève</th><th>Niveau</th><th>Moyenne</th></tr></thead>
-          <tbody>{eleves.map(e=>{const g=grades[e.id]||[];const mv=moy(g);return<tr key={e.id}><td><strong>{e.name}</strong></td><td>{e.niveau}</td><td>{mv?<span style={{fontWeight:700,color:gcol(parseFloat(mv),20)}}>{mv}/20</span>:<span style={{color:'#9ca3af'}}>—</span>}</td></tr>;})}</tbody>
-        </table>
+    <div className="pg" style={{paddingTop:0}}>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,marginBottom:20}}>
+        {/* Prochains cours */}
+        <div className="stat-section">
+          <div className="stat-section-ttl">📅 Prochains cours</div>
+          {prochainsCours.length===0?<div style={{fontSize:13,color:'var(--muted)'}}>Aucun cours planifié</div>:
+          <div style={{display:'flex',flexDirection:'column',gap:6}}>
+            {prochainsCours.map(c=>{
+              const p=users.find(u=>u.id===c.profId);
+              const clr=nc(c.niveau);
+              return <div key={c.id} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 11px',background:clr.bg,border:`1.5px solid ${clr.bd}`,borderRadius:4}}>
+                <div style={{background:clr.bd,borderRadius:2,width:4,height:36,flexShrink:0}}/>
+                <div style={{flex:1}}>
+                  <div style={{fontWeight:600,fontSize:13,color:clr.tx}}>{c.matiere} — {c.niveau}</div>
+                  <div style={{fontSize:11,color:'var(--muted)'}}>{c.jour} {hs(c.debut)}–{hs(c.fin)} · {p?.name.split(' ').slice(-1)[0]} · {c.eleveIds.length}él</div>
+                </div>
+                {c.recurrent&&<span style={{fontSize:9,background:'var(--cream2)',borderRadius:2,padding:'1px 5px',color:'var(--muted)'}}>↺</span>}
+              </div>;
+            })}
+          </div>}
+        </div>
+        {/* Alertes impayés */}
+        <div className="stat-section">
+          <div className="stat-section-ttl">🔔 Alertes & Notifications</div>
+          <div style={{display:'flex',flexDirection:'column',gap:7}}>
+            {impayes.filter(f=>f.statut==='retard').slice(0,3).map(f=>{
+              const fam=f.familleId?.replace('fam_','').replace(/^\w/,c=>c.toUpperCase())||'';
+              return <div key={f.id} style={{display:'flex',gap:8,padding:'8px 11px',background:'#FFF0F0',border:'1px solid #FECACA',borderRadius:4,fontSize:12}}>
+                <span>🔴</span><div><div style={{fontWeight:600,color:'var(--err)'}}>Retard — Famille {fam}</div><div style={{color:'var(--muted)'}}>{f.libelle} · {f.montant-(f.reduction||0)}€</div></div>
+              </div>;
+            })}
+            {impayes.filter(f=>f.statut==='attente').slice(0,2).map(f=>{
+              const fam=f.familleId?.replace('fam_','').replace(/^\w/,c=>c.toUpperCase())||'';
+              return <div key={f.id} style={{display:'flex',gap:8,padding:'8px 11px',background:'#FFFCE8',border:'1px solid #FDE68A',borderRadius:4,fontSize:12}}>
+                <span>🟡</span><div><div style={{fontWeight:600,color:'#C47A00'}}>En attente — Famille {fam}</div><div style={{color:'var(--muted)'}}>{f.libelle} · {f.montant-(f.reduction||0)}€</div></div>
+              </div>;
+            })}
+            {impayes.length===0&&<div style={{background:'#ECFDF5',border:'1.5px solid #86EFAC',borderRadius:4,padding:'10px 12px',fontSize:13,color:'#059669',fontWeight:600,textAlign:'center'}}>✅ Aucun impayé</div>}
+            {/* Stats mensuelles */}
+            <div style={{borderTop:'1px solid var(--cream2)',paddingTop:10,marginTop:4}}>
+              <div style={{fontSize:11,fontWeight:700,color:'var(--muted)',marginBottom:6,textTransform:'uppercase',letterSpacing:.5}}>Revenus des 3 derniers mois</div>
+              <div style={{display:'flex',gap:6,alignItems:'flex-end',height:40}}>
+                {[-2,-1,0].map(offset=>{
+                  const m=(moisCourant+12+offset)%12;
+                  const labels=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+                  const val=factures.filter(f=>f.statut==='paye'&&f.datePaiement&&new Date(f.datePaiement).getMonth()===m).reduce((a,f)=>a+f.montant,0);
+                  const maxV=Math.max(...[-2,-1,0].map(o=>{const mm=(moisCourant+12+o)%12;return factures.filter(f=>f.statut==='paye'&&f.datePaiement&&new Date(f.datePaiement).getMonth()===mm).reduce((a,f)=>a+f.montant,0);}),1);
+                  return <div key={m} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:3}}>
+                    <div style={{fontSize:9,color:'var(--muted)',fontWeight:600}}>{val>0?val+'€':''}</div>
+                    <div style={{width:'100%',height:`${Math.max(Math.round((val/maxV)*28),3)}px`,background:offset===0?'var(--gold2)':'var(--cream2)',borderRadius:2,transition:'height .5s'}}/>
+                    <div style={{fontSize:9,color:'var(--muted)'}}>{labels[m]}</div>
+                  </div>;
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div>
-        <div className="sh"><h2 className="st">Cours planifiés</h2></div>
-        <table className="tbl">
-          <thead><tr><th>Cours</th><th>Jour</th><th>Prof</th></tr></thead>
-          <tbody>{cours.map(c=>{const p=users.find(u=>u.id===c.profId);return<tr key={c.id}><td><span style={getCoursBadge(c.matiere)}>{c.matiere}</span> <span style={{fontSize:12}}>{c.niveau}</span></td><td style={{fontSize:12,color:'var(--muted)'}}>{c.jour}</td><td style={{fontSize:12}}>{p?.name.split(' ').slice(-1)[0]}</td></tr>;})}
-          </tbody>
-        </table>
+      {/* Synthèse budget */}
+      <div className="stat-section" style={{marginBottom:0}}>
+        <div className="stat-section-ttl">📊 Synthèse financière mensuelle</div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))',gap:12}}>
+          {[
+            {label:'Revenus prévisionnels',val:mrrTotal,col:'#059669',sign:'+'},
+            {label:'Masse salariale',val:totalSal,col:'var(--err)',sign:'−'},
+            {label:'Marge nette',val:Math.abs(marge),col:marge>=0?'#7C3AED':'var(--err)',sign:marge>=0?'+':'−'},
+          ].map((r,i)=>(
+            <div key={i} style={{background:i===2?(marge>=0?'#F5EEFF':'#FFF0F0'):'var(--cream)',borderRadius:4,padding:'12px 16px',border:`1.5px solid ${i===2?(marge>=0?'#C4B5FD':'#FECACA'):'var(--cream2)'}`}}>
+              <div style={{fontSize:11,color:'var(--muted)',marginBottom:4}}>{r.label}</div>
+              <div style={{fontFamily:'Playfair Display,serif',fontSize:22,fontWeight:700,color:r.col}}>{r.sign}{r.val}€</div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   </div>;
@@ -2473,7 +2573,7 @@ function Modules({user,users,modules,setModules,enrollments,setEnrollments}){
 function PlanningEditor({users,cours,setCours}){
   const [showSlot,setShowSlot]=useState(false);
   const [editSlot,setEditSlot]=useState(null);
-  const [slotForm,setSlotForm]=useState({profId:'',matiere:'Mathématiques',niveau:'3ème',jour:'Lundi',debut:'14',fin:'15.5',salle:'Salle A',eleveIds:[]});
+  const [slotForm,setSlotForm]=useState({profId:'',matiere:'Mathématiques',niveau:'3ème',jour:'Lundi',debut:'14',fin:'15.5',salle:'Salle A',eleveIds:[],recurrent:true});
   const SALLES=['Salle A','Salle B','Salle C','Salle D'];
   const PH=42;
   const PH_START=9,PH_END=20;
@@ -2532,12 +2632,12 @@ function PlanningEditor({users,cours,setCours}){
 
   const openNewSlot=(jour,debut)=>{
     setEditSlot(null);
-    setSlotForm({profId:profs[0]?.id||'',matiere:'Mathématiques',niveau:'3ème',jour:jour||'Lundi',debut:String(debut||14),fin:String((debut||14)+1.5),salle:'Salle A',eleveIds:[]});
+    setSlotForm({profId:profs[0]?.id||'',matiere:'Mathématiques',niveau:'3ème',jour:jour||'Lundi',debut:String(debut||14),fin:String((debut||14)+1.5),salle:'Salle A',eleveIds:[],recurrent:true});
     setShowSlot(true);
   };
   const openEditSlot=(c)=>{
     setEditSlot(c.id);
-    setSlotForm({profId:c.profId,matiere:c.matiere,niveau:c.niveau,jour:c.jour,debut:String(c.debut),fin:String(c.fin),salle:c.salle,eleveIds:[...c.eleveIds]});
+    setSlotForm({profId:c.profId,matiere:c.matiere,niveau:c.niveau,jour:c.jour,debut:String(c.debut),fin:String(c.fin),salle:c.salle,eleveIds:[...c.eleveIds],recurrent:c.recurrent!==false});
     setShowSlot(true);
   };
   const saveSlot=()=>{
@@ -2642,7 +2742,7 @@ function PlanningEditor({users,cours,setCours}){
                     {height>28&&<div style={{fontSize:9,color:'var(--text)',opacity:.8}}>{c.niveau}</div>}
                     {height>42&&<div style={{fontSize:9,color:'var(--muted)'}}>{hs(c.debut)}–{hs(c.fin)}</div>}
                     {height>56&&<div style={{fontSize:9,color:'var(--muted)'}}>{p?.name.split(' ').slice(-1)[0]}</div>}
-                    <div style={{position:'absolute',bottom:2,right:3,fontSize:9,opacity:.4}}>⠿</div>
+                    <div style={{position:'absolute',bottom:2,right:3,fontSize:9,opacity:.4}}>{c.recurrent!==false?'↺':'📌'}</div>
                   </div>;
                 })}
               </div>;
@@ -2684,6 +2784,19 @@ function PlanningEditor({users,cours,setCours}){
           <select className="fi" value={slotForm.salle} onChange={e=>setSlotForm({...slotForm,salle:e.target.value})}>
             {SALLES.map(s=><option key={s}>{s}</option>)}
           </select>
+        </div>
+        <div className="fg" style={{gridColumn:'1/-1'}}>
+          <label className="fl">Type de créneau</label>
+          <div style={{display:'flex',gap:10,marginTop:4}}>
+            <button type="button" onClick={()=>setSlotForm(p=>({...p,recurrent:true}))}
+              style={{flex:1,padding:'8px',border:`2px solid ${slotForm.recurrent?'var(--gold)':'var(--cream2)'}`,background:slotForm.recurrent?'#EEF5FF':'white',borderRadius:4,cursor:'pointer',fontFamily:'var(--ff-mono)',fontSize:12,fontWeight:slotForm.recurrent?700:400}}>
+              ↺ Récurrent <span style={{fontSize:10,color:'var(--muted)',fontWeight:400}}>— Hebdomadaire, toujours planifié</span>
+            </button>
+            <button type="button" onClick={()=>setSlotForm(p=>({...p,recurrent:false}))}
+              style={{flex:1,padding:'8px',border:`2px solid ${!slotForm.recurrent?'var(--gold)':'var(--cream2)'}`,background:!slotForm.recurrent?'#EEF5FF':'white',borderRadius:4,cursor:'pointer',fontFamily:'var(--ff-mono)',fontSize:12,fontWeight:!slotForm.recurrent?700:400}}>
+              📌 Ponctuel <span style={{fontSize:10,color:'var(--muted)',fontWeight:400}}>— Séance unique</span>
+            </button>
+          </div>
         </div>
         <div className="fg"><label className="fl">Début (h décimal)</label>
           <input className="fi" type="number" step="0.5" min="8" max="20" value={slotForm.debut} onChange={e=>setSlotForm({...slotForm,debut:e.target.value})}/>
@@ -3323,18 +3436,43 @@ function Statistiques({users,cours,factures,salaires,setSalaires}){
         </div>
       </div>
       <div className="stat-section">
-        <div className="stat-section-ttl">💶 MRR prévisionnel par élève — {TARIF}€/matière/mois</div>
-        {mrrParEleve.length===0?<div style={{fontSize:13,color:'var(--muted)'}}>Aucun élève inscrit dans un cours</div>:(
-        <>
-          {mrrParEleve.map(e=><div key={e.id} className="prog-row">
-            <div className="prog-label"><div style={{fontWeight:600,fontSize:12}}>{e.name}</div><div style={{fontSize:10,color:'var(--muted)'}}>{e.matieres.join(', ')}</div></div>
-            <div className="prog-bar"><div className="prog-fill" style={{width:`${(e.mrr/Math.max(...mrrParEleve.map(x=>x.mrr)))*100}%`,background:'var(--gold2)'}}/></div>
-            <div className="prog-pct" style={{color:'var(--navy)',fontFamily:'Playfair Display,serif'}}>{e.mrr}€</div>
-          </div>)}
-          <div style={{borderTop:'1px solid var(--cream2)',marginTop:12,paddingTop:10,display:'flex',justifyContent:'space-between',fontWeight:700,fontSize:13}}>
-            <span>Total MRR</span><span style={{color:'var(--gold)',fontFamily:'Playfair Display,serif',fontSize:16}}>{mrrTotal}€/mois</span>
-          </div>
-        </>)}
+        <div className="stat-section-ttl">💶 MRR prévisionnel — {TARIF}€/matière/mois</div>
+        {(()=>{
+          // Agrégation par niveau
+          const byNiveau={};
+          mrrParEleve.forEach(e=>{
+            const niv=e.niveau||'Non défini';
+            if(!byNiveau[niv])byNiveau[niv]={niveau:niv,nbEleves:0,matieres:new Set(),mrr:0};
+            byNiveau[niv].nbEleves++;
+            e.matieres.forEach(m=>byNiveau[niv].matieres.add(m));
+            byNiveau[niv].mrr+=e.mrr;
+          });
+          const rows=Object.values(byNiveau).sort((a,b)=>b.mrr-a.mrr);
+          if(rows.length===0)return<div style={{fontSize:13,color:'var(--muted)'}}>Aucun élève inscrit dans un cours</div>;
+          return <>
+            {rows.map(r=>{
+              const clr=nc(r.niveau);
+              return <div key={r.niveau} className="prog-row">
+                <div className="prog-label">
+                  <div style={{display:'flex',alignItems:'center',gap:6}}>
+                    <span style={{background:clr.bg,border:`2px solid ${clr.bd}`,borderRadius:2,width:10,height:10,flexShrink:0,display:'inline-block'}}/>
+                    <div style={{fontWeight:600,fontSize:12,color:clr.tx}}>{r.niveau}</div>
+                  </div>
+                  <div style={{fontSize:10,color:'var(--muted)'}}>{r.nbEleves} élève{r.nbEleves>1?'s':''} · {[...r.matieres].join(', ')}</div>
+                </div>
+                <div className="prog-bar"><div className="prog-fill" style={{width:`${(r.mrr/Math.max(...rows.map(x=>x.mrr)))*100}%`,background:clr.bd}}/></div>
+                <div className="prog-pct" style={{color:clr.tx,fontFamily:'Playfair Display,serif'}}>{r.mrr}€</div>
+              </div>;
+            })}
+            <div style={{borderTop:'1px solid var(--cream2)',marginTop:12,paddingTop:10,display:'flex',justifyContent:'space-between',flexWrap:'wrap',gap:8}}>
+              <div style={{display:'flex',gap:16,fontSize:12,color:'var(--muted)'}}>
+                <span>👥 {mrrParEleve.length} élèves actifs</span>
+                <span>📚 {[...new Set(mrrParEleve.flatMap(e=>e.matieres))].length} matières</span>
+              </div>
+              <span style={{color:'var(--gold)',fontFamily:'Playfair Display,serif',fontSize:16,fontWeight:700}}>{mrrTotal}€/mois</span>
+            </div>
+          </>;
+        })()}
       </div>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,marginBottom:20}}>
         <div className="stat-section">
@@ -3363,22 +3501,48 @@ function Statistiques({users,cours,factures,salaires,setSalaires}){
         </div>
       </div>
       <div className="stat-section">
-        <div className="stat-section-ttl">👨‍👩‍👧 Taux de paiement par famille</div>
-        {famStats.length===0?<div style={{fontSize:13,color:'var(--muted)'}}>Aucune donnée</div>:(
-        <table className="tbl">
-          <thead><tr><th>Famille</th><th>MRR</th><th>Facturé</th><th>Encaissé</th><th>Retard</th><th>Taux</th></tr></thead>
-          <tbody>{famStats.map(f=><tr key={f.id}>
-            <td style={{fontWeight:600,fontSize:13}}>{f.nom}</td>
-            <td style={{fontSize:12,color:'var(--gold)',fontWeight:700}}>{f.mrr}€</td>
-            <td style={{fontSize:12}}>{f.total}€</td>
-            <td style={{color:'var(--ok)',fontWeight:600,fontSize:12}}>{f.paye}€</td>
-            <td style={{color:f.retard>0?'var(--err)':'var(--muted)',fontWeight:f.retard>0?700:400,fontSize:12}}>{f.retard>0?f.retard+'€':'—'}</td>
-            <td><div style={{display:'flex',alignItems:'center',gap:7}}>
-              <div style={{flex:1,height:6,background:'var(--cream2)',borderRadius:3,overflow:'hidden',minWidth:50}}><div style={{height:'100%',borderRadius:3,width:`${f.taux}%`,background:f.taux>=80?'var(--ok)':f.taux>=50?'#D97706':'var(--err)',transition:'width .5s'}}/></div>
-              <span style={{fontSize:11,fontWeight:700,color:f.taux>=80?'var(--ok)':f.taux>=50?'#D97706':'var(--err)',minWidth:28}}>{f.taux}%</span>
-            </div></td>
-          </tr>)}</tbody>
-        </table>)}
+        <div className="stat-section-ttl">⚠️ Impayés — Liste de relance</div>
+        {(()=>{
+          const impayes=famStats.filter(f=>f.retard>0||f.total-f.paye>0);
+          if(impayes.length===0)return<div style={{background:'#ECFDF5',border:'1.5px solid #86EFAC',borderRadius:4,padding:'14px 16px',textAlign:'center',color:'#059669',fontWeight:600,fontSize:13}}>✅ Aucun impayé — Toutes les familles sont à jour</div>;
+          return <>
+            <div style={{fontSize:12,color:'var(--muted)',marginBottom:10}}>
+              {impayes.length} famille{impayes.length>1?'s':''} avec impayés · Total : <strong style={{color:'var(--err)'}}>{impayes.reduce((a,f)=>a+(f.retard+(f.total-f.paye-f.retard)),0)}€</strong>
+            </div>
+            <div style={{display:'flex',flexDirection:'column',gap:8}}>
+              {impayes.map(f=>{
+                const attente=f.total-f.paye-f.retard;
+                const elv=users.filter(u=>f.eleveIds.includes(u.id));
+                const contact=elv.map(e=>e.parentTel||e.parentEmail||'').filter(Boolean)[0]||'—';
+                return <div key={f.id} style={{background:f.retard>0?'#FFF0F0':'#FFFCE8',border:`1.5px solid ${f.retard>0?'#FECACA':'#FDE68A'}`,borderRadius:4,padding:'12px 16px'}}>
+                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',flexWrap:'wrap',gap:6}}>
+                    <div>
+                      <div style={{fontWeight:700,fontSize:14}}>{f.nom}</div>
+                      <div style={{fontSize:11,color:'var(--muted)',marginTop:2}}>
+                        {elv.map(e=>e.name).join(', ')}
+                        {contact&&<span style={{marginLeft:8}}>📞 {contact}</span>}
+                      </div>
+                    </div>
+                    <div style={{textAlign:'right'}}>
+                      {f.retard>0&&<div style={{fontSize:14,fontWeight:700,color:'var(--err)'}}>⚠️ {f.retard}€ en retard</div>}
+                      {attente>0&&<div style={{fontSize:13,fontWeight:600,color:'#C47A00'}}>⏳ {attente}€ en attente</div>}
+                    </div>
+                  </div>
+                  <div style={{marginTop:8,display:'flex',gap:6,flexWrap:'wrap'}}>
+                    {elv[0]?.parentEmail&&<button className="btn btn-sm" style={{background:'#EEF5FF',border:'1.5px solid #C8D8F5',color:'var(--info)',fontSize:11,padding:'3px 10px'}}
+                      onClick={()=>window.open(`mailto:${elv[0].parentEmail}?subject=Relance%20paiement%20%E2%80%94%20${encodeURIComponent(f.nom)}&body=Bonjour,%0A%0ANous%20vous%20contactons%20concernant%20le%20règlement%20des%20frais%20de%20soutien%20scolaire.%0AMontant%20impayé%20:%20${f.retard+attente}€%0A%0AMerci%20de%20régulariser%20votre%20situation.%0A%0ACordialement,%0APlus%20de%20bonnes%20notes`)}>
+                      📧 Relance email
+                    </button>}
+                    {elv[0]?.parentTel&&<button className="btn btn-sm" style={{background:'#ECFDF5',border:'1.5px solid #86EFAC',color:'#059669',fontSize:11,padding:'3px 10px'}}
+                      onClick={()=>window.open(`tel:${elv[0].parentTel}`)}>
+                      📞 Appeler
+                    </button>}
+                  </div>
+                </div>;
+              })}
+            </div>
+          </>;
+        })()}
       </div>
     </div>
     {showSal&&<Modal title="Taux horaires des professeurs" onClose={()=>setShowSal(false)}>
@@ -3702,7 +3866,7 @@ function CoursParticuliers({user,users,dispos,setDispos,demandes,setDemandes}){
   const [tab,setTab]=useState('planning');
   const [showDispo,setShowDispo]=useState(false);
   const [showDemande,setShowDemande]=useState(false);
-  const [dispoForm,setDispoForm]=useState({date:'',debut:'14',fin:'15.5',mode:'presentiel',matiere:'Mathématiques',notes:''});
+  const [dispoForm,setDispoForm]=useState({date:'',debut:'14',fin:'15.5',mode:'presentiel',matiere:'Mathématiques',notes:'',tarifHoraire:40,fraisInfra:20});
   const [demandeForm,setDemandeForm]=useState({matiere:'Mathématiques',niveau:'3ème',datePreference:'',creneauDebut:'',creneauFin:'',notes:''});
 
   const profs=users.filter(u=>u.role==='prof');
@@ -3714,7 +3878,7 @@ function CoursParticuliers({user,users,dispos,setDispos,demandes,setDemandes}){
   const weekStart=getWeekStart(weekOffset);
   const weekEnd=new Date(weekStart);weekEnd.setDate(weekStart.getDate()+6);
   const weekLabel=`${weekStart.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})} – ${weekEnd.toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'})}`;
-  const dayToDate2=(day)=>{const idx=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'].indexOf(day);const d=new Date(weekStart);d.setDate(weekStart.getDate()+idx);return d.toISOString().split('T')[0];};
+  const dayToDate2=(day)=>{const idx=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'].indexOf(day);const d=new Date(weekStart);d.setDate(weekStart.getDate()+(idx===6?6:idx));return d.toISOString().split('T')[0];};
   const CP_H_START=8,CP_H_END=21,CP_CH=48;
   const CP_HOURS=Array.from({length:CP_H_END-CP_H_START},(_,i)=>i+CP_H_START);
   // Filter dispos for this week
@@ -3733,7 +3897,7 @@ function CoursParticuliers({user,users,dispos,setDispos,demandes,setDemandes}){
   // ── Prof actions ──
   const addDispo=()=>{
     if(!dispoForm.date||!dispoForm.debut||!dispoForm.fin)return;
-    setDispos(p=>[...p,{id:'d'+Date.now(),profId:user.id,date:dispoForm.date,debut:parseFloat(dispoForm.debut),fin:parseFloat(dispoForm.fin),mode:dispoForm.mode,matiere:dispoForm.matiere,notes:dispoForm.notes,statut:'libre',eleveId:null,demandeId:null}]);
+    setDispos(p=>[...p,{id:'d'+Date.now(),profId:user.id,date:dispoForm.date,debut:parseFloat(dispoForm.debut),fin:parseFloat(dispoForm.fin),mode:dispoForm.mode,matiere:dispoForm.matiere,notes:dispoForm.notes,statut:'libre',eleveId:null,demandeId:null,tarifHoraire:dispoForm.tarifHoraire||40,fraisInfra:dispoForm.fraisInfra||20}]);
     setShowDispo(false);
     setDispoForm({date:'',debut:'14',fin:'15.5',mode:'presentiel',matiere:'Mathématiques',notes:''});
   };
@@ -3952,6 +4116,7 @@ function CoursParticuliers({user,users,dispos,setDispos,demandes,setDemandes}){
                            dsp.statut==='reserve'?(dsp.eleveId===user.id?'👆 Cliquer pour annuler':'En attente'):
                            '✓ Confirmé'}
                         </div>}
+                        {dsp.tarifHoraire&&height>60&&<div style={{fontSize:9,color:statColor,fontWeight:700}}>{dsp.tarifHoraire}€/h</div>}
                         {dsp.notes&&height>68&&<div style={{fontSize:9,color:'var(--muted)',fontStyle:'italic',marginTop:1,overflow:'hidden',whiteSpace:'nowrap',textOverflow:'ellipsis'}}>{dsp.notes}</div>}
                       </div>;
                     })}
@@ -4059,6 +4224,18 @@ function CoursParticuliers({user,users,dispos,setDispos,demandes,setDemandes}){
             <option value="visio">💻 Visio</option>
             <option value="both">🏫💻 Les deux</option>
           </select>
+        </div>
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+        <div className="fg">
+          <label className="fl">Tarif horaire affiché (€/h)</label>
+          <input className="fi" type="number" min="0" step="5" value={dispoForm.tarifHoraire} onChange={e=>setDispoForm({...dispoForm,tarifHoraire:parseFloat(e.target.value)||0})}/>
+          <div style={{fontSize:10,color:'var(--muted)',marginTop:3}}>Visible par les élèves</div>
+        </div>
+        <div className="fg">
+          <label className="fl">Frais infrastructure (%)</label>
+          <input className="fi" type="number" min="0" max="100" step="5" value={dispoForm.fraisInfra} onChange={e=>setDispoForm({...dispoForm,fraisInfra:parseFloat(e.target.value)||0})}/>
+          <div style={{fontSize:10,color:'var(--muted)',marginTop:3}}>Part PlusDeBonnesNotes — Prof perçoit {Math.round(dispoForm.tarifHoraire*(1-dispoForm.fraisInfra/100))}€/h</div>
         </div>
       </div>
       <div className="fg"><label className="fl">Notes (optionnel)</label><input className="fi" value={dispoForm.notes} onChange={e=>setDispoForm({...dispoForm,notes:e.target.value})} placeholder="Ex: disponible en centre ou en visio Zoom"/></div>
@@ -4442,6 +4619,7 @@ function InvoiceEditor({facture, eleve, cours, users, onSave, onClose}){
         </div>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10,marginBottom:10}}>
           <div className="fg"><label className="fl">Montant (€)</label><input className="fi" type="number" min="0" step="5" value={form.montant} onChange={e=>setForm(p=>({...p,montant:e.target.value}))}/></div>
+          <div className="fg"><label className="fl">Réduction (€)</label><input className="fi" type="number" min="0" step="5" value={form.reduction||0} onChange={e=>setForm(p=>({...p,reduction:parseFloat(e.target.value)||0}))}/></div>
           <div className="fg"><label className="fl">Type</label>
             <select className="fi" value={form.type} onChange={e=>setForm(p=>({...p,type:e.target.value}))}>
               <option value="mensuel">Mensuel</option><option value="trimestriel">Trimestriel</option><option value="annuel">Annuel</option><option value="ponctuel">Ponctuel</option>
@@ -4479,7 +4657,7 @@ function Facturation({user,users,factures,setFactures,cours}){
   const [open,setOpen]=useState({});
   const [showFact,setShowFact]=useState(false);
   const [editingFact,setEditingFact]=useState(null); // {facture, eleve} → opens InvoiceEditor
-  const [factForm,setFactForm]=useState({familleId:'',eleveId:'',libelle:'',type:'mensuel',montant:'',echeance:'',statut:'attente',nbCreneaux:0,notes:''});
+  const [factForm,setFactForm]=useState({familleId:'',eleveId:'',libelle:'',type:'mensuel',montant:'',echeance:'',statut:'attente',nbCreneaux:0,notes:'',reduction:0});
   const [searchEleve,setSearchEleve]=useState('');
   const [filterStatut,setFilterStatut]=useState('tous');
   const [searchFacture,setSearchFacture]=useState('');
@@ -4523,7 +4701,7 @@ function Facturation({user,users,factures,setFactures,cours}){
   const delFact=id=>{if(window.confirm('Supprimer cette facture ?')){setFactures(p=>p.filter(f=>f.id!==id));sbDelete('factures',id);}};
   const addFact=()=>{
     if(!factForm.libelle||!factForm.montant||!factForm.familleId)return;
-    const newF={id:'fc'+Date.now(),...factForm,montant:parseFloat(factForm.montant),eleveId:factForm.eleveId||null,nbCreneaux:factForm.nbCreneaux||0,datePaiement:factForm.statut==='paye'?new Date().toISOString().split('T')[0]:null};
+    const newF={id:'fc'+Date.now(),...factForm,montant:parseFloat(factForm.montant),reduction:factForm.reduction||0,eleveId:factForm.eleveId||null,nbCreneaux:factForm.nbCreneaux||0,datePaiement:factForm.statut==='paye'?new Date().toISOString().split('T')[0]:null};
     setFactures(p=>[...p,newF]);
     setShowFact(false);setFactForm({familleId:'',eleveId:'',libelle:'',type:'mensuel',montant:'',echeance:'',statut:'attente',nbCreneaux:0,notes:''});setSearchEleve('');
     // Open editor immediately for PDF
@@ -4555,7 +4733,10 @@ function Facturation({user,users,factures,setFactures,cours}){
           {f.datePaiement&&<span style={{color:'#2D9B6F'}}>✓ {f.datePaiement}</span>}
         </div>
       </div>
-      <span style={{fontWeight:700,fontSize:15,minWidth:52,textAlign:'right',color:'#1a2340'}}>{f.montant}€</span>
+      <div style={{textAlign:'right',minWidth:60}}>
+        <div style={{fontWeight:700,fontSize:15,color:'#1a2340'}}>{f.reduction>0?f.montant-f.reduction:f.montant}€</div>
+        {f.reduction>0&&<div style={{fontSize:10,color:'#059669',textDecoration:'line-through'}}>{f.montant}€ <span style={{textDecoration:'none',fontWeight:600}}>-{f.reduction}€</span></div>}
+      </div>
       <SBadge s={f.statut}/>
       <div style={{display:'flex',gap:4,flexShrink:0}}>
         {f.statut!=='paye'&&<button className="btn btn-sm" title="Marquer payé" style={{background:'#e8f8ee',border:'1.5px solid #b8dbb8',color:'#2D9B6F',fontSize:10,padding:'4px 8px'}} onClick={()=>setStatut(f.id,'paye')}>✓ Payé</button>}
@@ -4722,8 +4903,9 @@ function Facturation({user,users,factures,setFactures,cours}){
         {getSessions(factForm.eleveId).map(c=><div key={c.id} style={{display:'flex',alignItems:'center',gap:8,marginBottom:2}}><span style={{...getCoursBadge(c.matiere),fontSize:10,padding:'1px 6px'}}>{c.matiere}</span><span style={{color:'var(--muted)'}}>{c.jour} {hs(c.debut)}–{hs(c.fin)}</span></div>)}
       </div>}
       <div className="fg"><label className="fl">Libellé *</label><input className="fi" value={factForm.libelle} onChange={e=>setFactForm({...factForm,libelle:e.target.value})}/></div>
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10}}>
         <div className="fg"><label className="fl">Montant (€) *</label><input className="fi" type="number" value={factForm.montant} onChange={e=>setFactForm({...factForm,montant:e.target.value})}/></div>
+        <div className="fg"><label className="fl">Réduction (€)</label><input className="fi" type="number" min="0" value={factForm.reduction} onChange={e=>setFactForm({...factForm,reduction:parseFloat(e.target.value)||0})} placeholder="0"/></div>
         <div className="fg"><label className="fl">Échéance</label><input className="fi" type="date" value={factForm.echeance} onChange={e=>setFactForm({...factForm,echeance:e.target.value})}/></div>
       </div>
       <div className="fa"><button className="btn btn-o" onClick={()=>{setShowFact(false);setSearchEleve('');}}>Annuler</button><button className="btn btn-p" onClick={addFact} disabled={!factForm.libelle||!factForm.montant||!factForm.familleId}>Créer → Ouvrir éditeur</button></div>
