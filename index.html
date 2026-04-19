@@ -374,21 +374,52 @@ var SUPABASE_URL='https://gwmdurhncotftuxfgwkg.supabase.co';var SUPABASE_KEY='ey
 // Marque les tables initialisées (pour ne pas ré-injecter les seeds au refresh)
 var _sbInitialized = {};
 
+// ─── CLEF D'INITIALISATION PERSISTANTE ───
+// Stockée dans kv_store Supabase sous "system:init:<table>"
+// Survit aux refreshs contrairement à une variable JS en mémoire
+async function sbIsInitialized(table) {
+  // Cache mémoire pour éviter trop de requêtes
+  if (_sbInitialized[table]) return true;
+  try {
+    var res = await sb.from('kv_store').select('value').eq('key', 'system:init:'+table).single();
+    if (res.data && res.data.value === true) { _sbInitialized[table] = true; return true; }
+    return false;
+  } catch(e) { return false; }
+}
+
+async function sbMarkInitialized(table) {
+  _sbInitialized[table] = true;
+  try {
+    await sb.from('kv_store').upsert({key: 'system:init:'+table, value: true, user_id: 'system'}, {onConflict:'key'});
+  } catch(e) {}
+}
+
 async function sbLoad(table, fallback) {
   try {
-    var { data, error } = await sb.from(table).select('*');
-    if (error) { console.warn('[sb] load error', table, error.message); return fallback || []; }
-    // Si données présentes dans Supabase → on les utilise (jamais de retour aux seeds)
-    if (data && data.length > 0) { _sbInitialized[table] = true; return data; }
-    // Table vide ET jamais initialisée → première connexion, on injecte les seeds
-    if (!_sbInitialized[table] && fallback && fallback.length > 0) {
-      _sbInitialized[table] = true;
-      try { await sb.from(table).upsert(fallback, { onConflict: 'id' }); } catch(e) {}
-      return fallback;
+    var res = await sb.from(table).select('*');
+    if (res.error) { console.warn('[sb] load error', table, res.error.message); return fallback || []; }
+    var data = res.data || [];
+
+    if (data.length > 0) {
+      // Des données existent → les utiliser et marquer comme initialisé
+      await sbMarkInitialized(table);
+      return data;
     }
-    // Table vide et déjà initialisée (l'utilisateur a tout supprimé) → tableau vide
-    _sbInitialized[table] = true;
-    return [];
+
+    // Table vide : vérifier si elle a déjà été initialisée (= l'utilisateur a tout supprimé)
+    var alreadyInit = await sbIsInitialized(table);
+    if (alreadyInit) {
+      // L'utilisateur a tout supprimé intentionnellement → respecter le vide
+      return [];
+    }
+
+    // Première connexion : injecter les seeds et marquer comme initialisé
+    await sbMarkInitialized(table);
+    if (fallback && fallback.length > 0) {
+      try { await sb.from(table).upsert(fallback, { onConflict: 'id' }); } catch(e) {}
+    }
+    return fallback || [];
+
   } catch(e) {
     console.warn('[sb] load', table, e);
     return fallback || [];
@@ -396,20 +427,15 @@ async function sbLoad(table, fallback) {
 }
 
 async function sbSave(table, rows) {
-  if (!rows || !_sbInitialized[table]) return;
+  if (!rows) return;
   try {
-    // 1. Récupérer les IDs présents dans Supabase
-    var { data: existing } = await sb.from(table).select('id');
-    var remoteIds = (existing || []).map(function(r){ return r.id; });
-    var localIds  = (rows || []).map(function(r){ return r.id; });
-
-    // 2. Supprimer les lignes qui ne sont plus dans React
-    var toDelete = remoteIds.filter(function(id){ return !localIds.includes(id); });
+    var res = await sb.from(table).select('id');
+    var remoteIds = ((res.data) || []).map(function(r){ return r.id; });
+    var localIds  = rows.map(function(r){ return r.id; });
+    var toDelete  = remoteIds.filter(function(id){ return !localIds.includes(id); });
     if (toDelete.length > 0) {
       await sb.from(table).delete().in('id', toDelete);
     }
-
-    // 3. Upsert les lignes actuelles
     if (rows.length > 0) {
       await sb.from(table).upsert(rows, { onConflict: 'id' });
     }
@@ -2192,7 +2218,7 @@ function Modules({user,users,modules,setModules,enrollments,setEnrollments}){
   const enroll=(id)=>{const mod=modules.find(m=>m.id===id);if(!mod||mod.inscrits>=mod.places)return;setEnrollments(p=>({...p,[user.id]:[...(p[user.id]||[]),id]}));setModules(p=>p.map(m=>m.id===id?{...m,inscrits:m.inscrits+1}:m));};
   const unenroll=(id)=>{setEnrollments(p=>({...p,[user.id]:(p[user.id]||[]).filter(x=>x!==id)}));setModules(p=>p.map(m=>m.id===id?{...m,inscrits:Math.max(0,m.inscrits-1)}:m));};
   const add=()=>{if(!form.title.trim())return;setModules(p=>[...p,{id:'m'+Date.now(),...form,places:parseInt(form.places),inscrits:0}]);setShow(false);};
-  const del=(id)=>{setModules(p=>p.filter(m=>m.id!==id));setEnrollments(p=>{const n={...p};Object.keys(n).forEach(k=>{n[k]=(n[k]||[]).filter(x=>x!==id)});return n;});};
+  const del=(id)=>{setModules(p=>p.filter(m=>m.id!==id));setEnrollments(p=>{const n={...p};Object.keys(n).forEach(k=>{n[k]=(n[k]||[]).filter(x=>x!==id)});return n;});sbDelete('modules',id);};
 
   return <>
     <TB title="Modules & Activités">
@@ -2694,7 +2720,7 @@ function Admin({user,users,setUsers,resources,setResources,modules,setModules,co
         <div className="sh"><h2 className="st">Ressources ({resources.length})</h2></div>
         <table className="tbl">
           <thead><tr><th>Titre</th><th>Type</th><th>Matière</th><th>DL</th><th></th></tr></thead>
-          <tbody>{resources.map(r=><tr key={r.id}><td style={{fontSize:12,maxWidth:180}}>{r.title}</td><td><span className={`rtag ${TC[r.type]}`} style={{fontSize:9}}>{TL[r.type]}</span></td><td style={{fontSize:12}}>{r.matiere}</td><td style={{fontSize:12,color:'var(--muted)'}}>{r.dl}</td><td><button className="btn btn-d btn-sm" onClick={()=>setResources(p=>p.filter(x=>x.id!==r.id))}>🗑️</button></td></tr>)}</tbody>
+          <tbody>{resources.map(r=><tr key={r.id}><td style={{fontSize:12,maxWidth:180}}>{r.title}</td><td><span className={`rtag ${TC[r.type]}`} style={{fontSize:9}}>{TL[r.type]}</span></td><td style={{fontSize:12}}>{r.matiere}</td><td style={{fontSize:12,color:'var(--muted)'}}>{r.dl}</td><td><button className="btn btn-d btn-sm" onClick={()=>{setResources(p=>p.filter(x=>x.id!==r.id));sbDelete('ressources',r.id);}}>🗑️</button></td></tr>)}</tbody>
         </table>
       </>}
       {tab==='modules'&&<>
@@ -2705,7 +2731,7 @@ function Admin({user,users,setUsers,resources,setResources,modules,setModules,co
             <td><div style={{display:'flex',alignItems:'center',gap:7}}><span>{m.emoji}</span><span style={{fontWeight:500,fontSize:13}}>{m.title}</span></div></td>
             <td style={{fontSize:12}}>{m.matiere}</td><td style={{fontSize:12,color:'var(--muted)'}}>{m.date}</td>
             <td><div style={{display:'flex',alignItems:'center',gap:7}}><div className="pb" style={{width:48}}><div className="pbf" style={{width:`${pct}%`,background:pct>=100?'var(--err)':'var(--ok)'}}/></div><span style={{fontSize:12}}>{m.inscrits}/{m.places}</span></div></td>
-            <td><button className="btn btn-d btn-sm" onClick={()=>setModules(p=>p.filter(x=>x.id!==m.id))}>🗑️</button></td>
+            <td><button className="btn btn-d btn-sm" onClick={()=>{setModules(p=>p.filter(x=>x.id!==m.id));sbDelete('modules',m.id);}}>🗑️</button></td>
           </tr>;})}
           </tbody>
         </table>
@@ -4129,18 +4155,32 @@ function Facturation({user,users,factures,setFactures,cours}){
   const [factForm,setFactForm]=useState({familleId:'',eleveId:'',libelle:'',type:'mensuel',montant:'',echeance:'',statut:'attente',nbCreneaux:0,notes:''});
   const [searchEleve,setSearchEleve]=useState('');
   const [filterStatut,setFilterStatut]=useState('tous');
+  const [searchFacture,setSearchFacture]=useState('');
+  const [famOverrides,setFamOverrides]=useState({});
+  const [showDissocier,setShowDissocier]=useState(null); // famId being dissociated
+  const [famOverridesReady,setFamOverridesReady]=useState(false);
+
+  // Charger les overrides familles depuis kv_store
+  useEffect(()=>{
+    sbLoadKV('famille_overrides','global',{}).then(v=>{setFamOverrides(v||{});setFamOverridesReady(true);});
+  },[]);
+  // Sauvegarder les overrides quand ils changent
+  useEffect(()=>{ if(famOverridesReady) sbSaveKV('famille_overrides',famOverrides,'global'); },[famOverrides,famOverridesReady]);
 
   const familles=useMemo(()=>{
     const eleves=users.filter(u=>u.role==='eleve');
     const map={};
     eleves.forEach(e=>{
       const ln=e.name.trim().split(/\s+/).slice(-1)[0];
-      const id='fam_'+ln.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-      if(!map[id]){map[id]={id,nom:'Famille '+ln,lastName:ln,eleveIds:[e.id]};}
+      const autoId='fam_'+ln.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+      const id=famOverrides[e.id]||autoId;
+      const prenom=e.name.trim().split(/\s+/)[0];
+      const nom=famOverrides[e.id]?'Famille '+ln+' ('+prenom+')':'Famille '+ln;
+      if(!map[id]){map[id]={id,nom,lastName:ln,eleveIds:[e.id]};}
       else if(!map[id].eleveIds.includes(e.id)){map[id].eleveIds.push(e.id);}
     });
     return Object.values(map).sort((a,b)=>a.lastName.localeCompare(b.lastName));
-  },[users]);
+  },[users,famOverrides]);
 
   const getSessions=eid=>cours.filter(c=>c.eleveIds.includes(eid));
   const getMontant=eid=>{const mats=new Set(getSessions(eid).map(c=>c.matiere));return mats.size*55;};
@@ -4219,24 +4259,41 @@ function Facturation({user,users,factures,setFactures,cours}){
         ))}
       </div>
 
-      {/* Tabs + filtre */}
-      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16,flexWrap:'wrap',gap:8}}>
-        <div className="tabs" style={{maxWidth:280}}>
-          <button className={`tab ${tab==='vue'?'on':''}`} onClick={()=>setTab('vue')}>👨‍👩‍👧 Par famille</button>
-          <button className={`tab ${tab==='liste'?'on':''}`} onClick={()=>setTab('liste')}>📋 Liste</button>
-        </div>
-        <div style={{display:'flex',gap:6}}>
-          {['tous','paye','attente','retard'].map(s=>(
-            <button key={s} onClick={()=>setFilterStatut(s)} style={{padding:'5px 11px',border:`1.5px solid ${filterStatut===s?'#1a4fc4':'#dde3f0'}`,borderRadius:4,background:filterStatut===s?'#1a4fc4':'white',color:filterStatut===s?'white':'#6b7ab5',fontSize:11,fontWeight:filterStatut===s?700:400,cursor:'pointer'}}>
-              {s==='tous'?'Tous':s==='paye'?'✓ Payé':s==='attente'?'⏳ Attente':'⚠️ Retard'}
-            </button>
-          ))}
+      {/* Tabs + recherche + filtre */}
+      <div style={{marginBottom:12}}>
+        <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8,flexWrap:'wrap'}}>
+          <div className="tabs" style={{maxWidth:280,marginBottom:0}}>
+            <button className={`tab ${tab==='vue'?'on':''}`} onClick={()=>setTab('vue')}>👨‍👩‍👧 Par famille</button>
+            <button className={`tab ${tab==='liste'?'on':''}`} onClick={()=>setTab('liste')}>📋 Liste</button>
+          </div>
+          <div style={{flex:1,minWidth:180,position:'relative'}}>
+            <input
+              style={{width:'100%',padding:'6px 12px 6px 32px',border:'1.5px solid #dde3f0',borderRadius:4,fontSize:12,fontFamily:'var(--ff-mono)',color:'#1a2340',background:'white'}}
+              placeholder="Rechercher famille, élève, libellé…"
+              value={searchFacture}
+              onChange={e=>setSearchFacture(e.target.value)}
+            />
+            <span style={{position:'absolute',left:10,top:'50%',transform:'translateY(-50%)',fontSize:13,opacity:.4}}>🔍</span>
+            {searchFacture&&<button onClick={()=>setSearchFacture('')} style={{position:'absolute',right:8,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:13,color:'#aaa'}}>✕</button>}
+          </div>
+          <div style={{display:'flex',gap:6}}>
+            {['tous','paye','attente','retard'].map(s=>(
+              <button key={s} onClick={()=>setFilterStatut(s)} style={{padding:'5px 11px',border:`1.5px solid ${filterStatut===s?'#1a4fc4':'#dde3f0'}`,borderRadius:4,background:filterStatut===s?'#1a4fc4':'white',color:filterStatut===s?'white':'#6b7ab5',fontSize:11,fontWeight:filterStatut===s?700:400,cursor:'pointer'}}>
+                {s==='tous'?'Tous':s==='paye'?'✓ Payé':s==='attente'?'⏳ Attente':'⚠️ Retard'}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       {tab==='vue'&&<div style={{display:'flex',flexDirection:'column',gap:10}}>
         {familles.length===0&&<div className="emp"><div className="emp-icon">👨‍👩‍👧</div><h3>Aucun élève inscrit</h3></div>}
-        {familles.map(fam=>{
+        {familles.filter(fam=>{
+          if(!searchFacture)return true;
+          const q=searchFacture.toLowerCase();
+          const famEleves=users.filter(u=>fam.eleveIds.includes(u.id));
+          return fam.nom.toLowerCase().includes(q)||famEleves.some(e=>e.name.toLowerCase().includes(q))||famFacts(fam.id).some(f=>f.libelle.toLowerCase().includes(q));
+        }).map(fam=>{
           const facts=famFacts(fam.id).filter(f=>filterStatut==='tous'||f.statut===filterStatut);
           const allFacts=famFacts(fam.id);
           const tp=totalFam(fam.id);const pp=payeFam(fam.id);const pend=pendingFam(fam.id);const pct=tp>0?Math.round((pp/tp)*100):0;
@@ -4253,7 +4310,8 @@ function Facturation({user,users,factures,setFactures,cours}){
                   {getFamMats(fam).length>0&&<div style={{marginTop:4,display:'flex',gap:4,flexWrap:'wrap'}}>{getFamMats(fam).map(m=><span key={m} style={{...getCoursBadge(m),fontSize:10}}>{m}</span>)}<span style={{fontSize:11,fontWeight:700,color:'#1a4fc4',marginLeft:4}}>{getFamTarif(fam)}€/mois</span></div>}
                 </div>
               </div>
-              <div style={{display:'flex',alignItems:'center',gap:12}}>
+              <div style={{display:'flex',alignItems:'center',gap:8}}>
+                {famEleves.length>1&&<button className="btn btn-sm" title="Dissocier des élèves de cette famille" onClick={e=>{e.stopPropagation();setShowDissocier(fam.id);}} style={{background:'#fff8e0',border:'1.5px solid #f5d882',color:'#c47a00',fontSize:10,padding:'3px 8px',flexShrink:0}}>✂️ Dissocier</button>}
                 {pend>0&&<span style={{padding:'4px 10px',borderRadius:20,fontSize:11,fontWeight:700,background:hasRetard?'#fff0f0':'#fff8e0',color:hasRetard?'#b02020':'#c47a00',border:`1.5px solid ${hasRetard?'#f5b8b8':'#f5d882'}`}}>⚠ {pend} impayée{pend>1?'s':''}</span>}
                 {tp>0&&<div style={{textAlign:'right'}}><div style={{fontWeight:700,fontSize:14}}>{pp}€ <span style={{fontSize:11,fontWeight:400,color:'#8892b0'}}>/ {tp}€</span></div><div style={{height:4,width:80,background:'#e8ecf5',borderRadius:2,marginTop:4}}><div style={{height:'100%',width:`${pct}%`,background:pct===100?'#2D9B6F':pct>60?'#1a4fc4':'#D97706',borderRadius:2}}/></div></div>}
                 <span style={{color:'#8892b0',fontSize:12}}>{open[fam.id]?'▲':'▼'}</span>
@@ -4279,11 +4337,17 @@ function Facturation({user,users,factures,setFactures,cours}){
         <div style={{display:'grid',gridTemplateColumns:'180px 1fr 80px 120px 180px',gap:0,padding:'8px 14px',fontSize:10,fontWeight:700,textTransform:'uppercase',letterSpacing:.8,color:'#8892b0',borderBottom:'2px solid #e8ecf5',background:'#f8faff'}}>
           <span>Famille</span><span>Libellé</span><span>Montant</span><span>Statut</span><span>Actions</span>
         </div>
-        {factures.filter(f=>filterStatut==='tous'||f.statut===filterStatut).length===0
-          ?<div style={{padding:'30px',textAlign:'center',color:'#8892b0'}}>Aucune facture</div>
-          :[...factures].filter(f=>filterStatut==='tous'||f.statut===filterStatut)
-            .sort((a,b)=>{const o={retard:0,attente:1,paye:2};return(o[a.statut]??1)-(o[b.statut]??1)||((a.echeance||'').localeCompare(b.echeance||''));})
-            .map(f=>{
+        {(()=>{const listFiltered=[...factures].filter(f=>{
+          if(filterStatut!=='tous'&&f.statut!==filterStatut)return false;
+          if(!searchFacture)return true;
+          const q=searchFacture.toLowerCase();
+          const fam=familles.find(x=>x.id===f.familleId);
+          const elv=users.find(u=>u.id===f.eleveId);
+          return f.libelle.toLowerCase().includes(q)||(fam?.nom||'').toLowerCase().includes(q)||(elv?.name||'').toLowerCase().includes(q);
+        }).sort((a,b)=>{const o={retard:0,attente:1,paye:2};return(o[a.statut]??1)-(o[b.statut]??1)||((a.echeance||'').localeCompare(b.echeance||''));});
+        return listFiltered.length===0
+          ?<div style={{padding:'30px',textAlign:'center',color:'#8892b0'}}>Aucune facture{searchFacture?' pour cette recherche':''}</div>
+          :listFiltered.map(f=>{
               const fam=familles.find(x=>x.id===f.familleId);const eleveF=users.find(u=>u.id===f.eleveId);
               return <div key={f.id} style={{display:'grid',gridTemplateColumns:'180px 1fr 80px 120px 180px',gap:0,alignItems:'center',padding:'9px 14px',borderBottom:'1px solid #f0f4fc',background:'white',cursor:'default'}}
                 onMouseEnter={e=>e.currentTarget.style.background='#f8faff'}
@@ -4298,7 +4362,7 @@ function Facturation({user,users,factures,setFactures,cours}){
                   <button className="btn btn-d btn-sm" onClick={()=>delFact(f.id)}>🗑️</button>
                 </div>
               </div>;
-            })}
+            });})()} 
       </div>}
     </div>
 
@@ -4337,6 +4401,40 @@ function Facturation({user,users,factures,setFactures,cours}){
       </div>
       <div className="fa"><button className="btn btn-o" onClick={()=>{setShowFact(false);setSearchEleve('');}}>Annuler</button><button className="btn btn-p" onClick={addFact} disabled={!factForm.libelle||!factForm.montant||!factForm.familleId}>Créer → Ouvrir éditeur</button></div>
     </Modal>}
+
+    {/* ── Modale Dissocier ── */}
+    {showDissocier&&(()=>{
+      const fam=familles.find(f=>f.id===showDissocier);
+      if(!fam)return null;
+      const famEleves=users.filter(u=>fam.eleveIds.includes(u.id));
+      return <Modal title="✂️ Dissocier des élèves" onClose={()=>setShowDissocier(null)}>
+        <div style={{background:'#fff8e0',border:'1px solid #f5d882',borderRadius:4,padding:'9px 13px',marginBottom:14,fontSize:12,color:'#7a5800'}}>
+          💡 Les élèves dissociés obtiendront leur propre dossier de facturation indépendant.
+        </div>
+        <div style={{marginBottom:14}}>
+          <div style={{fontSize:11,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>Famille actuelle : {fam.nom}</div>
+          {famEleves.map(e=>{
+            const isOverridden=!!famOverrides[e.id];
+            return <div key={e.id} style={{display:'flex',alignItems:'center',gap:12,padding:'10px 14px',background:'white',border:'1.5px solid var(--cream2)',borderRadius:4,marginBottom:6}}>
+              <div style={{flex:1}}>
+                <div style={{fontWeight:600,fontSize:13}}>{e.name}</div>
+                <div style={{fontSize:11,color:'var(--muted)',marginTop:1}}>{e.niveau}</div>
+                {isOverridden&&<div style={{fontSize:10,color:'#059669',fontWeight:600,marginTop:2}}>✓ Dossier séparé</div>}
+              </div>
+              {isOverridden
+                ?<button className="btn btn-sm" style={{background:'#EEFFF6',border:'1.5px solid #b8dbb8',color:'#1a7a4a',fontSize:11}} onClick={()=>setFamOverrides(p=>{const n={...p};delete n[e.id];return n;})}>↩ Réunifier</button>
+                :<button className="btn btn-sm" style={{background:'#fff8e0',border:'1.5px solid #f5d882',color:'#c47a00',fontSize:11}} onClick={()=>{
+                  const ln=e.name.trim().split(/\s+/).slice(-1)[0];
+                  const customId='fam_'+ln.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')+'_'+e.id;
+                  setFamOverrides(p=>({...p,[e.id]:customId}));
+                }}>✂️ Dissocier</button>
+              }
+            </div>;
+          })}
+        </div>
+        <div className="fa"><button className="btn btn-p" onClick={()=>setShowDissocier(null)}>Fermer</button></div>
+      </Modal>;
+    })()}
   </>;
 }
 
