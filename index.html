@@ -2568,6 +2568,7 @@ function Admin({user,users,setUsers,resources,setResources,modules,setModules,co
   const [form,setForm]=useState({name:'',role:'eleve',niveau:'3ème',matiere:''});
   // Gestion groupes
   const [selCours,setSelCours]=useState(null);
+  const [searchGroupe,setSearchGroupe]=useState('');
   const [ficheEleve,setFicheEleve]=useState(null); // élève dont on affiche/édite la fiche
   const [ficheForm,setFicheForm]=useState({});
   // Inscriptions
@@ -2705,15 +2706,15 @@ function Admin({user,users,setUsers,resources,setResources,modules,setModules,co
               </div>
 
               {/* Recherche + Grille élèves avec toggle */}
-              {(()=>{const [sqg,setSqg]=React.useState('');
-              const elevesFiltres=sqg?eleves.filter(e=>e.name.toLowerCase().includes(sqg.toLowerCase())||(e.niveau||'').toLowerCase().includes(sqg.toLowerCase())):eleves;
+              {(()=>{
+              const elevesFiltres=searchGroupe?eleves.filter(e=>e.name.toLowerCase().includes(searchGroupe.toLowerCase())||(e.niveau||'').toLowerCase().includes(searchGroupe.toLowerCase())):eleves;
               const inscrits=elevesFiltres.filter(e=>curC.eleveIds.includes(e.id));
               const nonInscrits=elevesFiltres.filter(e=>!curC.eleveIds.includes(e.id));
               return <>
                 <div style={{display:'flex',gap:8,marginBottom:12,alignItems:'center'}}>
                   <div style={{position:'relative',flex:1}}>
-                    <input className="fi" placeholder="🔍 Chercher un élève…" value={sqg} onChange={e=>setSqg(e.target.value)} style={{fontSize:12,padding:'6px 10px',width:'100%'}}/>
-                    {sqg&&<button onClick={()=>setSqg('')} style={{position:'absolute',right:8,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',color:'#aaa',fontSize:12}}>✕</button>}
+                    <input className="fi" placeholder="🔍 Chercher un élève à ajouter…" value={searchGroupe} onChange={e=>setSearchGroupe(e.target.value)} style={{fontSize:12,padding:'6px 10px',width:'100%'}}/>
+                    {searchGroupe&&<button onClick={()=>setSearchGroupe('')} style={{position:'absolute',right:8,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',color:'#aaa',fontSize:12}}>✕</button>}
                   </div>
                   <span style={{fontSize:11,color:'var(--muted)',whiteSpace:'nowrap'}}>{curC.eleveIds.length}/{eleves.length} inscrits</span>
                 </div>
