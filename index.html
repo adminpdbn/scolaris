@@ -362,10 +362,13 @@ textarea.fi{resize:vertical;min-height:68px;}
 </style>
 <script>
 // ─── SUPABASE CLIENT ───
-// sb, sbLoad, sbSave etc. définis dans le script global (avant Babel)
+// var (pas const) → accessible depuis tous les scripts de la page
+var SUPABASE_URL = 'https://gwmdurhncotftuxfgwkg.supabase.co';
+var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3bWR1cmhuY290ZnR1eGZnd2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NzYyMTAsImV4cCI6MjA5MTU1MjIxMH0.WDcPFpYyJIF8QcNsjUzckb0EUtbxw_iQ0hmN6OPCn08';
+var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ─── DEBOUNCE POUR LES SAVES SUPABASE ───
-const _dbTimers = {};
+var _dbTimers = {};
 function sbDebounce(key, fn, ms=1500) {
   clearTimeout(_dbTimers[key]);
   _dbTimers[key] = setTimeout(fn, ms);
@@ -373,6 +376,12 @@ function sbDebounce(key, fn, ms=1500) {
 
 // ─── SYNC SUPABASE ───
 var _sbInitialized = {};
+
+// localStorage helper (non utilisé actuellement, conservé pour compatibilité)
+var ls = {
+  get: (k,d) => { try { const v=localStorage.getItem(k); return v?JSON.parse(v):d; } catch(e){ return d; } },
+  set: (k,v) => { try { localStorage.setItem(k,JSON.stringify(v)); } catch(e){} }
+};
 
 async function sbIsInitialized(table) {
   if (_sbInitialized[table]) return true;
