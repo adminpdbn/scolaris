@@ -2568,6 +2568,8 @@ function Admin({user,users,setUsers,resources,setResources,modules,setModules,co
   const [form,setForm]=useState({name:'',role:'eleve',niveau:'3ème',matiere:''});
   // Gestion groupes
   const [selCours,setSelCours]=useState(null);
+  const [ficheEleve,setFicheEleve]=useState(null); // élève dont on affiche/édite la fiche
+  const [ficheForm,setFicheForm]=useState({});
   // Inscriptions
   const [showIns,setShowIns]=useState(false);
   const [selIns,setSelIns]=useState(null);
@@ -2655,7 +2657,10 @@ function Admin({user,users,setUsers,resources,setResources,modules,setModules,co
             <td><div style={{display:'flex',alignItems:'center',gap:8}}><div style={{width:28,height:28,borderRadius:'50%',background:'var(--navy)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,flexShrink:0}}>{RI[u.role]}</div><div style={{fontWeight:600,fontSize:13}}>{u.name}</div></div></td>
             <td><span style={{padding:'2px 8px',borderRadius:2,fontSize:11,fontWeight:700,background:u.role==='admin'?'#EEF5FF':u.role==='prof'?'#EEF3FF':'#EEFFF6',color:u.role==='admin'?'#D97706':u.role==='prof'?'var(--info)':'#2D9B6F'}}>{RL[u.role]}</span></td>
             <td style={{fontSize:12,color:'var(--muted)'}}>{u.niveau||u.matiere||'—'}</td>
-            <td><button className="btn btn-d btn-sm" onClick={()=>delUser(u.id)}>🗑️</button></td>
+            <td style={{display:'flex',gap:4}}>
+              {u.role==='eleve'&&<button className="btn btn-sm" style={{background:'#EEF3FF',border:'1.5px solid #C8D8F5',color:'var(--info)',fontSize:10,padding:'3px 8px'}} onClick={()=>{setFicheForm({name:u.name,niveau:u.niveau||'3ème',etablissement:u.etablissement||'',dateNaissance:u.dateNaissance||'',parentNom:u.parentNom||'',parentTel:u.parentTel||'',parentEmail:u.parentEmail||'',adresse:u.adresse||'',notes:u.notes||''});setFicheEleve(u);}}>📋 Fiche</button>}
+              <button className="btn btn-d btn-sm" onClick={()=>delUser(u.id)}>🗑️</button>
+            </td>
           </tr>)}</tbody>
         </table>
       </>}
@@ -2699,26 +2704,41 @@ function Admin({user,users,setUsers,resources,setResources,modules,setModules,co
                 </div>
               </div>
 
-              {/* Grille élèves avec toggle */}
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:10}}>
-                {eleves.map(e=>{
-                  const inscrit=curC.eleveIds.includes(e.id);
-                  return <div key={e.id}
-                    onClick={()=>toggleEleve(curC.id,e.id)}
-                    style={{background:'white',borderRadius:0,padding:'11px 14px',border:`2px solid ${inscrit?'var(--gold)':'var(--cream2)'}`,cursor:'pointer',transition:'all .15s',display:'flex',alignItems:'center',gap:10,
-                      background:inscrit?'linear-gradient(135deg,#EEF5FF,white)':'white'}}>
-                    <div style={{width:32,height:32,borderRadius:2,background:inscrit?'var(--navy)':'var(--cream2)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,transition:'all .15s',flexShrink:0}}>
-                      {inscrit?'✓':'🎓'}
-                    </div>
-                    <div>
-                      <div style={{fontSize:13,fontWeight:inscrit?700:500,color:inscrit?'var(--navy)':'var(--text)'}}>{e.name}</div>
-                      <div style={{fontSize:11,color:'var(--muted)'}}>{e.niveau}</div>
-                    </div>
-                  </div>;
-                })}
-              </div>
-
-              {eleves.length===0&&<div className="emp" style={{padding:'30px 0'}}><div className="emp-icon">🎓</div><h3>Aucun élève</h3></div>}
+              {/* Recherche + Grille élèves avec toggle */}
+              {(()=>{const [sqg,setSqg]=React.useState('');
+              const elevesFiltres=sqg?eleves.filter(e=>e.name.toLowerCase().includes(sqg.toLowerCase())||(e.niveau||'').toLowerCase().includes(sqg.toLowerCase())):eleves;
+              const inscrits=elevesFiltres.filter(e=>curC.eleveIds.includes(e.id));
+              const nonInscrits=elevesFiltres.filter(e=>!curC.eleveIds.includes(e.id));
+              return <>
+                <div style={{display:'flex',gap:8,marginBottom:12,alignItems:'center'}}>
+                  <div style={{position:'relative',flex:1}}>
+                    <input className="fi" placeholder="🔍 Chercher un élève…" value={sqg} onChange={e=>setSqg(e.target.value)} style={{fontSize:12,padding:'6px 10px',width:'100%'}}/>
+                    {sqg&&<button onClick={()=>setSqg('')} style={{position:'absolute',right:8,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',color:'#aaa',fontSize:12}}>✕</button>}
+                  </div>
+                  <span style={{fontSize:11,color:'var(--muted)',whiteSpace:'nowrap'}}>{curC.eleveIds.length}/{eleves.length} inscrits</span>
+                </div>
+                {inscrits.length>0&&<>
+                  <div style={{fontSize:10,fontWeight:700,color:'var(--ok)',textTransform:'uppercase',letterSpacing:.5,marginBottom:6}}>✓ Inscrits ({inscrits.length})</div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(190px,1fr))',gap:8,marginBottom:14}}>
+                    {inscrits.map(e=><div key={e.id} onClick={()=>toggleEleve(curC.id,e.id)}
+                      style={{background:'linear-gradient(135deg,#EEF5FF,white)',borderRadius:0,padding:'10px 13px',border:'2px solid var(--gold)',cursor:'pointer',display:'flex',alignItems:'center',gap:9}}>
+                      <div style={{width:28,height:28,borderRadius:2,background:'var(--navy)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}>✓</div>
+                      <div><div style={{fontSize:12,fontWeight:700,color:'var(--navy)'}}>{e.name}</div><div style={{fontSize:11,color:'var(--muted)'}}>{e.niveau}</div></div>
+                    </div>)}
+                  </div>
+                </>}
+                {nonInscrits.length>0&&<>
+                  <div style={{fontSize:10,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.5,marginBottom:6}}>+ Ajouter au groupe ({nonInscrits.length})</div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(190px,1fr))',gap:8}}>
+                    {nonInscrits.map(e=><div key={e.id} onClick={()=>toggleEleve(curC.id,e.id)}
+                      style={{background:'white',borderRadius:0,padding:'10px 13px',border:'2px solid var(--cream2)',cursor:'pointer',display:'flex',alignItems:'center',gap:9,transition:'all .1s'}}>
+                      <div style={{width:28,height:28,borderRadius:2,background:'var(--cream2)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}>🎓</div>
+                      <div><div style={{fontSize:12,fontWeight:500}}>{e.name}</div><div style={{fontSize:11,color:'var(--muted)'}}>{e.niveau}</div></div>
+                    </div>)}
+                  </div>
+                </>}
+                {elevesFiltres.length===0&&<div style={{textAlign:'center',padding:'20px',color:'var(--muted)',fontSize:12}}>Aucun élève trouvé</div>}
+              </>;})()} 
             </>
           )}
         </div>
@@ -2926,6 +2946,53 @@ function Admin({user,users,setUsers,resources,setResources,modules,setModules,co
       </Modal>}
 
 
+    {/* ── Modale Fiche Élève ── */}
+    {ficheEleve&&<Modal title={`📋 Fiche — ${ficheEleve.name}`} onClose={()=>setFicheEleve(null)}>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+        <div className="fg"><label className="fl">Nom complet</label><input className="fi" value={ficheForm.name} onChange={e=>setFicheForm(p=>({...p,name:e.target.value}))}/></div>
+        <div className="fg"><label className="fl">Niveau</label>
+          <select className="fi" value={ficheForm.niveau} onChange={e=>setFicheForm(p=>({...p,niveau:e.target.value}))}>
+            {NIVEAUX.filter(n=>n!=='Tous').map(n=><option key={n}>{n}</option>)}
+          </select>
+        </div>
+        <div className="fg"><label className="fl">Date de naissance</label><input className="fi" type="date" value={ficheForm.dateNaissance} onChange={e=>setFicheForm(p=>({...p,dateNaissance:e.target.value}))}/></div>
+        <div className="fg"><label className="fl">Établissement fréquenté</label><input className="fi" value={ficheForm.etablissement} placeholder="Ex: Collège Paul Éluard" onChange={e=>setFicheForm(p=>({...p,etablissement:e.target.value}))}/></div>
+      </div>
+      <div style={{borderTop:'1.5px solid var(--cream2)',margin:'12px 0 10px',fontSize:11,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.5}}>Contact parent / tuteur</div>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+        <div className="fg"><label className="fl">Nom du parent</label><input className="fi" value={ficheForm.parentNom} onChange={e=>setFicheForm(p=>({...p,parentNom:e.target.value}))}/></div>
+        <div className="fg"><label className="fl">Téléphone</label><input className="fi" type="tel" value={ficheForm.parentTel} onChange={e=>setFicheForm(p=>({...p,parentTel:e.target.value}))}/></div>
+        <div className="fg" style={{gridColumn:'1/-1'}}><label className="fl">Email</label><input className="fi" type="email" value={ficheForm.parentEmail} onChange={e=>setFicheForm(p=>({...p,parentEmail:e.target.value}))}/></div>
+        <div className="fg" style={{gridColumn:'1/-1'}}><label className="fl">Adresse domicile</label><input className="fi" value={ficheForm.adresse} placeholder="Rue, code postal, ville" onChange={e=>setFicheForm(p=>({...p,adresse:e.target.value}))}/></div>
+      </div>
+      <div style={{borderTop:'1.5px solid var(--cream2)',margin:'12px 0 10px',fontSize:11,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.5}}>Groupes & créneaux</div>
+      <div style={{display:'flex',flexDirection:'column',gap:5,maxHeight:180,overflowY:'auto',marginBottom:10}}>
+        {cours.map(c=>{
+          const inscrit=c.eleveIds.includes(ficheEleve.id);
+          const p=users.find(u=>u.id===c.profId);
+          return <div key={c.id} onClick={()=>toggleEleve(c.id,ficheEleve.id)}
+            style={{display:'flex',alignItems:'center',gap:10,padding:'8px 12px',border:`2px solid ${inscrit?'var(--gold)':'var(--cream2)'}`,background:inscrit?'#EEF5FF':'white',cursor:'pointer',borderRadius:2}}>
+            <div style={{width:22,height:22,background:inscrit?'var(--navy)':'var(--cream2)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,flexShrink:0,borderRadius:2}}>{inscrit?'✓':'+'}</div>
+            <div style={{flex:1}}>
+              <span style={{...getCoursBadge(c.matiere),fontSize:10,marginRight:6}}>{c.matiere}</span>
+              <span style={{fontSize:12,fontWeight:500}}>{c.niveau}</span>
+              <span style={{fontSize:11,color:'var(--muted)',marginLeft:6}}>{c.jour} {hs(c.debut)}–{hs(c.fin)} · {p?.name.split(' ').slice(-1)[0]}</span>
+            </div>
+          </div>;
+        })}
+      </div>
+      <div className="fg"><label className="fl">Notes internes</label>
+        <textarea className="fi" rows={2} value={ficheForm.notes} onChange={e=>setFicheForm(p=>({...p,notes:e.target.value}))} placeholder="Besoins particuliers, remarques…" style={{resize:'vertical',fontSize:12}}/>
+      </div>
+      <div className="fa">
+        <button className="btn btn-o" onClick={()=>setFicheEleve(null)}>Annuler</button>
+        <button className="btn btn-p" onClick={()=>{
+          setUsers(p=>p.map(u=>u.id===ficheEleve.id?{...u,...ficheForm,initials:(ficheForm.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase())}:u));
+          setFicheEleve(null);
+        }}>💾 Enregistrer</button>
+      </div>
+    </Modal>}
+
     {show&&<Modal title="Ajouter un utilisateur" onClose={()=>setShow(false)}>
       <div className="fg"><label className="fl">Nom complet *</label><input className="fi" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Ex: Lucas Moreau"/></div>
       <div className="fg"><label className="fl">Rôle</label><select className="fi" value={form.role} onChange={e=>setForm({...form,role:e.target.value})}><option value="eleve">Élève</option><option value="prof">Professeur</option><option value="admin">Administrateur</option></select></div>
@@ -3119,8 +3186,24 @@ function SuiviCompetences({user,users,cours,compEtats,setCompEtats,customComps=[
   const [showAddComp,setShowAddComp]=useState(false);
   const [addCompForm,setAddCompForm]=useState({eleveId:'',matiere:'Mathématiques',chapitre:'',nom:'',tier:'base'});
 
+  const [searchEleve,setSearchEleve]=useState('');
+  const [groupFilter,setGroupFilter]=useState('tous');
+
   const eleves=users.filter(u=>u.role==='eleve');
   const viewedId=user.role==='eleve'?user.id:selEleve;
+
+  // Groupes disponibles pour le filtre
+  const allGroupes=useMemo(()=>[...new Set(cours.map(c=>c.id+':'+c.matiere+' '+c.niveau+' '+c.jour))]
+    .map(s=>{const[id,...rest]=s.split(':');return{id,label:rest.join(':').trim()};}),[cours]);
+
+  // Élèves filtrés et triés
+  const filteredEleves=useMemo(()=>{
+    let list=eleves;
+    if(user.role==='prof') list=list.filter(e=>cours.some(c=>c.profId===user.id&&c.eleveIds.includes(e.id)));
+    if(searchEleve) list=list.filter(e=>e.name.toLowerCase().includes(searchEleve.toLowerCase())||(e.niveau||'').toLowerCase().includes(searchEleve.toLowerCase()));
+    if(groupFilter!=='tous') list=list.filter(e=>cours.find(c=>c.id===groupFilter&&c.eleveIds.includes(e.id)));
+    return list;
+  },[eleves,searchEleve,groupFilter,cours,user]);
 
   // All templates (base + custom)
   const allTemplates=(eleveId)=>{
@@ -3291,21 +3374,35 @@ function SuiviCompetences({user,users,cours,compEtats,setCompEtats,customComps=[
     </TB>
     <div className="pg">
       {user.role==='eleve'&&<CompView eid={user.id} canEdit={false}/>}
-      {(user.role==='prof'||user.role==='admin')&&<div style={{display:'grid',gridTemplateColumns:'220px 1fr',gap:20,alignItems:'start'}}>
-        {/* Sidebar élèves */}
+      {(user.role==='prof'||user.role==='admin')&&<div style={{display:'grid',gridTemplateColumns:'240px 1fr',gap:20,alignItems:'start'}}>
+        {/* Sidebar élèves avec recherche + filtre groupe */}
         <div>
-          <div style={{fontWeight:700,fontSize:11,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.5,marginBottom:10,paddingLeft:4}}>Élèves</div>
-          {eleves.map(e=>{
+          <div style={{marginBottom:8,position:'relative'}}>
+            <input className="fi" placeholder="🔍 Rechercher un élève…" value={searchEleve}
+              onChange={e=>setSearchEleve(e.target.value)}
+              style={{fontSize:12,padding:'6px 10px',width:'100%'}}/>
+            {searchEleve&&<button onClick={()=>setSearchEleve('')} style={{position:'absolute',right:8,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',color:'#aaa',fontSize:12}}>✕</button>}
+          </div>
+          <select className="fi" value={groupFilter} onChange={e=>setGroupFilter(e.target.value)} style={{fontSize:11,padding:'5px 8px',marginBottom:10,width:'100%'}}>
+            <option value="tous">Tous les groupes</option>
+            {cours.map(c=>{const p=users.find(u=>u.id===c.profId);return<option key={c.id} value={c.id}>{c.matiere} {c.niveau} · {c.jour} ({p?.name.split(' ').slice(-1)[0]})</option>;})}
+          </select>
+          <div style={{fontSize:10,color:'var(--muted)',marginBottom:8,paddingLeft:2}}>{filteredEleves.length} élève{filteredEleves.length!==1?'s':''}</div>
+          {filteredEleves.length===0&&<div style={{textAlign:'center',padding:'20px 0',color:'var(--muted)',fontSize:12}}>Aucun élève</div>}
+          {filteredEleves.map(e=>{
             const s=getStats(e.id);
-            const isMe=user.role==='prof'&&cours.some(c=>c.profId===user.id&&c.eleveIds.includes(e.id));
-            if(user.role==='prof'&&!isMe)return null;
+            const groupes=cours.filter(c=>c.eleveIds.includes(e.id));
             return <div key={e.id} onClick={()=>{setSelEleve(e.id);setSelMat('Toutes');}}
               style={{padding:'10px 12px',borderRadius:0,background:selEleve===e.id?'var(--navy)':'white',border:'1.5px solid var(--cream2)',marginBottom:6,cursor:'pointer'}}>
               <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
                 <div style={{fontWeight:600,fontSize:13,color:selEleve===e.id?'white':'var(--navy)'}}>{e.name}</div>
                 <span style={{fontSize:12,fontWeight:700,color:selEleve===e.id?'white':s.pct===100?'var(--ok)':'var(--gold)'}}>{s.pct}%</span>
               </div>
-              <div style={{fontSize:11,color:selEleve===e.id?'rgba(255,255,255,.5)':'var(--muted)',marginBottom:6}}>{e.niveau} · {s.valide}/{s.total}</div>
+              <div style={{fontSize:11,color:selEleve===e.id?'rgba(255,255,255,.5)':'var(--muted)',marginBottom:4}}>{e.niveau} · {s.valide}/{s.total}</div>
+              {groupes.length>0&&<div style={{display:'flex',gap:3,flexWrap:'wrap',marginBottom:4}}>
+                {groupes.slice(0,2).map(c=><span key={c.id} style={{fontSize:9,padding:'1px 5px',borderRadius:2,background:selEleve===e.id?'rgba(255,255,255,.15)':'var(--cream2)',color:selEleve===e.id?'white':'var(--muted)',fontWeight:600}}>{c.matiere.slice(0,4)}.</span>)}
+                {groupes.length>2&&<span style={{fontSize:9,color:selEleve===e.id?'rgba(255,255,255,.4)':'var(--muted)'}}>+{groupes.length-2}</span>}
+              </div>}
               <div style={{height:3,background:selEleve===e.id?'rgba(255,255,255,.15)':'var(--cream2)',borderRadius:2,overflow:'hidden'}}>
                 <div style={{height:'100%',width:`${s.pct}%`,background:s.pct===100?'var(--ok)':'#8b6b3a',borderRadius:2}}/>
               </div>
