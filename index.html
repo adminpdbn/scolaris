@@ -5052,6 +5052,7 @@ function Sorties({sorties,setSorties,users,cours}){
       // Encadrement
       accompagnateurs:[],
       // Budget prévisionnel
+      budgetTransportParEleve:0,budgetEntreesParEleve:0,budgetNourritureParEleve:0,budgetDiversParEleve:0,
       budgetTransport:0,budgetEntrees:0,budgetNourriture:0,budgetDivers:0,
       budgetReel:0,
       financementEtablissement:0,financementFamilles:0,financementSubventions:0,
@@ -5101,7 +5102,7 @@ function Sorties({sorties,setSorties,users,cours}){
         {sorties.map(s=>{
           const st=STATUTS[s.statut]||STATUTS.brouillon;
           const budgetTotal=(s.budgetTransport||0)+(s.budgetEntrees||0)+(s.budgetNourriture||0)+(s.budgetDivers||0);
-          const parEleve=s.nbEleves>0?Math.round(budgetTotal/s.nbEleves):0;
+          const parEleve=s.nbEleves>0?(s.budgetTransportParEleve||0)+(s.budgetEntreesParEleve||0)+(s.budgetNourritureParEleve||0)+(s.budgetDiversParEleve||0):0;
           const nbAcc=s.accompagnateurs?.length||0;
           const ratio=s.nbEleves&&nbAcc?Math.round(s.nbEleves/nbAcc)+'é/1a':'—';
           const autoOk=Object.values(s.autorisations||{}).filter(v=>v==='autorise').length;
@@ -5348,27 +5349,57 @@ function Sorties({sorties,setSorties,users,cours}){
 
       {/* ── BUDGET ── */}
       {tab==='budget'&&<div>
+        {/* Avertissement si nbEleves = 0 */}
+        {!sel.nbEleves&&<div style={{background:'#FEF3C7',border:'1.5px solid #FDE68A',borderRadius:6,padding:'10px 14px',marginBottom:14,fontSize:13,color:'#92400E'}}>
+          ⚠️ Renseignez le nombre d'élèves dans l'onglet Général pour que le calcul soit automatique.
+        </div>}
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,marginBottom:20}}>
           <div className="stat-section">
             <div className="stat-section-ttl">💰 Coûts prévisionnels</div>
-            {[
-              {label:'🚌 Transport',key:'budgetTransport'},
-              {label:'🎟️ Entrées',key:'budgetEntrees'},
-              {label:'🍽️ Nourriture',key:'budgetNourriture'},
-              {label:'📦 Divers',key:'budgetDivers'},
-            ].map(r=><div key={r.key} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid var(--cream2)'}}>
-              <span style={{fontSize:13}}>{r.label}</span>
-              <div style={{display:'flex',alignItems:'center',gap:6}}>
-                <input type="number" min="0" className="fi" style={{width:90,textAlign:'right',fontSize:12,padding:'4px 8px'}} value={sel[r.key]||0}
-                  onChange={e=>upd({[r.key]:parseFloat(e.target.value)||0})}/>
-                <span style={{fontSize:12,color:'var(--muted)'}}>€</span>
+            {/* En-tête colonnes */}
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'6px 0',borderBottom:'2px solid var(--cream2)',marginBottom:4}}>
+              <span style={{fontSize:11,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.5}}>Poste</span>
+              <div style={{display:'flex',gap:10,alignItems:'center'}}>
+                <span style={{fontSize:11,fontWeight:700,color:'var(--muted)',width:80,textAlign:'right',textTransform:'uppercase',letterSpacing:.5}}>Par élève</span>
+                <span style={{fontSize:11,fontWeight:700,color:'var(--navy)',width:70,textAlign:'right',textTransform:'uppercase',letterSpacing:.5}}>Total</span>
               </div>
-            </div>)}
-            <div style={{display:'flex',justifyContent:'space-between',padding:'10px 0',fontWeight:700,fontSize:14}}>
-              <span>Total prévu</span><span style={{color:'var(--navy)'}}>{budgetPrev}€</span>
             </div>
-            {sel.nbEleves>0&&<div style={{background:'#EFF6FF',borderRadius:4,padding:'8px 12px',textAlign:'center',fontSize:13,color:'var(--info)',fontWeight:600}}>
-              💡 {parEleve}€ par élève ({sel.nbEleves} élèves)
+            {[
+              {label:'🚌 Transport',keyU:'budgetTransportParEleve',keyT:'budgetTransport'},
+              {label:'🎟️ Entrées',keyU:'budgetEntreesParEleve',keyT:'budgetEntrees'},
+              {label:'🍽️ Nourriture',keyU:'budgetNourritureParEleve',keyT:'budgetNourriture'},
+              {label:'📦 Divers',keyU:'budgetDiversParEleve',keyT:'budgetDivers'},
+            ].map(r=>{
+              const unitaire=sel[r.keyU]||0;
+              const total=sel.nbEleves>0?Math.round(unitaire*sel.nbEleves):unitaire;
+              return <div key={r.keyU} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid var(--cream2)'}}>
+                <span style={{fontSize:13,flex:1}}>{r.label}</span>
+                <div style={{display:'flex',alignItems:'center',gap:6}}>
+                  <input type="number" min="0" step="0.5" className="fi"
+                    style={{width:80,textAlign:'right',fontSize:12,padding:'4px 8px'}}
+                    value={unitaire}
+                    onChange={e=>{
+                      const u=parseFloat(e.target.value)||0;
+                      const t=sel.nbEleves>0?Math.round(u*sel.nbEleves):u;
+                      upd({[r.keyU]:u,[r.keyT]:t});
+                    }}/>
+                  <span style={{fontSize:11,color:'var(--muted)',width:18}}>€</span>
+                  <div style={{width:70,textAlign:'right',fontSize:13,fontWeight:600,color:'var(--navy)'}}>
+                    {total}€
+                  </div>
+                </div>
+              </div>;
+            })}
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',fontWeight:700,fontSize:14,borderTop:'2px solid var(--cream2)',marginTop:4}}>
+              <span>Total prévu</span>
+              <div style={{display:'flex',gap:10,alignItems:'center'}}>
+                {sel.nbEleves>0&&<span style={{fontSize:12,color:'var(--muted)',fontWeight:400}}>{parEleve}€/élève</span>}
+                <span style={{color:'var(--navy)',fontSize:16}}>{budgetPrev}€</span>
+              </div>
+            </div>
+            {sel.nbEleves>0&&<div style={{background:'#EFF6FF',borderRadius:4,padding:'8px 12px',display:'flex',justifyContent:'space-between',alignItems:'center',fontSize:13}}>
+              <span style={{color:'var(--muted)'}}>👤 {sel.nbEleves} élève{sel.nbEleves>1?'s':''}</span>
+              <span style={{fontWeight:700,color:'var(--info)'}}>× {parEleve}€ = {budgetPrev}€</span>
             </div>}
           </div>
           <div className="stat-section">
