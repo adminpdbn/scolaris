@@ -626,15 +626,15 @@ const mc=(m)=>MC[m]||defMC;
 
 // ─── COULEURS PAR NIVEAU (planning + PDF) ───
 const NC={
-  '6ème':     {bg:'#F3E8FF',bd:'#7C3AED',tx:'#5B21B6',pdf:{bg:[243,232,255],bd:[124,58,237],tx:[91,33,182]}},
-  '5ème':     {bg:'#FEFCE8',bd:'#CA8A04',tx:'#92400E',pdf:{bg:[254,252,232],bd:[202,138,4],  tx:[146,64,14]}},
-  '4ème':     {bg:'#EFF6FF',bd:'#1D4FC4',tx:'#1E40AF',pdf:{bg:[239,246,255],bd:[29,79,196],  tx:[30,64,175]}},
-  '3ème':     {bg:'#ECFDF5',bd:'#059669',tx:'#065F46',pdf:{bg:[236,253,245],bd:[5,150,105],  tx:[6,95,70]}},
-  'Seconde':  {bg:'#FEF2F2',bd:'#DC2626',tx:'#991B1B',pdf:{bg:[254,242,242],bd:[220,38,38],  tx:[153,27,27]}},
-  'Première': {bg:'#F1F5F9',bd:'#475569',tx:'#1E293B',pdf:{bg:[241,245,249],bd:[71,85,105],  tx:[30,41,59]}},
-  'Terminale':{bg:'#FFFBEB',bd:'#B45309',tx:'#78350F',pdf:{bg:[255,251,235],bd:[180,83,9],   tx:[120,53,15]}, gold:true},
-  'Lycée':    {bg:'#F8FAFC',bd:'#64748B',tx:'#334155',pdf:{bg:[248,250,252],bd:[100,116,139],tx:[51,65,85]}},
-  'Collège':  {bg:'#EFF6FF',bd:'#3B82F6',tx:'#1D4ED8',pdf:{bg:[239,246,255],bd:[59,130,246], tx:[29,78,216]}},
+  '6ème':       {bg:'#F3E8FF',bd:'#7C3AED',tx:'#5B21B6',pdf:{bg:[243,232,255],bd:[124,58,237],tx:[91,33,182]}},
+  '5ème':       {bg:'#FEFCE8',bd:'#CA8A04',tx:'#92400E',pdf:{bg:[254,252,232],bd:[202,138,4],  tx:[146,64,14]}},
+  '4ème':       {bg:'#EFF6FF',bd:'#1D4FC4',tx:'#1E40AF',pdf:{bg:[239,246,255],bd:[29,79,196],  tx:[30,64,175]}},
+  '3ème':       {bg:'#ECFDF5',bd:'#059669',tx:'#065F46',pdf:{bg:[236,253,245],bd:[5,150,105],  tx:[6,95,70]}},
+  'Seconde':    {bg:'#FEF2F2',bd:'#DC2626',tx:'#991B1B',pdf:{bg:[254,242,242],bd:[220,38,38],  tx:[153,27,27]}},
+  'Première':   {bg:'#F1F5F9',bd:'#475569',tx:'#1E293B',pdf:{bg:[241,245,249],bd:[71,85,105],  tx:[30,41,59]}},
+  'Terminale':  {bg:'#FFFBEB',bd:'#B45309',tx:'#78350F',pdf:{bg:[255,251,235],bd:[180,83,9],   tx:[120,53,15]}, gold:true},
+  'Supérieures':{bg:'#FDF4FF',bd:'#A21CAF',tx:'#86198F',pdf:{bg:[253,244,255],bd:[162,28,175], tx:[134,25,143]}},
+  'Module':     {bg:'#F0FDFA',bd:'#0D9488',tx:'#0F766E',pdf:{bg:[240,253,250],bd:[13,148,136],  tx:[15,118,110]}},
 };
 const defNC={bg:'#F1F5F9',bd:'#64748B',tx:'#475569',pdf:{bg:[241,245,249],bd:[100,116,139],tx:[71,85,105]}};
 const nc=(niv)=>{for(const[k,v] of Object.entries(NC)){if(niv&&niv===k)return v;}return defNC;};
@@ -735,7 +735,7 @@ const SEED_SALAIRES=[
 
 // ─── CONSTANTS ───
 const MATIERES=['Toutes','Mathématiques','Physique','Français','Histoire','Multi'];
-const NIVEAUX=['Tous','6ème','5ème','4ème','3ème','Seconde','Première','Terminale','Lycée','Collège'];
+const NIVEAUX=['Tous','6ème','5ème','4ème','3ème','Seconde','Première','Terminale','Supérieures','Module'];
 const TL={fiche:'Fiche',exercice:'Exercice',trace:'Trace écrite',cours:'Cours'};
 const TC={fiche:'t-f',exercice:'t-e',trace:'t-t',cours:'t-c'};
 const TI={fiche:'📋',exercice:'📝',trace:'✏️',cours:'📚'};
@@ -1069,15 +1069,15 @@ function generatePlanningPDF(cours, users, filtres){
 
   // ── Couleurs par niveau (PDF) ──
   const NCLR={
-    '6ème':     {bg:[243,232,255],bd:[124,58,237], tx:[91,33,182],  gold:false},
-    '5ème':     {bg:[255,252,210],bd:[202,138,4],  tx:[146,64,14],  gold:false},
-    '4ème':     {bg:[219,234,255],bd:[29,79,196],  tx:[30,64,175],  gold:false},
-    '3ème':     {bg:[209,250,229],bd:[5,150,105],  tx:[6,95,70],    gold:false},
-    'Seconde':  {bg:[254,220,220],bd:[220,38,38],  tx:[153,27,27],  gold:false},
-    'Première': {bg:[235,238,243],bd:[71,85,105],  tx:[30,41,59],   gold:false},
-    'Terminale':{bg:[255,248,195],bd:[180,130,0],  tx:[120,80,0],   gold:true},
-    'Lycée':    {bg:[242,244,248],bd:[100,116,139],tx:[51,65,85],   gold:false},
-    'Collège':  {bg:[224,238,255],bd:[59,130,246], tx:[29,78,216],  gold:false},
+    '6ème':       {bg:[243,232,255],bd:[124,58,237], tx:[91,33,182],  gold:false},
+    '5ème':       {bg:[255,252,210],bd:[202,138,4],  tx:[146,64,14],  gold:false},
+    '4ème':       {bg:[219,234,255],bd:[29,79,196],  tx:[30,64,175],  gold:false},
+    '3ème':       {bg:[209,250,229],bd:[5,150,105],  tx:[6,95,70],    gold:false},
+    'Seconde':    {bg:[254,220,220],bd:[220,38,38],  tx:[153,27,27],  gold:false},
+    'Première':   {bg:[235,238,243],bd:[71,85,105],  tx:[30,41,59],   gold:false},
+    'Terminale':  {bg:[255,248,195],bd:[180,130,0],  tx:[120,80,0],   gold:true},
+    'Supérieures':{bg:[253,244,255],bd:[162,28,175], tx:[134,25,143], gold:false},
+    'Module':     {bg:[224,252,249],bd:[13,148,136],  tx:[15,118,110], gold:false, isModule:true},
   };
   const defC={bg:[235,240,248],bd:[90,110,150],tx:[60,80,120],gold:false};
   const getC=niv=>{for(const[k,v]of Object.entries(NCLR))if(niv===k)return v;return defC;};
@@ -1087,6 +1087,8 @@ function generatePlanningPDF(cours, users, filtres){
   if(filtres.prof&&filtres.prof!=='tous')    filtered=filtered.filter(c=>c.profId===filtres.prof);
   if(filtres.matiere&&filtres.matiere!=='toutes') filtered=filtered.filter(c=>c.matiere===filtres.matiere);
   if(filtres.niveau&&filtres.niveau!=='tous') filtered=filtered.filter(c=>c.niveau===filtres.niveau);
+  // Modules exclus par défaut sauf si coché explicitement
+  if(!filtres.includeModules) filtered=filtered.filter(c=>c.niveau!=='Module');
 
   // Plage horaire FIXE — toute la journée pour avoir un template cohérent
   const H_START=8;
@@ -1354,10 +1356,11 @@ function EmploiDuTemps({user,users,cours,setCours,modules,enrollments,dispos=[]}
   const disposByDay=DAYS.reduce((acc,d)=>{const date=dayToDate(d);acc[d]=visibleDispos.filter(x=>x.date===date);return acc;},{});
 
   const [edtTab,setEdtTab]=useState('vue');
+  const [includeModules,setIncludeModules]=useState(false);
 
   const doExportPDF=()=>{
     try{
-      generatePlanningPDF(filteredCours,users,{prof:filterProf,matiere:filterMat,niveau:filterNiv});
+      generatePlanningPDF(filteredCours,users,{prof:filterProf,matiere:filterMat,niveau:filterNiv,includeModules});
     }catch(e){alert('Erreur PDF: '+e.message);console.error(e);}
   };
 
@@ -1367,7 +1370,13 @@ function EmploiDuTemps({user,users,cours,setCours,modules,enrollments,dispos=[]}
 
   return <>
     <TB title="Emploi du Temps">
-      {user.role==='admin'&&<button className="btn btn-sm" style={{background:'#1a3a8c',border:'none',color:'white',display:'flex',alignItems:'center',gap:5,fontSize:11}} onClick={doExportPDF}>⬇ Export PDF</button>}
+      {user.role==='admin'&&<div style={{display:'flex',alignItems:'center',gap:8}}>
+        <label style={{display:'flex',alignItems:'center',gap:5,fontSize:11,cursor:'pointer',color:'var(--muted)',userSelect:'none'}}>
+          <input type="checkbox" checked={includeModules} onChange={e=>setIncludeModules(e.target.checked)} style={{accentColor:'#0D9488',width:13,height:13}}/>
+          <span style={{color:'#0D9488',fontWeight:600}}>🟦 Modules</span>
+        </label>
+        <button className="btn btn-sm" style={{background:'#1a3a8c',border:'none',color:'white',display:'flex',alignItems:'center',gap:5,fontSize:11}} onClick={doExportPDF}>⬇ Export PDF</button>
+      </div>}
     </TB>
     <div className="pg">
       {/* ── Filters bar (admin only) ── */}
@@ -2789,7 +2798,7 @@ function Admin({user,users,setUsers,resources,setResources,modules,setModules,co
   const [searchIns,setSearchIns]=useState('');
   const [showAssign,setShowAssign]=useState(false);
   const [insForm,setInsForm]=useState({prenom:'',nom:'',dateNaissance:'',niveau:'3eme',matieres:[],parentNom:'',parentTel:'',parentEmail:'',adresse:'',notes:'',statut:'nouveau'});
-  const NIVEAUX_INS=['6ème','5ème','4ème','3ème','Seconde','Première','Terminale'];
+  const NIVEAUX_INS=['6ème','5ème','4ème','3ème','Seconde','Première','Terminale','Supérieures'];
   const MATIERES_INS=['Mathematiques','Francais','Physique','Histoire','Anglais','SVT','Philosophie','Informatique'];
   const insStatutStyle=s=>({nouveau:{bg:'#EEF3FF',color:'var(--info)',label:'Nouveau'},actif:{bg:'#EEFFF6',color:'#2D9B6F',label:'Actif'},archive:{bg:'#f5f5f5',color:'#aaa',label:'Archive'}}[s]||{bg:'#f5f5f5',color:'#888',label:s});
   const filteredIns=useMemo(()=>{const q=searchIns.toLowerCase();return inscriptions.filter(i=>q===''||(i.prenom+' '+i.nom).toLowerCase().includes(q)||(i.parentNom||'').toLowerCase().includes(q)||(i.niveau||'').toLowerCase().includes(q));},[inscriptions,searchIns]);
