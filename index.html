@@ -1216,10 +1216,8 @@ function generatePlanningPDF(cours, users, filtres){
       doc.setDrawColor(...clr.bd);doc.setLineWidth(0.25);
       doc.roundedRect(x,y,w,h,1,1,'S');
 
-      // ── TEXT ──
+      // ── TEXT (discret — sans noms) ──
       const tx=x+3.5; let ty=y+4;
-      const prof=users.find(u=>u.id===c.profId);
-      const elevs=users.filter(u=>c.eleveIds.includes(u.id));
 
       // Matière
       doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(...clr.tx);
@@ -1236,15 +1234,10 @@ function generatePlanningPDF(cours, users, filtres){
         doc.setFont('helvetica','normal');doc.setFontSize(5.5);doc.setTextColor(100,115,140);
         doc.text(hs(c.debut)+'–'+hs(c.fin),tx,ty);ty+=2.8;
       }
-      // Prof
-      if(h>17&&prof){
-        doc.setFont('helvetica','normal');doc.setFontSize(5.5);doc.setTextColor(120,135,160);
-        doc.text(prof.name.split(' ').slice(-1)[0],tx,ty);ty+=2.8;
-      }
-      // Élèves
-      if(h>22&&elevs.length>0){
-        doc.setFont('helvetica','normal');doc.setFontSize(5);doc.setTextColor(140,155,175);
-        doc.text(elevs.map(e=>e.name.split(' ').slice(-1)[0]).join(', '),tx,ty,{maxWidth:w-4.5});
+      // Effectif (discret — pas de noms)
+      if(h>17&&c.eleveIds.length>0){
+        doc.setFont('helvetica','normal');doc.setFontSize(5.5);doc.setTextColor(140,155,175);
+        doc.text(c.eleveIds.length+' élève'+(c.eleveIds.length>1?'s':''),tx,ty);
       }
     });
   });
