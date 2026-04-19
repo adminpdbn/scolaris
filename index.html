@@ -5093,7 +5093,7 @@ function Sorties({sorties,setSorties,users,cours}){
         })}
         <div className="sc c-gold">
           <div className="sc-ic">💰</div>
-          <div className="sc-v">{sorties.reduce((a,s)=>a+(s.budgetTransport||0)+(s.budgetEntrees||0)+(s.budgetNourriture||0)+(s.budgetDivers||0),0)}€</div>
+          <div className="sc-v">{sorties.reduce((a,s)=>a+(s.transportCoutEstime||0)+(s.budgetEntrees||0)+(s.repasBudget||0)+(s.budgetDivers||0),0)}€</div>
           <div className="sc-l">Budget total prévu</div>
         </div>
       </div>
@@ -5101,7 +5101,7 @@ function Sorties({sorties,setSorties,users,cours}){
       <div style={{display:'flex',flexDirection:'column',gap:10}}>
         {sorties.map(s=>{
           const st=STATUTS[s.statut]||STATUTS.brouillon;
-          const budgetTotal=(s.budgetTransport||0)+(s.budgetEntrees||0)+(s.budgetNourriture||0)+(s.budgetDivers||0);
+          const budgetTotal=(s.transportCoutEstime||0)+(s.budgetEntrees||0)+(s.repasBudget||0)+(s.budgetDivers||0);
           const parEleve=s.nbEleves>0?(s.budgetTransportParEleve||0)+(s.budgetEntreesParEleve||0)+(s.budgetNourritureParEleve||0)+(s.budgetDiversParEleve||0):0;
           const nbAcc=s.accompagnateurs?.length||0;
           const ratio=s.nbEleves&&nbAcc?Math.round(s.nbEleves/nbAcc)+'é/1a':'—';
@@ -5169,9 +5169,11 @@ function Sorties({sorties,setSorties,users,cours}){
   // ── FICHE DÉTAIL ──
   if(!sel) return null;
   const st=STATUTS[sel.statut]||STATUTS.brouillon;
-  const budgetPrev=(sel.budgetTransport||0)+(sel.budgetEntrees||0)+(sel.budgetNourriture||0)+(sel.budgetDivers||0);
+  // Transport ← transportCoutEstime, Nourriture ← repasBudget (source Logistique)
+  const budgetPrev=(sel.transportCoutEstime||0)+(sel.budgetEntrees||0)+(sel.repasBudget||0)+(sel.budgetDivers||0);
   const budgetReel=sel.budgetReel||0;
   const parEleve=sel.nbEleves>0?Math.round(budgetPrev/sel.nbEleves):0;
+  const parEleveDetail=`${Math.round((sel.transportCoutEstime||0)/Math.max(sel.nbEleves,1))}+${sel.budgetEntreesParEleve||0}+${Math.round((sel.repasBudget||0)/Math.max(sel.nbEleves,1))}+${sel.budgetDiversParEleve||0}€`;
   const financement=(sel.financementEtablissement||0)+(sel.financementFamilles||0)+(sel.financementSubventions||0);
   const deficit=budgetPrev-financement;
   const upd=(patch)=>updateSortie(sel.id,patch);
@@ -5290,8 +5292,10 @@ function Sorties({sorties,setSorties,users,cours}){
         <div className="fg"><label className="fl">Temps de trajet (min)</label>
           <input className="fi" type="number" min="0" value={sel.transportTemps||0} onChange={e=>upd({transportTemps:parseInt(e.target.value)||0})}/>
         </div>
-        <div className="fg"><label className="fl">Coût estimé (€)</label>
-          <input className="fi" type="number" min="0" value={sel.transportCoutEstime||0} onChange={e=>upd({transportCoutEstime:parseFloat(e.target.value)||0})}/>
+        <div className="fg"><label className="fl">Coût total transport (€) <span style={{fontSize:10,color:'#059669',fontWeight:700}}>→ Budget</span></label>
+          <input className="fi" type="number" min="0" value={sel.transportCoutEstime||0}
+            onChange={e=>{const t=parseFloat(e.target.value)||0;upd({transportCoutEstime:t,budgetTransportParEleve:sel.nbEleves>0?Math.round(t/sel.nbEleves*100)/100:t});}}/>
+          {sel.nbEleves>0&&<div style={{fontSize:11,color:'var(--muted)',marginTop:3}}>= {Math.round((sel.transportCoutEstime||0)/sel.nbEleves*100)/100}€/élève × {sel.nbEleves} élèves</div>}
         </div>
         <div className="sh" style={{gridColumn:'1/-1',marginTop:8}}><h2 className="st">🍽️ Restauration</h2></div>
         <div className="fg"><label className="fl">Type de repas</label>
@@ -5306,8 +5310,10 @@ function Sorties({sorties,setSorties,users,cours}){
             {profs.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
         </div>
-        <div className="fg"><label className="fl">Budget nourriture (€)</label>
-          <input className="fi" type="number" min="0" value={sel.repasBudget||0} onChange={e=>upd({repasBudget:parseFloat(e.target.value)||0})}/>
+        <div className="fg"><label className="fl">Budget nourriture total (€) <span style={{fontSize:10,color:'#059669',fontWeight:700}}>→ Budget</span></label>
+          <input className="fi" type="number" min="0" value={sel.repasBudget||0}
+            onChange={e=>{const r=parseFloat(e.target.value)||0;upd({repasBudget:r,budgetNourritureParEleve:sel.nbEleves>0?Math.round(r/sel.nbEleves*100)/100:r});}}/>
+          {sel.nbEleves>0&&<div style={{fontSize:11,color:'var(--muted)',marginTop:3}}>= {Math.round((sel.repasBudget||0)/sel.nbEleves*100)/100}€/élève × {sel.nbEleves} élèves</div>}
         </div>
         <div className="fg"><label className="fl">Allergies / régimes spéciaux</label>
           <input className="fi" value={sel.repasAllergies||''} onChange={e=>upd({repasAllergies:e.target.value})} placeholder="Ex: 2 végétariens, 1 allergie gluten"/>
@@ -5364,32 +5370,66 @@ function Sorties({sorties,setSorties,users,cours}){
                 <span style={{fontSize:11,fontWeight:700,color:'var(--navy)',width:70,textAlign:'right',textTransform:'uppercase',letterSpacing:.5}}>Total</span>
               </div>
             </div>
-            {[
-              {label:'🚌 Transport',keyU:'budgetTransportParEleve',keyT:'budgetTransport'},
-              {label:'🎟️ Entrées',keyU:'budgetEntreesParEleve',keyT:'budgetEntrees'},
-              {label:'🍽️ Nourriture',keyU:'budgetNourritureParEleve',keyT:'budgetNourriture'},
-              {label:'📦 Divers',keyU:'budgetDiversParEleve',keyT:'budgetDivers'},
-            ].map(r=>{
-              const unitaire=sel[r.keyU]||0;
-              const total=sel.nbEleves>0?Math.round(unitaire*sel.nbEleves):unitaire;
-              return <div key={r.keyU} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid var(--cream2)'}}>
-                <span style={{fontSize:13,flex:1}}>{r.label}</span>
-                <div style={{display:'flex',alignItems:'center',gap:6}}>
-                  <input type="number" min="0" step="0.5" className="fi"
-                    style={{width:80,textAlign:'right',fontSize:12,padding:'4px 8px'}}
-                    value={unitaire}
-                    onChange={e=>{
-                      const u=parseFloat(e.target.value)||0;
-                      const t=sel.nbEleves>0?Math.round(u*sel.nbEleves):u;
-                      upd({[r.keyU]:u,[r.keyT]:t});
-                    }}/>
-                  <span style={{fontSize:11,color:'var(--muted)',width:18}}>€</span>
-                  <div style={{width:70,textAlign:'right',fontSize:13,fontWeight:600,color:'var(--navy)'}}>
-                    {total}€
-                  </div>
+            {/* Transport — auto depuis Logistique */}
+            {(()=>{
+              const total=sel.transportCoutEstime||0;
+              const unit=sel.nbEleves>0?Math.round(total/sel.nbEleves*100)/100:total;
+              return <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid var(--cream2)',background:'#F0FDF4',borderRadius:4,padding:'8px 10px',marginBottom:2}}>
+                <div>
+                  <div style={{fontSize:13}}>🚌 Transport</div>
+                  <div style={{fontSize:10,color:'#059669',fontWeight:600}}>↗ depuis Logistique</div>
+                </div>
+                <div style={{display:'flex',alignItems:'center',gap:10}}>
+                  <span style={{fontSize:12,color:'var(--muted)'}}>{unit}€/él</span>
+                  <div style={{width:70,textAlign:'right',fontSize:14,fontWeight:700,color:'var(--navy)'}}>{total}€</div>
                 </div>
               </div>;
-            })}
+            })()}
+            {/* Entrées — saisie par élève */}
+            {(()=>{
+              const unit=sel.budgetEntreesParEleve||0;
+              const total=sel.nbEleves>0?Math.round(unit*sel.nbEleves):unit;
+              return <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid var(--cream2)'}}>
+                <span style={{fontSize:13,flex:1}}>🎟️ Entrées</span>
+                <div style={{display:'flex',alignItems:'center',gap:6}}>
+                  <input type="number" min="0" step="0.5" className="fi" style={{width:80,textAlign:'right',fontSize:12,padding:'4px 8px'}}
+                    value={unit}
+                    onChange={e=>{const u=parseFloat(e.target.value)||0;upd({budgetEntreesParEleve:u,budgetEntrees:sel.nbEleves>0?Math.round(u*sel.nbEleves):u});}}/>
+                  <span style={{fontSize:11,color:'var(--muted)',width:18}}>€</span>
+                  <div style={{width:70,textAlign:'right',fontSize:13,fontWeight:600,color:'var(--navy)'}}>{total}€</div>
+                </div>
+              </div>;
+            })()}
+            {/* Nourriture — auto depuis Restauration */}
+            {(()=>{
+              const total=sel.repasBudget||0;
+              const unit=sel.nbEleves>0?Math.round(total/sel.nbEleves*100)/100:total;
+              return <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid var(--cream2)',background:'#F0FDF4',borderRadius:4,padding:'8px 10px',marginBottom:2}}>
+                <div>
+                  <div style={{fontSize:13}}>🍽️ Nourriture</div>
+                  <div style={{fontSize:10,color:'#059669',fontWeight:600}}>↗ depuis Restauration</div>
+                </div>
+                <div style={{display:'flex',alignItems:'center',gap:10}}>
+                  <span style={{fontSize:12,color:'var(--muted)'}}>{unit}€/él</span>
+                  <div style={{width:70,textAlign:'right',fontSize:14,fontWeight:700,color:'var(--navy)'}}>{total}€</div>
+                </div>
+              </div>;
+            })()}
+            {/* Divers — saisie par élève */}
+            {(()=>{
+              const unit=sel.budgetDiversParEleve||0;
+              const total=sel.nbEleves>0?Math.round(unit*sel.nbEleves):unit;
+              return <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid var(--cream2)'}}>
+                <span style={{fontSize:13,flex:1}}>📦 Divers</span>
+                <div style={{display:'flex',alignItems:'center',gap:6}}>
+                  <input type="number" min="0" step="0.5" className="fi" style={{width:80,textAlign:'right',fontSize:12,padding:'4px 8px'}}
+                    value={unit}
+                    onChange={e=>{const u=parseFloat(e.target.value)||0;upd({budgetDiversParEleve:u,budgetDivers:sel.nbEleves>0?Math.round(u*sel.nbEleves):u});}}/>
+                  <span style={{fontSize:11,color:'var(--muted)',width:18}}>€</span>
+                  <div style={{width:70,textAlign:'right',fontSize:13,fontWeight:600,color:'var(--navy)'}}>{total}€</div>
+                </div>
+              </div>;
+            })()}
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',fontWeight:700,fontSize:14,borderTop:'2px solid var(--cream2)',marginTop:4}}>
               <span>Total prévu</span>
               <div style={{display:'flex',gap:10,alignItems:'center'}}>
