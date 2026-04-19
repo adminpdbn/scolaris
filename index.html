@@ -583,494 +583,6 @@ function InvoiceEditor(_ref51){var facture=_ref51.facture,eleve=_ref51.eleve,cou
 var _useState135=useState({familleId:'',eleveId:'',libelle:'',type:'mensuel',montant:'',echeance:'',statut:'attente',nbCreneaux:0,notes:''}),_useState136=_slicedToArray(_useState135,2),factForm=_useState136[0],setFactForm=_useState136[1];var _useState137=useState(''),_useState138=_slicedToArray(_useState137,2),searchEleve=_useState138[0],setSearchEleve=_useState138[1];var _useState139=useState('tous'),_useState140=_slicedToArray(_useState139,2),filterStatut=_useState140[0],setFilterStatut=_useState140[1];var familles=useMemo(function(){var eleves=users.filter(function(u){return u.role==='eleve';});var map={};eleves.forEach(function(e){var ln=e.name.trim().split(/\s+/).slice(-1)[0];var id='fam_'+ln.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');if(!map[id]){map[id]={id:id,nom:'Famille '+ln,lastName:ln,eleveIds:[e.id]};}else if(!map[id].eleveIds.includes(e.id)){map[id].eleveIds.push(e.id);}});return Object.values(map).sort(function(a,b){return a.lastName.localeCompare(b.lastName);});},[users]);var getSessions=function getSessions(eid){return cours.filter(function(c){return c.eleveIds.includes(eid);});};var getMontant=function getMontant(eid){var mats=new Set(getSessions(eid).map(function(c){return c.matiere;}));return mats.size*55;};var getLabel=function getLabel(eid){var e=users.find(function(u){return u.id===eid;});var mats=_toConsumableArray(new Set(getSessions(eid).map(function(c){return c.matiere;})));var mo=new Date().toLocaleString('fr-FR',{month:'long',year:'numeric'});return e?"Forfait ".concat(mats.join(' + ')," \u2014 ").concat(e.name," \u2014 ").concat(mo):'';};var getFamMats=function getFamMats(fam){return _toConsumableArray(new Set(cours.filter(function(c){return c.eleveIds.some(function(id){return fam.eleveIds.includes(id);});}).map(function(c){return c.matiere;})));};var getFamTarif=function getFamTarif(fam){return getFamMats(fam).length*55;};var famFacts=function famFacts(fid){return factures.filter(function(f){return f.familleId===fid;});};var totalFam=function totalFam(fid){return famFacts(fid).reduce(function(a,f){return a+f.montant;},0);};var payeFam=function payeFam(fid){return famFacts(fid).filter(function(f){return f.statut==='paye';}).reduce(function(a,f){return a+f.montant;},0);};var pendingFam=function pendingFam(fid){return famFacts(fid).filter(function(f){return f.statut!=='paye';}).length;};var toggle=function toggle(id){return setOpen(function(p){return _objectSpread(_objectSpread({},p),{},_defineProperty({},id,!p[id]));});};var setStatut=function setStatut(id,s){return setFactures(function(p){return p.map(function(f){return f.id===id?_objectSpread(_objectSpread({},f),{},{statut:s,datePaiement:s==='paye'?new Date().toISOString().split('T')[0]:null}):f;});});};var delFact=function delFact(id){if(window.confirm('Supprimer cette facture ?')){setFactures(function(p){return p.filter(function(f){return f.id!==id;});});sbDelete('factures',id);}};var addFact=function addFact(){if(!factForm.libelle||!factForm.montant||!factForm.familleId)return;var newF=_objectSpread(_objectSpread({id:'fc'+Date.now()},factForm),{},{montant:parseFloat(factForm.montant),eleveId:factForm.eleveId||null,nbCreneaux:factForm.nbCreneaux||0,datePaiement:factForm.statut==='paye'?new Date().toISOString().split('T')[0]:null});setFactures(function(p){return[].concat(_toConsumableArray(p),[newF]);});setShowFact(false);setFactForm({familleId:'',eleveId:'',libelle:'',type:'mensuel',montant:'',echeance:'',statut:'attente',nbCreneaux:0,notes:''});setSearchEleve('');// Open editor immediately for PDF
 var eleveF=users.find(function(u){return u.id===factForm.eleveId;});setEditingFact({facture:newF,eleve:eleveF});};var saveEditedFact=function saveEditedFact(updated){setFactures(function(p){return p.map(function(f){return f.id===updated.id?updated:f;});});};var totalGlobal=factures.reduce(function(a,f){return a+f.montant;},0);var totalPaye=factures.filter(function(f){return f.statut==='paye';}).reduce(function(a,f){return a+f.montant;},0);var totalAttente=factures.filter(function(f){return f.statut==='attente';}).reduce(function(a,f){return a+f.montant;},0);var totalRetard=factures.filter(function(f){return f.statut==='retard';}).reduce(function(a,f){return a+f.montant;},0);var nbRetard=factures.filter(function(f){return f.statut==='retard';}).length;var tauxEncaissement=totalGlobal>0?Math.round(totalPaye/totalGlobal*100):0;var filteredEleves=useMemo(function(){return users.filter(function(u){return u.role==='eleve'&&(searchEleve===''||u.name.toLowerCase().includes(searchEleve.toLowerCase())||(u.niveau||'').toLowerCase().includes(searchEleve.toLowerCase()));});},[users,searchEleve]);var SBadge=function SBadge(_ref53){var s=_ref53.s;var m={paye:{c:'s-paye',i:'✓',l:'Payé'},attente:{c:'s-attente',i:'⏳',l:'En attente'},retard:{c:'s-retard',i:'⚠️',l:'En retard'}}[s]||{c:'s-attente',i:'⏳',l:'En attente'};return/*#__PURE__*/React.createElement("span",{className:"stat-badge ".concat(m.c)},m.i," ",m.l);};var FactRow=function FactRow(_ref54){var f=_ref54.f;var eleveF=users.find(function(u){return u.id===f.eleveId;});return/*#__PURE__*/React.createElement("div",{style:{display:'flex',alignItems:'center',gap:10,padding:'10px 14px',background:'white',border:'1px solid #e8ecf5',borderRadius:4,marginBottom:4},onMouseEnter:function onMouseEnter(e){return e.currentTarget.style.boxShadow='0 2px 8px rgba(26,79,196,.08)';},onMouseLeave:function onMouseLeave(e){return e.currentTarget.style.boxShadow='none';}},/*#__PURE__*/React.createElement("div",{style:{flex:1,minWidth:0}},/*#__PURE__*/React.createElement("div",{style:{fontSize:13,fontWeight:500,color:'#1a2340',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}},f.libelle),/*#__PURE__*/React.createElement("div",{style:{fontSize:11,color:'#8892b0',marginTop:2,display:'flex',gap:8}},f.echeance&&/*#__PURE__*/React.createElement("span",null,"\uD83D\uDCC5 ",f.echeance),f.nbCreneaux>0&&/*#__PURE__*/React.createElement("span",null,"\u23F1 ",f.nbCreneaux," cr\xE9neau",f.nbCreneaux>1?'x':''),f.datePaiement&&/*#__PURE__*/React.createElement("span",{style:{color:'#2D9B6F'}},"\u2713 ",f.datePaiement))),/*#__PURE__*/React.createElement("span",{style:{fontWeight:700,fontSize:15,minWidth:52,textAlign:'right',color:'#1a2340'}},f.montant,"\u20AC"),/*#__PURE__*/React.createElement(SBadge,{s:f.statut}),/*#__PURE__*/React.createElement("div",{style:{display:'flex',gap:4,flexShrink:0}},f.statut!=='paye'&&/*#__PURE__*/React.createElement("button",{className:"btn btn-sm",title:"Marquer pay\xE9",style:{background:'#e8f8ee',border:'1.5px solid #b8dbb8',color:'#2D9B6F',fontSize:10,padding:'4px 8px'},onClick:function onClick(){return setStatut(f.id,'paye');}},"\u2713 Pay\xE9"),/*#__PURE__*/React.createElement("button",{className:"btn btn-sm",title:"Modifier / T\xE9l\xE9charger PDF",style:{background:'#f0f5ff',border:'1.5px solid #c0d0f0',color:'#1a4fc4',fontSize:11,padding:'4px 9px'},onClick:function onClick(){return setEditingFact({facture:f,eleve:eleveF});}},"\uD83D\uDCC4 Facture"),/*#__PURE__*/React.createElement("button",{className:"btn btn-d btn-sm",onClick:function onClick(){return delFact(f.id);}},"\uD83D\uDDD1\uFE0F")));};return/*#__PURE__*/React.createElement(React.Fragment,null,/*#__PURE__*/React.createElement(TB,{title:"Facturation"},/*#__PURE__*/React.createElement("button",{className:"btn btn-sm",style:{background:'var(--cream2)',border:'none',color:'var(--muted)',fontSize:11},onClick:function onClick(){if(window.confirm('Reset demo ?'))setFactures(SEED_FACTURES);}},"\u21BA"),/*#__PURE__*/React.createElement("button",{className:"btn btn-p btn-sm",onClick:function onClick(){return setShowFact(true);}},"\uFF0B Nouvelle facture")),/*#__PURE__*/React.createElement("div",{className:"pg"},/*#__PURE__*/React.createElement("div",{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:24}},[{icon:'💶',val:totalGlobal+'€',label:'Total facturé',color:'#1a2340',bg:'#f4f7ff',border:'#c8d8f5'},{icon:'✅',val:totalPaye+'€',label:"Encaiss\xE9 (".concat(tauxEncaissement,"%)"),color:'#1a7a4a',bg:'#e8f8ee',border:'#b8dbb8'},{icon:'⏳',val:totalAttente+'€',label:'En attente',color:'#c47a00',bg:'#fff8e0',border:'#f5d882'},{icon:'⚠️',val:totalRetard+'€',label:"".concat(nbRetard," en retard"),color:'#b02020',bg:'#fff0f0',border:'#f5b8b8'}].map(function(k,i){return/*#__PURE__*/React.createElement("div",{key:i,style:{background:k.bg,border:"1.5px solid ".concat(k.border),borderRadius:6,padding:'14px 16px',display:'flex',alignItems:'center',gap:12}},/*#__PURE__*/React.createElement("span",{style:{fontSize:22}},k.icon),/*#__PURE__*/React.createElement("div",null,/*#__PURE__*/React.createElement("div",{style:{fontSize:18,fontWeight:700,color:k.color,fontFamily:'var(--ff-serif)'}},k.val),/*#__PURE__*/React.createElement("div",{style:{fontSize:11,color:'#6b7ab5',marginTop:1}},k.label)));})),/*#__PURE__*/React.createElement("div",{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16,flexWrap:'wrap',gap:8}},/*#__PURE__*/React.createElement("div",{className:"tabs",style:{maxWidth:280}},/*#__PURE__*/React.createElement("button",{className:"tab ".concat(tab==='vue'?'on':''),onClick:function onClick(){return setTab('vue');}},"\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67 Par famille"),/*#__PURE__*/React.createElement("button",{className:"tab ".concat(tab==='liste'?'on':''),onClick:function onClick(){return setTab('liste');}},"\uD83D\uDCCB Liste")),/*#__PURE__*/React.createElement("div",{style:{display:'flex',gap:6}},['tous','paye','attente','retard'].map(function(s){return/*#__PURE__*/React.createElement("button",{key:s,onClick:function onClick(){return setFilterStatut(s);},style:{padding:'5px 11px',border:"1.5px solid ".concat(filterStatut===s?'#1a4fc4':'#dde3f0'),borderRadius:4,background:filterStatut===s?'#1a4fc4':'white',color:filterStatut===s?'white':'#6b7ab5',fontSize:11,fontWeight:filterStatut===s?700:400,cursor:'pointer'}},s==='tous'?'Tous':s==='paye'?'✓ Payé':s==='attente'?'⏳ Attente':'⚠️ Retard');}))),tab==='vue'&&/*#__PURE__*/React.createElement("div",{style:{display:'flex',flexDirection:'column',gap:10}},familles.length===0&&/*#__PURE__*/React.createElement("div",{className:"emp"},/*#__PURE__*/React.createElement("div",{className:"emp-icon"},"\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67"),/*#__PURE__*/React.createElement("h3",null,"Aucun \xE9l\xE8ve inscrit")),familles.map(function(fam){var facts=famFacts(fam.id).filter(function(f){return filterStatut==='tous'||f.statut===filterStatut;});var allFacts=famFacts(fam.id);var tp=totalFam(fam.id);var pp=payeFam(fam.id);var pend=pendingFam(fam.id);var pct=tp>0?Math.round(pp/tp*100):0;var famEleves=users.filter(function(u){return fam.eleveIds.includes(u.id);});var hasRetard=allFacts.some(function(f){return f.statut==='retard';});if(filterStatut!=='tous'&&facts.length===0)return null;return/*#__PURE__*/React.createElement("div",{key:fam.id,style:{background:'white',border:'1.5px solid #e0e8f5',borderRadius:6,overflow:'hidden'}},/*#__PURE__*/React.createElement("div",{onClick:function onClick(){return toggle(fam.id);},style:{padding:'14px 18px',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'space-between',background:open[fam.id]?'#f8faff':'white'}},/*#__PURE__*/React.createElement("div",{style:{display:'flex',alignItems:'center',gap:12}},/*#__PURE__*/React.createElement("div",{style:{width:40,height:40,borderRadius:8,background:'linear-gradient(135deg,#1a3a8c,#2a5bd4)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,flexShrink:0}},"\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67"),/*#__PURE__*/React.createElement("div",null,/*#__PURE__*/React.createElement("div",{style:{fontWeight:700,fontSize:14,color:'#1a2340'}},fam.nom),/*#__PURE__*/React.createElement("div",{style:{fontSize:12,color:'#6b82b5',marginTop:2}},famEleves.map(function(e){return/*#__PURE__*/React.createElement("span",{key:e.id,style:{marginRight:8}},"\uD83C\uDF93 ",e.name," ",/*#__PURE__*/React.createElement("span",{style:{opacity:.6}},"(",e.niveau,")"));})),getFamMats(fam).length>0&&/*#__PURE__*/React.createElement("div",{style:{marginTop:4,display:'flex',gap:4,flexWrap:'wrap'}},getFamMats(fam).map(function(m){return/*#__PURE__*/React.createElement("span",{key:m,style:_objectSpread(_objectSpread({},getCoursBadge(m)),{},{fontSize:10})},m);}),/*#__PURE__*/React.createElement("span",{style:{fontSize:11,fontWeight:700,color:'#1a4fc4',marginLeft:4}},getFamTarif(fam),"\u20AC/mois")))),/*#__PURE__*/React.createElement("div",{style:{display:'flex',alignItems:'center',gap:12}},pend>0&&/*#__PURE__*/React.createElement("span",{style:{padding:'4px 10px',borderRadius:20,fontSize:11,fontWeight:700,background:hasRetard?'#fff0f0':'#fff8e0',color:hasRetard?'#b02020':'#c47a00',border:"1.5px solid ".concat(hasRetard?'#f5b8b8':'#f5d882')}},"\u26A0 ",pend," impay\xE9e",pend>1?'s':''),tp>0&&/*#__PURE__*/React.createElement("div",{style:{textAlign:'right'}},/*#__PURE__*/React.createElement("div",{style:{fontWeight:700,fontSize:14}},pp,"\u20AC ",/*#__PURE__*/React.createElement("span",{style:{fontSize:11,fontWeight:400,color:'#8892b0'}},"/ ",tp,"\u20AC")),/*#__PURE__*/React.createElement("div",{style:{height:4,width:80,background:'#e8ecf5',borderRadius:2,marginTop:4}},/*#__PURE__*/React.createElement("div",{style:{height:'100%',width:"".concat(pct,"%"),background:pct===100?'#2D9B6F':pct>60?'#1a4fc4':'#D97706',borderRadius:2}}))),/*#__PURE__*/React.createElement("span",{style:{color:'#8892b0',fontSize:12}},open[fam.id]?'▲':'▼'))),open[fam.id]&&/*#__PURE__*/React.createElement("div",{style:{padding:'14px 18px',borderTop:'1px solid #e8ecf5'}},/*#__PURE__*/React.createElement("div",{style:{display:'flex',justifyContent:'space-between',marginBottom:10}},/*#__PURE__*/React.createElement("span",{style:{fontSize:11,color:'#8892b0'}},facts.length," facture",facts.length!==1?'s':''),/*#__PURE__*/React.createElement("button",{className:"btn btn-p btn-sm",style:{fontSize:11},onClick:function onClick(){setFactForm(function(p){return _objectSpread(_objectSpread({},p),{},{familleId:fam.id});});setShowFact(true);}},"\uFF0B Facture")),facts.length===0?/*#__PURE__*/React.createElement("div",{style:{textAlign:'center',padding:'10px',color:'#8892b0',fontSize:12}},"Aucune facture",filterStatut!=='tous'?' pour ce filtre':''):facts.map(function(f){return/*#__PURE__*/React.createElement(FactRow,{key:f.id,f:f});}),allFacts.length>0&&/*#__PURE__*/React.createElement("div",{style:{display:'flex',justifyContent:'flex-end',gap:16,paddingTop:8,borderTop:'1px solid #e8ecf5',marginTop:6,fontSize:13}},/*#__PURE__*/React.createElement("span",{style:{color:'#2D9B6F',fontWeight:700}},"\u2713 ",pp,"\u20AC"),tp-pp>0&&/*#__PURE__*/React.createElement("span",{style:{color:'#b02020',fontWeight:700}},"\u2717 ",tp-pp,"\u20AC"),/*#__PURE__*/React.createElement("span",{style:{fontWeight:700,color:'#1a2340'}},tp,"\u20AC"))));})),tab==='liste'&&/*#__PURE__*/React.createElement("div",{style:{borderRadius:6,overflow:'hidden',border:'1.5px solid #e0e8f5'}},/*#__PURE__*/React.createElement("div",{style:{display:'grid',gridTemplateColumns:'150px 100px 1fr 80px 100px 160px',gap:0,padding:'8px 14px',fontSize:10,fontWeight:700,textTransform:'uppercase',letterSpacing:.8,color:'#8892b0',borderBottom:'2px solid #e8ecf5',background:'#f8faff'}},/*#__PURE__*/React.createElement("span",null,"Famille"),/*#__PURE__*/React.createElement("span",null,"Libell\xE9"),/*#__PURE__*/React.createElement("span",null,"Montant"),/*#__PURE__*/React.createElement("span",null,"Statut"),/*#__PURE__*/React.createElement("span",null,"Actions")),factures.filter(function(f){return filterStatut==='tous'||f.statut===filterStatut;}).length===0?/*#__PURE__*/React.createElement("div",{style:{padding:'30px',textAlign:'center',color:'#8892b0'}},"Aucune facture"):_toConsumableArray(factures).filter(function(f){return filterStatut==='tous'||f.statut===filterStatut;}).sort(function(a,b){var _o$a$statut,_o$b$statut;var o={retard:0,attente:1,paye:2};return((_o$a$statut=o[a.statut])!==null&&_o$a$statut!==void 0?_o$a$statut:1)-((_o$b$statut=o[b.statut])!==null&&_o$b$statut!==void 0?_o$b$statut:1)||(a.echeance||'').localeCompare(b.echeance||'');}).map(function(f){var fam=familles.find(function(x){return x.id===f.familleId;});var eleveF=users.find(function(u){return u.id===f.eleveId;});return/*#__PURE__*/React.createElement("div",{key:f.id,style:{display:'grid',gridTemplateColumns:'150px 100px 1fr 80px 100px 160px',gap:0,alignItems:'center',padding:'9px 14px',borderBottom:'1px solid #f0f4fc',background:'white',cursor:'default'},onMouseEnter:function onMouseEnter(e){return e.currentTarget.style.background='#f8faff';},onMouseLeave:function onMouseLeave(e){return e.currentTarget.style.background='white';}},/*#__PURE__*/React.createElement("span",{style:{fontWeight:600,fontSize:12,color:'#1a2340',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}},(fam===null||fam===void 0?void 0:fam.nom)||f.familleId),/*#__PURE__*/React.createElement("span",{style:{fontSize:12,color:'#4a5568',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',paddingRight:8}},f.libelle),/*#__PURE__*/React.createElement("span",{style:{fontWeight:700,color:'#1a2340'}},f.montant,"\u20AC"),/*#__PURE__*/React.createElement("span",null,f.statut==='paye'?/*#__PURE__*/React.createElement("span",{style:{color:'#1a7a4a',fontWeight:700,fontSize:11}},"\u2713 Pay\xE9"):f.statut==='retard'?/*#__PURE__*/React.createElement("span",{style:{color:'#b02020',fontWeight:700,fontSize:11}},"\u26A0 Retard"):/*#__PURE__*/React.createElement("span",{style:{color:'#c47a00',fontSize:11}},"\u23F3 Attente")),/*#__PURE__*/React.createElement("div",{style:{display:'flex',gap:4}},f.statut!=='paye'&&/*#__PURE__*/React.createElement("button",{className:"btn btn-sm",style:{background:'#e8f8ee',border:'1.5px solid #b8dbb8',color:'#2D9B6F',fontSize:10,padding:'3px 7px'},onClick:function onClick(){return setStatut(f.id,'paye');}},"\u2713"),/*#__PURE__*/React.createElement("button",{className:"btn btn-sm",style:{background:'#f0f5ff',border:'1.5px solid #c0d0f0',color:'#1a4fc4',fontSize:11,padding:'3px 9px'},onClick:function onClick(){return setEditingFact({facture:f,eleve:eleveF});}},"\uD83D\uDCC4 Facture"),/*#__PURE__*/React.createElement("button",{className:"btn btn-d btn-sm",onClick:function onClick(){return delFact(f.id);}},"\uD83D\uDDD1\uFE0F")));}))),editingFact&&/*#__PURE__*/React.createElement(InvoiceEditor,{facture:editingFact.facture,eleve:editingFact.eleve,cours:cours,users:users,onSave:saveEditedFact,onClose:function onClose(){return setEditingFact(null);}}),showFact&&/*#__PURE__*/React.createElement(Modal,{title:"Nouvelle facture",onClose:function onClose(){setShowFact(false);setSearchEleve('');}},/*#__PURE__*/React.createElement("div",{className:"fg"},/*#__PURE__*/React.createElement("label",{className:"fl"},"Rechercher un \xE9l\xE8ve *"),/*#__PURE__*/React.createElement("input",{className:"fi",placeholder:"Nom, niveau...",value:searchEleve,onChange:function onChange(e){return setSearchEleve(e.target.value);},autoFocus:true,style:{fontSize:13,marginBottom:6}}),/*#__PURE__*/React.createElement("div",{style:{border:'1.5px solid var(--cream2)',borderRadius:4,maxHeight:150,overflowY:'auto',background:'white'}},filteredEleves.length===0&&/*#__PURE__*/React.createElement("div",{style:{padding:'10px 12px',color:'var(--muted)',fontSize:12,fontStyle:'italic'}},"Aucun \xE9l\xE8ve trouv\xE9"),filteredEleves.map(function(e){var nc=getSessions(e.id).length;var mt=getMontant(e.id);var sel=factForm.eleveId===e.id;return/*#__PURE__*/React.createElement("div",{key:e.id,onClick:function onClick(){var ln=e.name.trim().split(/\s+/).slice(-1)[0];var fid='fam_'+ln.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');var ed=new Date();ed.setDate(1);ed.setMonth(ed.getMonth()+1);setFactForm(_objectSpread(_objectSpread({},factForm),{},{eleveId:e.id,familleId:fid,libelle:getLabel(e.id),montant:String(mt),nbCreneaux:nc,echeance:ed.toISOString().split('T')[0]}));},style:{padding:'9px 12px',cursor:'pointer',borderBottom:'1px solid var(--cream2)',background:sel?'#EEF5FF':'white',display:'flex',justifyContent:'space-between',alignItems:'center'}},/*#__PURE__*/React.createElement("div",null,/*#__PURE__*/React.createElement("div",{style:{fontSize:13,fontWeight:sel?700:500}},sel?'✓ ':'',e.name),/*#__PURE__*/React.createElement("div",{style:{fontSize:11,color:'var(--muted)'}},e.niveau," \xB7 ",nc," cr\xE9neau",nc>1?'x':'')),/*#__PURE__*/React.createElement("span",{style:{fontWeight:700,fontSize:13,color:'var(--gold)'}},mt,"\u20AC/mois"));}))),factForm.eleveId&&/*#__PURE__*/React.createElement("div",{style:{background:'#EEF5FF',border:'1px solid #C8D8F5',borderRadius:4,padding:'10px 14px',marginBottom:4,fontSize:12}},/*#__PURE__*/React.createElement("div",{style:{fontWeight:600,marginBottom:5,color:'var(--navy)'}},"\uD83D\uDCC5 Cr\xE9neaux"),getSessions(factForm.eleveId).map(function(c){return/*#__PURE__*/React.createElement("div",{key:c.id,style:{display:'flex',alignItems:'center',gap:8,marginBottom:2}},/*#__PURE__*/React.createElement("span",{style:_objectSpread(_objectSpread({},getCoursBadge(c.matiere)),{},{fontSize:10,padding:'1px 6px'})},c.matiere),/*#__PURE__*/React.createElement("span",{style:{color:'var(--muted)'}},c.jour," ",hs(c.debut),"\u2013",hs(c.fin)));})),/*#__PURE__*/React.createElement("div",{className:"fg"},/*#__PURE__*/React.createElement("label",{className:"fl"},"Libell\xE9 *"),/*#__PURE__*/React.createElement("input",{className:"fi",value:factForm.libelle,onChange:function onChange(e){return setFactForm(_objectSpread(_objectSpread({},factForm),{},{libelle:e.target.value}));}})),/*#__PURE__*/React.createElement("div",{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}},/*#__PURE__*/React.createElement("div",{className:"fg"},/*#__PURE__*/React.createElement("label",{className:"fl"},"Montant (\u20AC) *"),/*#__PURE__*/React.createElement("input",{className:"fi",type:"number",value:factForm.montant,onChange:function onChange(e){return setFactForm(_objectSpread(_objectSpread({},factForm),{},{montant:e.target.value}));}})),/*#__PURE__*/React.createElement("div",{className:"fg"},/*#__PURE__*/React.createElement("label",{className:"fl"},"\xC9ch\xE9ance"),/*#__PURE__*/React.createElement("input",{className:"fi",type:"date",value:factForm.echeance,onChange:function onChange(e){return setFactForm(_objectSpread(_objectSpread({},factForm),{},{echeance:e.target.value}));}}))),/*#__PURE__*/React.createElement("div",{className:"fa"},/*#__PURE__*/React.createElement("button",{className:"btn btn-o",onClick:function onClick(){setShowFact(false);setSearchEleve('');}},"Annuler"),/*#__PURE__*/React.createElement("button",{className:"btn btn-p",onClick:addFact,disabled:!factForm.libelle||!factForm.montant||!factForm.familleId},"Cr\xE9er \u2192 Ouvrir \xE9diteur"))));}// ─── FACTURATION ───
 // ─── APP ───
-// ─── MODULE SORTIES SCOLAIRES ───────────────────────────────────────────────
-function Sorties({sorties,setSorties,users,cours}){
-  const STATUTS={
-    brouillon:{label:'Brouillon',color:'#6B7280',bg:'#F3F4F6',icon:'📝'},
-    validation:{label:'En validation',color:'#D97706',bg:'#FEF3C7',icon:'⏳'},
-    validee:{label:'Validée',color:'#059669',bg:'#D1FAE5',icon:'✅'},
-    realisee:{label:'Réalisée',color:'#1D4ED8',bg:'#DBEAFE',icon:'🎉'},
-    annulee:{label:'Annulée',color:'#9CA3AF',bg:'#F3F4F6',icon:'❌'},
-  };
-  const CHECKLIST_BASE=[
-    {id:'transport',label:'Transport réservé'},
-    {id:'autorisations',label:'Autorisations récupérées'},
-    {id:'paiement',label:'Paiement effectué'},
-    {id:'assurance',label:'Assurance vérifiée'},
-    {id:'programme',label:'Programme finalisé'},
-    {id:'repas',label:'Repas organisé'},
-    {id:'urgence',label:'Contacts d\'urgence établis'},
-  ];
-
-  const [view,setView]=useState('liste'); // liste | fiche
-  const [selId,setSelId]=useState(null);
-  const [tab,setTab]=useState('general');
-  const [showNew,setShowNew]=useState(false);
-  const [newForm,setNewForm]=useState({nom:'',objectif:'',classes:[],nbEleves:0,date:'',heureDepart:'09:00',heureRetour:'17:00',lieu:'',adresse:'',statut:'brouillon'});
-
-  const profs=users.filter(u=>u.role==='prof');
-  const sel=sorties.find(s=>s.id===selId);
-
-  const createSortie=()=>{
-    if(!newForm.nom.trim())return;
-    const s={
-      id:'sor'+Date.now(),
-      ...newForm,
-      // Transport
-      transportType:'bus',transportPrestataire:'',transportCoutEstime:0,transportCoutReel:0,
-      transportDepart:'',transportArrivee:'',transportTemps:0,
-      // Repas
-      repasType:'pique-nique',repasAllergies:'',repasBudget:0,repasResponsable:'',
-      // Encadrement
-      accompagnateurs:[],
-      // Budget prévisionnel
-      budgetTransport:0,budgetEntrees:0,budgetNourriture:0,budgetDivers:0,
-      budgetReel:0,
-      financementEtablissement:0,financementFamilles:0,financementSubventions:0,
-      // Autorisations par élève
-      autorisations:{},
-      // Checklist
-      checklist:{},
-      // Bilan
-      bilanPedago:'',bilanIncidents:'',bilanEcartBudget:'',
-      // Timeline
-      dateCreation:new Date().toISOString().split('T')[0],
-      dateValidation:'',dateTransportResa:'',datePaiement:'',
-    };
-    setSorties(p=>[s,...p]);
-    setSelId(s.id);setView('fiche');setTab('general');setShowNew(false);
-  };
-
-  const updateSortie=(id,patch)=>setSorties(p=>p.map(s=>s.id===id?{...s,...patch}:s));
-  const deleteSortie=id=>{if(window.confirm('Supprimer cette sortie ?')){setSorties(p=>p.filter(s=>s.id!==id));if(selId===id){setView('liste');setSelId(null);}}};
-  const dupliquerSortie=s=>{
-    const d={...s,id:'sor'+Date.now(),nom:s.nom+' (copie)',statut:'brouillon',dateCreation:new Date().toISOString().split('T')[0],dateValidation:'',checklist:{}};
-    setSorties(p=>[d,...p]);setSelId(d.id);setView('fiche');
-  };
-
-  // ── LISTE ──
-  if(view==='liste') return <>
-    <TB title="🚌 Sorties scolaires">
-      <button className="btn btn-p" onClick={()=>setShowNew(true)}>＋ Nouvelle sortie</button>
-    </TB>
-    <div className="pg">
-      {/* Dashboard rapide */}
-      <div className="sg" style={{marginBottom:20}}>
-        {Object.entries(STATUTS).map(([k,v])=>{
-          const n=sorties.filter(s=>s.statut===k).length;
-          return n>0?<div key={k} className="sc" style={{borderBottom:`3px solid ${v.color}`}}>
-            <div className="sc-ic">{v.icon}</div><div className="sc-v">{n}</div><div className="sc-l">{v.label}</div>
-          </div>:null;
-        })}
-        <div className="sc c-gold">
-          <div className="sc-ic">💰</div>
-          <div className="sc-v">{sorties.reduce((a,s)=>a+(s.budgetTransport||0)+(s.budgetEntrees||0)+(s.budgetNourriture||0)+(s.budgetDivers||0),0)}€</div>
-          <div className="sc-l">Budget total prévu</div>
-        </div>
-      </div>
-      {sorties.length===0?<div className="emp"><div className="emp-icon">🚌</div><h3>Aucune sortie planifiée</h3><p>Créez votre première fiche de sortie scolaire.</p></div>:
-      <div style={{display:'flex',flexDirection:'column',gap:10}}>
-        {sorties.map(s=>{
-          const st=STATUTS[s.statut]||STATUTS.brouillon;
-          const budgetTotal=(s.budgetTransport||0)+(s.budgetEntrees||0)+(s.budgetNourriture||0)+(s.budgetDivers||0);
-          const parEleve=s.nbEleves>0?Math.round(budgetTotal/s.nbEleves):0;
-          const nbAcc=s.accompagnateurs?.length||0;
-          const ratio=s.nbEleves&&nbAcc?Math.round(s.nbEleves/nbAcc)+'é/1a':'—';
-          const autoOk=Object.values(s.autorisations||{}).filter(v=>v==='autorise').length;
-          return <div key={s.id} style={{background:'white',border:`1.5px solid ${st.color}22`,borderLeft:`4px solid ${st.color}`,borderRadius:6,padding:'14px 18px',cursor:'pointer',transition:'box-shadow .15s'}}
-            onClick={()=>{setSelId(s.id);setView('fiche');setTab('general');}}>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',flexWrap:'wrap',gap:8}}>
-              <div style={{flex:1}}>
-                <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
-                  <span style={{background:st.bg,color:st.color,borderRadius:3,padding:'2px 8px',fontSize:11,fontWeight:700}}>{st.icon} {st.label}</span>
-                  {s.autoGenerated&&<span style={{fontSize:10,color:'var(--gold)',background:'#EEF5FF',borderRadius:2,padding:'1px 5px'}}>auto</span>}
-                </div>
-                <div style={{fontWeight:700,fontSize:15,color:'#1a2340',marginBottom:3}}>{s.nom}</div>
-                <div style={{fontSize:12,color:'var(--muted)'}}>{s.date&&`📅 ${s.date}`} {s.heureDepart&&`· ${s.heureDepart}–${s.heureRetour}`} {s.lieu&&`· 📍 ${s.lieu}`}</div>
-                {s.classes?.length>0&&<div style={{fontSize:11,color:'var(--muted)',marginTop:2}}>{s.classes.join(', ')} · {s.nbEleves} élève{s.nbEleves>1?'s':''}</div>}
-              </div>
-              <div style={{textAlign:'right',flexShrink:0}}>
-                <div style={{fontSize:18,fontWeight:700,color:'var(--navy)'}}>{budgetTotal>0?budgetTotal+'€':'—'}</div>
-                {parEleve>0&&<div style={{fontSize:11,color:'var(--muted)'}}>{parEleve}€/élève</div>}
-                <div style={{fontSize:11,color:'var(--muted)',marginTop:2}}>Ratio {ratio} · {autoOk} autor.</div>
-              </div>
-            </div>
-            <div style={{display:'flex',gap:8,marginTop:10}} onClick={e=>e.stopPropagation()}>
-              <button className="btn btn-sm" style={{fontSize:11}} onClick={()=>{setSelId(s.id);setView('fiche');setTab('general');}}>📋 Ouvrir</button>
-              <button className="btn btn-sm" style={{fontSize:11}} onClick={()=>dupliquerSortie(s)}>📋 Dupliquer</button>
-              <button className="btn btn-d btn-sm" style={{fontSize:11}} onClick={()=>deleteSortie(s.id)}>🗑️</button>
-            </div>
-          </div>;
-        })}
-      </div>}
-    </div>
-    {showNew&&<Modal title="Nouvelle sortie" onClose={()=>setShowNew(false)}>
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
-        <div className="fg" style={{gridColumn:'1/-1'}}><label className="fl">Nom de la sortie *</label>
-          <input className="fi" value={newForm.nom} onChange={e=>setNewForm(p=>({...p,nom:e.target.value}))} placeholder="Ex: Sortie musée des sciences"/>
-        </div>
-        <div className="fg" style={{gridColumn:'1/-1'}}><label className="fl">Objectif pédagogique</label>
-          <input className="fi" value={newForm.objectif} onChange={e=>setNewForm(p=>({...p,objectif:e.target.value}))} placeholder="Ex: Découverte des sciences naturelles"/>
-        </div>
-        <div className="fg"><label className="fl">Date prévue</label>
-          <input className="fi" type="date" value={newForm.date} onChange={e=>setNewForm(p=>({...p,date:e.target.value}))}/>
-        </div>
-        <div className="fg"><label className="fl">Nombre d'élèves</label>
-          <input className="fi" type="number" min="0" value={newForm.nbEleves} onChange={e=>setNewForm(p=>({...p,nbEleves:parseInt(e.target.value)||0}))}/>
-        </div>
-        <div className="fg"><label className="fl">Lieu</label>
-          <input className="fi" value={newForm.lieu} onChange={e=>setNewForm(p=>({...p,lieu:e.target.value}))} placeholder="Ex: Cité des sciences, Paris"/>
-        </div>
-        <div className="fg"><label className="fl">Classes concernées</label>
-          <div style={{display:'flex',flexWrap:'wrap',gap:5,padding:'6px',border:'1.5px solid var(--cream2)',borderRadius:4}}>
-            {NIVEAUX.filter(n=>n!=='Tous').map(n=>{
-              const on=(newForm.classes||[]).includes(n);
-              return <button key={n} type="button" onClick={()=>setNewForm(p=>({...p,classes:on?p.classes.filter(c=>c!==n):[...(p.classes||[]),n]}))}
-                style={{padding:'2px 8px',borderRadius:3,border:`1.5px solid ${on?'var(--navy)':'var(--cream2)'}`,background:on?'var(--navy)':'white',color:on?'white':'var(--text)',fontSize:11,cursor:'pointer'}}>
-                {n}
-              </button>;
-            })}
-          </div>
-        </div>
-      </div>
-      <div className="fa"><button className="btn btn-o" onClick={()=>setShowNew(false)}>Annuler</button><button className="btn btn-p" onClick={createSortie}>Créer la fiche</button></div>
-    </Modal>}
-  </>;
-
-  // ── FICHE DÉTAIL ──
-  if(!sel) return null;
-  const st=STATUTS[sel.statut]||STATUTS.brouillon;
-  const budgetPrev=(sel.budgetTransport||0)+(sel.budgetEntrees||0)+(sel.budgetNourriture||0)+(sel.budgetDivers||0);
-  const budgetReel=sel.budgetReel||0;
-  const parEleve=sel.nbEleves>0?Math.round(budgetPrev/sel.nbEleves):0;
-  const financement=(sel.financementEtablissement||0)+(sel.financementFamilles||0)+(sel.financementSubventions||0);
-  const deficit=budgetPrev-financement;
-  const upd=(patch)=>updateSortie(sel.id,patch);
-
-  const TABS=[
-    {id:'general',label:'📋 Général'},
-    {id:'logistique',label:'🚌 Logistique'},
-    {id:'encadrement',label:'👩‍🏫 Encadrement'},
-    {id:'budget',label:'💰 Budget'},
-    {id:'autorisations',label:'📄 Autorisations'},
-    {id:'checklist',label:'✅ Checklist'},
-    {id:'bilan',label:'📊 Bilan'},
-  ];
-
-  return <>
-    <TB title={`🚌 ${sel.nom}`}>
-      <div style={{display:'flex',gap:8,alignItems:'center'}}>
-        <span style={{background:st.bg,color:st.color,borderRadius:3,padding:'4px 10px',fontSize:12,fontWeight:700}}>{st.icon} {st.label}</span>
-        <select className="fi" style={{fontSize:11,padding:'4px 8px',width:140}} value={sel.statut}
-          onChange={e=>upd({statut:e.target.value})}>
-          {Object.entries(STATUTS).map(([k,v])=><option key={k} value={k}>{v.label}</option>)}
-        </select>
-        <button className="btn btn-sm" style={{fontSize:11}} onClick={()=>dupliquerSortie(sel)}>📋 Dupliquer</button>
-        <button className="btn btn-o btn-sm" onClick={()=>setView('liste')}>← Retour</button>
-      </div>
-    </TB>
-
-    {/* KPI rapide */}
-    <div style={{padding:'0 24px 0',display:'flex',gap:12,flexWrap:'wrap',marginBottom:0,background:'white',borderBottom:'1.5px solid var(--cream2)'}}>
-      {[
-        {icon:'📅',val:sel.date||'—',sub:'Date'},
-        {icon:'🎓',val:sel.nbEleves||0,sub:'Élèves'},
-        {icon:'💰',val:budgetPrev+'€',sub:'Budget prévu'},
-        {icon:'👤',val:parEleve>0?parEleve+'€/él':'—',sub:'Par élève'},
-        {icon:'📊',val:deficit===0?'Équilibré':deficit>0?`-${deficit}€`:`+${Math.abs(deficit)}€`,sub:'Solde',col:deficit===0?'#059669':deficit>0?'var(--err)':'#059669'},
-      ].map((k,i)=><div key={i} style={{padding:'10px 8px',textAlign:'center',minWidth:90}}>
-        <div style={{fontSize:13,fontWeight:700,color:k.col||'var(--navy)'}}>{k.icon} {k.val}</div>
-        <div style={{fontSize:10,color:'var(--muted)'}}>{k.sub}</div>
-      </div>)}
-    </div>
-
-    <div className="pg" style={{paddingTop:12}}>
-      <div className="tabs" style={{marginBottom:16}}>
-        {TABS.map(t=><button key={t.id} className={`tab ${tab===t.id?'on':''}`} onClick={()=>setTab(t.id)}>{t.label}</button>)}
-      </div>
-
-      {/* ── GÉNÉRAL ── */}
-      {tab==='general'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
-        <div className="fg" style={{gridColumn:'1/-1'}}><label className="fl">Nom de la sortie</label>
-          <input className="fi" value={sel.nom} onChange={e=>upd({nom:e.target.value})}/>
-        </div>
-        <div className="fg" style={{gridColumn:'1/-1'}}><label className="fl">Objectif pédagogique</label>
-          <textarea className="fi" rows={2} value={sel.objectif||''} onChange={e=>upd({objectif:e.target.value})} placeholder="Lien avec le programme scolaire..."/>
-        </div>
-        <div className="fg"><label className="fl">Date prévue</label>
-          <input className="fi" type="date" value={sel.date||''} onChange={e=>upd({date:e.target.value})}/>
-        </div>
-        <div className="fg"><label className="fl">Nombre d'élèves</label>
-          <input className="fi" type="number" min="0" value={sel.nbEleves||0} onChange={e=>upd({nbEleves:parseInt(e.target.value)||0})}/>
-        </div>
-        <div className="fg"><label className="fl">Heure de départ</label>
-          <input className="fi" type="time" value={sel.heureDepart||'09:00'} onChange={e=>upd({heureDepart:e.target.value})}/>
-        </div>
-        <div className="fg"><label className="fl">Heure de retour</label>
-          <input className="fi" type="time" value={sel.heureRetour||'17:00'} onChange={e=>upd({heureRetour:e.target.value})}/>
-        </div>
-        <div className="fg"><label className="fl">Lieu</label>
-          <input className="fi" value={sel.lieu||''} onChange={e=>upd({lieu:e.target.value})} placeholder="Nom du lieu"/>
-        </div>
-        <div className="fg"><label className="fl">Adresse complète</label>
-          <input className="fi" value={sel.adresse||''} onChange={e=>upd({adresse:e.target.value})} placeholder="Adresse..."/>
-        </div>
-        <div className="fg" style={{gridColumn:'1/-1'}}><label className="fl">Classes concernées</label>
-          <div style={{display:'flex',flexWrap:'wrap',gap:6,padding:'8px',border:'1.5px solid var(--cream2)',borderRadius:4}}>
-            {NIVEAUX.filter(n=>n!=='Tous').map(n=>{
-              const on=(sel.classes||[]).includes(n);
-              const clr=nc(n);
-              return <button key={n} type="button" onClick={()=>upd({classes:on?(sel.classes||[]).filter(c=>c!==n):[...(sel.classes||[]),n]})}
-                style={{padding:'3px 10px',borderRadius:3,border:`1.5px solid ${on?clr.bd:'var(--cream2)'}`,background:on?clr.bg:'white',color:on?clr.tx:'var(--text)',fontSize:12,cursor:'pointer',fontWeight:on?700:400}}>
-                {n}
-              </button>;
-            })}
-          </div>
-        </div>
-        {sel.adresse&&<div className="fg" style={{gridColumn:'1/-1'}}>
-          <label className="fl">📍 Carte (aperçu)</label>
-          <div style={{borderRadius:6,overflow:'hidden',height:200,border:'1.5px solid var(--cream2)'}}>
-            <iframe title="map" width="100%" height="200" frameBorder="0" style={{border:0}}
-              src={`https://www.openstreetmap.org/export/embed.html?bbox=-0.5,48.5,3.0,49.0&layer=mapnik&marker=48.8566,2.3522`}
-              allowFullScreen/>
-          </div>
-          <div style={{fontSize:11,color:'var(--muted)',marginTop:4}}>
-            🔗 <a href={`https://www.google.com/maps/search/${encodeURIComponent(sel.adresse||sel.lieu||'')}`} target="_blank" rel="noopener noreferrer" style={{color:'var(--info)'}}>Ouvrir dans Google Maps</a>
-          </div>
-        </div>}
-      </div>}
-
-      {/* ── LOGISTIQUE ── */}
-      {tab==='logistique'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
-        <div className="sh" style={{gridColumn:'1/-1'}}><h2 className="st">🚌 Transport</h2></div>
-        <div className="fg"><label className="fl">Type de transport</label>
-          <select className="fi" value={sel.transportType||'bus'} onChange={e=>upd({transportType:e.target.value})}>
-            <option value="bus">🚌 Bus</option><option value="metro">🚇 Métro</option>
-            <option value="train">🚆 Train</option><option value="pied">🚶 À pied</option><option value="autre">Autre</option>
-          </select>
-        </div>
-        <div className="fg"><label className="fl">Prestataire</label>
-          <input className="fi" value={sel.transportPrestataire||''} onChange={e=>upd({transportPrestataire:e.target.value})} placeholder="Nom de la société"/>
-        </div>
-        <div className="fg"><label className="fl">Point de départ</label>
-          <input className="fi" value={sel.transportDepart||''} onChange={e=>upd({transportDepart:e.target.value})} placeholder="Adresse de départ"/>
-        </div>
-        <div className="fg"><label className="fl">Point d'arrivée</label>
-          <input className="fi" value={sel.transportArrivee||''} onChange={e=>upd({transportArrivee:e.target.value})} placeholder="Adresse d'arrivée"/>
-        </div>
-        <div className="fg"><label className="fl">Temps de trajet (min)</label>
-          <input className="fi" type="number" min="0" value={sel.transportTemps||0} onChange={e=>upd({transportTemps:parseInt(e.target.value)||0})}/>
-        </div>
-        <div className="fg"><label className="fl">Coût estimé (€)</label>
-          <input className="fi" type="number" min="0" value={sel.transportCoutEstime||0} onChange={e=>upd({transportCoutEstime:parseFloat(e.target.value)||0})}/>
-        </div>
-        <div className="sh" style={{gridColumn:'1/-1',marginTop:8}}><h2 className="st">🍽️ Restauration</h2></div>
-        <div className="fg"><label className="fl">Type de repas</label>
-          <select className="fi" value={sel.repasType||'pique-nique'} onChange={e=>upd({repasType:e.target.value})}>
-            <option value="pique-nique">🧺 Pique-nique</option><option value="cantine">🏫 Cantine</option>
-            <option value="restaurant">🍽️ Restaurant</option><option value="fourni">✅ Fourni</option><option value="aucun">❌ Non prévu</option>
-          </select>
-        </div>
-        <div className="fg"><label className="fl">Responsable repas</label>
-          <select className="fi" value={sel.repasResponsable||''} onChange={e=>upd({repasResponsable:e.target.value})}>
-            <option value="">— Sélectionner —</option>
-            {profs.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
-        </div>
-        <div className="fg"><label className="fl">Budget nourriture (€)</label>
-          <input className="fi" type="number" min="0" value={sel.repasBudget||0} onChange={e=>upd({repasBudget:parseFloat(e.target.value)||0})}/>
-        </div>
-        <div className="fg"><label className="fl">Allergies / régimes spéciaux</label>
-          <input className="fi" value={sel.repasAllergies||''} onChange={e=>upd({repasAllergies:e.target.value})} placeholder="Ex: 2 végétariens, 1 allergie gluten"/>
-        </div>
-      </div>}
-
-      {/* ── ENCADREMENT ── */}
-      {tab==='encadrement'&&(()=>{
-        const acc=sel.accompagnateurs||[];
-        const ratio=sel.nbEleves&&acc.length?`${(sel.nbEleves/acc.length).toFixed(1)} él/adult` : '—';
-        const addAcc=()=>{
-          const id='acc'+Date.now();
-          upd({accompagnateurs:[...acc,{id,nom:'',role:'accompagnateur',tel:'',email:''}]});
-        };
-        const updAcc=(id,patch)=>upd({accompagnateurs:acc.map(a=>a.id===id?{...a,...patch}:a)});
-        const delAcc=(id)=>upd({accompagnateurs:acc.filter(a=>a.id!==id)});
-        return <div>
-          <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16,padding:'10px 14px',background:'#EFF6FF',border:'1.5px solid #BFDBFE',borderRadius:6}}>
-            <div style={{fontSize:14,fontWeight:700,color:'var(--navy)'}}>👥 {acc.length} accompagnateur{acc.length>1?'s':''}</div>
-            <div style={{fontSize:14,fontWeight:700,color:acc.length>0&&sel.nbEleves/acc.length>8?'var(--err)':'#059669'}}>Ratio : {ratio}</div>
-            {sel.nbEleves/acc.length>8&&<span style={{fontSize:12,color:'var(--err)'}}>⚠️ Ratio trop élevé (max recommandé : 8él/1adult)</span>}
-          </div>
-          <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:12}}>
-            {acc.map((a,i)=><div key={a.id} style={{display:'grid',gridTemplateColumns:'140px 1fr 1fr 1fr auto',gap:8,alignItems:'center',background:a.role==='responsable'?'#EFF6FF':'white',border:'1.5px solid var(--cream2)',borderRadius:6,padding:'10px 12px'}}>
-              <select className="fi" style={{fontSize:11}} value={a.role} onChange={e=>updAcc(a.id,{role:e.target.value})}>
-                <option value="responsable">⭐ Responsable</option>
-                <option value="accompagnateur">👤 Accompagnateur</option>
-                <option value="secouriste">🩺 Secouriste</option>
-              </select>
-              <input className="fi" style={{fontSize:11}} value={a.nom} onChange={e=>updAcc(a.id,{nom:e.target.value})} placeholder="Nom"/>
-              <input className="fi" style={{fontSize:11}} value={a.tel||''} onChange={e=>updAcc(a.id,{tel:e.target.value})} placeholder="Téléphone"/>
-              <input className="fi" style={{fontSize:11}} value={a.email||''} onChange={e=>updAcc(a.id,{email:e.target.value})} placeholder="Email"/>
-              <button className="btn btn-d btn-sm" onClick={()=>delAcc(a.id)}>✕</button>
-            </div>)}
-          </div>
-          <button className="btn btn-sm" onClick={addAcc}>＋ Ajouter un accompagnateur</button>
-        </div>;
-      })()}
-
-      {/* ── BUDGET ── */}
-      {tab==='budget'&&<div>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,marginBottom:20}}>
-          <div className="stat-section">
-            <div className="stat-section-ttl">💰 Coûts prévisionnels</div>
-            {[
-              {label:'🚌 Transport',key:'budgetTransport'},
-              {label:'🎟️ Entrées',key:'budgetEntrees'},
-              {label:'🍽️ Nourriture',key:'budgetNourriture'},
-              {label:'📦 Divers',key:'budgetDivers'},
-            ].map(r=><div key={r.key} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid var(--cream2)'}}>
-              <span style={{fontSize:13}}>{r.label}</span>
-              <div style={{display:'flex',alignItems:'center',gap:6}}>
-                <input type="number" min="0" className="fi" style={{width:90,textAlign:'right',fontSize:12,padding:'4px 8px'}} value={sel[r.key]||0}
-                  onChange={e=>upd({[r.key]:parseFloat(e.target.value)||0})}/>
-                <span style={{fontSize:12,color:'var(--muted)'}}>€</span>
-              </div>
-            </div>)}
-            <div style={{display:'flex',justifyContent:'space-between',padding:'10px 0',fontWeight:700,fontSize:14}}>
-              <span>Total prévu</span><span style={{color:'var(--navy)'}}>{budgetPrev}€</span>
-            </div>
-            {sel.nbEleves>0&&<div style={{background:'#EFF6FF',borderRadius:4,padding:'8px 12px',textAlign:'center',fontSize:13,color:'var(--info)',fontWeight:600}}>
-              💡 {parEleve}€ par élève ({sel.nbEleves} élèves)
-            </div>}
-          </div>
-          <div className="stat-section">
-            <div className="stat-section-ttl">📊 Financement prévu</div>
-            {[
-              {label:'🏫 Établissement',key:'financementEtablissement',col:'var(--info)'},
-              {label:'👨‍👩‍👧 Familles',key:'financementFamilles',col:'#059669'},
-              {label:'🏛️ Subventions',key:'financementSubventions',col:'#7C3AED'},
-            ].map(r=><div key={r.key} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid var(--cream2)'}}>
-              <span style={{fontSize:13}}>{r.label}</span>
-              <div style={{display:'flex',alignItems:'center',gap:6}}>
-                <input type="number" min="0" className="fi" style={{width:90,textAlign:'right',fontSize:12,padding:'4px 8px'}} value={sel[r.key]||0}
-                  onChange={e=>upd({[r.key]:parseFloat(e.target.value)||0})}/>
-                <span style={{fontSize:12,color:'var(--muted)'}}>€</span>
-              </div>
-            </div>)}
-            <div style={{display:'flex',justifyContent:'space-between',padding:'10px 0',fontWeight:700,fontSize:14}}>
-              <span>Total financé</span><span style={{color:'#059669'}}>{financement}€</span>
-            </div>
-            <div style={{background:deficit===0?'#D1FAE5':deficit>0?'#FEF2F2':'#D1FAE5',borderRadius:4,padding:'10px 14px',textAlign:'center'}}>
-              <div style={{fontSize:12,color:'var(--muted)'}}>Solde (financement - coût)</div>
-              <div style={{fontSize:22,fontWeight:700,color:deficit===0?'#059669':deficit>0?'var(--err)':'#059669'}}>
-                {deficit===0?'✅ Équilibré':deficit>0?`-${deficit}€ à trouver`:`+${Math.abs(deficit)}€ excédent`}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="stat-section">
-          <div className="stat-section-ttl">📋 Coût réel (après sortie)</div>
-          <div style={{display:'flex',gap:12,alignItems:'center'}}>
-            <input type="number" min="0" className="fi" style={{width:120}} value={sel.budgetReel||0}
-              onChange={e=>upd({budgetReel:parseFloat(e.target.value)||0})}/>
-            <span style={{fontSize:13,color:'var(--muted)'}}>€ réel</span>
-            {sel.budgetReel>0&&<span style={{fontSize:13,fontWeight:700,color:sel.budgetReel>budgetPrev?'var(--err)':'#059669'}}>
-              Écart : {sel.budgetReel>budgetPrev?'+':''}{sel.budgetReel-budgetPrev}€
-            </span>}
-          </div>
-        </div>
-      </div>}
-
-      {/* ── AUTORISATIONS ── */}
-      {tab==='autorisations'&&(()=>{
-        const elevesClasses=users.filter(u=>u.role==='eleve'&&(sel.classes||[]).includes(u.niveau));
-        const aut=sel.autorisations||{};
-        const countAut=Object.values(aut).filter(v=>v==='autorise').length;
-        const countRef=Object.values(aut).filter(v=>v==='refuse').length;
-        const countAtt=elevesClasses.length-countAut-countRef;
-        return <div>
-          <div style={{display:'flex',gap:10,marginBottom:14,flexWrap:'wrap'}}>
-            <span style={{background:'#D1FAE5',color:'#059669',borderRadius:4,padding:'4px 12px',fontWeight:700,fontSize:12}}>✅ Autorisés : {countAut}</span>
-            <span style={{background:'#FEE2E2',color:'var(--err)',borderRadius:4,padding:'4px 12px',fontWeight:700,fontSize:12}}>❌ Refusés : {countRef}</span>
-            <span style={{background:'#FEF3C7',color:'#D97706',borderRadius:4,padding:'4px 12px',fontWeight:700,fontSize:12}}>⏳ En attente : {countAtt}</span>
-          </div>
-          {elevesClasses.length===0?<div style={{fontSize:13,color:'var(--muted)',padding:'20px 0',textAlign:'center'}}>
-            Aucun élève des classes sélectionnées (onglet Général → Classes).
-          </div>:
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))',gap:8}}>
-            {elevesClasses.map(e=>{
-              const status=aut[e.id]||'attente';
-              return <div key={e.id} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 12px',background:status==='autorise'?'#ECFDF5':status==='refuse'?'#FFF0F0':'#FFFCE8',border:`1.5px solid ${status==='autorise'?'#86EFAC':status==='refuse'?'#FECACA':'#FDE68A'}`,borderRadius:4}}>
-                <div style={{flex:1}}>
-                  <div style={{fontWeight:600,fontSize:12}}>{e.name}</div>
-                  <div style={{fontSize:11,color:'var(--muted)'}}>{e.niveau}</div>
-                </div>
-                <div style={{display:'flex',gap:4}}>
-                  {['autorise','attente','refuse'].map(s=>(
-                    <button key={s} type="button" onClick={()=>upd({autorisations:{...aut,[e.id]:s}})}
-                      style={{padding:'3px 7px',borderRadius:3,border:'none',cursor:'pointer',fontSize:11,fontWeight:status===s?700:400,background:status===s?(s==='autorise'?'#059669':s==='refuse'?'var(--err)':'#D97706'):'var(--cream2)',color:status===s?'white':'var(--text)'}}>
-                      {s==='autorise'?'✅':s==='refuse'?'❌':'⏳'}
-                    </button>
-                  ))}
-                </div>
-              </div>;
-            })}
-          </div>}
-        </div>;
-      })()}
-
-      {/* ── CHECKLIST ── */}
-      {tab==='checklist'&&<div>
-        <div style={{display:'flex',flexDirection:'column',gap:8}}>
-          {CHECKLIST_BASE.map(item=>{
-            const done=!!(sel.checklist||{})[item.id];
-            return <div key={item.id} onClick={()=>upd({checklist:{...(sel.checklist||{}),[item.id]:!done}})}
-              style={{display:'flex',alignItems:'center',gap:12,padding:'12px 16px',background:done?'#ECFDF5':'white',border:`1.5px solid ${done?'#86EFAC':'var(--cream2)'}`,borderRadius:6,cursor:'pointer',transition:'all .15s'}}>
-              <div style={{width:22,height:22,borderRadius:4,border:`2px solid ${done?'#059669':'#CBD5E0'}`,background:done?'#059669':'white',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-                {done&&<span style={{color:'white',fontSize:14,fontWeight:700}}>✓</span>}
-              </div>
-              <span style={{fontSize:13,fontWeight:done?600:400,color:done?'#059669':'var(--text)',textDecoration:done?'none':'none'}}>{item.label}</span>
-              {done&&<span style={{marginLeft:'auto',fontSize:11,color:'#059669'}}>✅ Fait</span>}
-            </div>;
-          })}
-        </div>
-        <div style={{marginTop:12,padding:'10px 14px',background:'#F0F6FF',border:'1.5px solid #C8D8F5',borderRadius:6,fontSize:13,color:'var(--info)'}}>
-          {Object.values(sel.checklist||{}).filter(Boolean).length}/{CHECKLIST_BASE.length} tâches complétées
-        </div>
-      </div>}
-
-      {/* ── BILAN ── */}
-      {tab==='bilan'&&<div style={{display:'grid',gridTemplateColumns:'1fr',gap:14}}>
-        <div className="fg"><label className="fl">📝 Bilan pédagogique</label>
-          <textarea className="fi" rows={4} value={sel.bilanPedago||''} onChange={e=>upd({bilanPedago:e.target.value})}
-            placeholder="Objectifs atteints, réactions des élèves, points forts de la sortie..."/>
-        </div>
-        <div className="fg"><label className="fl">⚠️ Incidents éventuels</label>
-          <textarea className="fi" rows={3} value={sel.bilanIncidents||''} onChange={e=>upd({bilanIncidents:e.target.value})}
-            placeholder="Retards, problèmes logistiques, comportements..."/>
-        </div>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
-          <div className="stat-section">
-            <div className="stat-section-ttl">💰 Bilan budgétaire</div>
-            {[
-              {label:'Budget prévu',val:budgetPrev+'€',col:'var(--navy)'},
-              {label:'Coût réel',val:(sel.budgetReel||0)+'€',col:sel.budgetReel>budgetPrev?'var(--err)':'#059669'},
-              {label:'Écart',val:(sel.budgetReel||0)-budgetPrev+'€',col:(sel.budgetReel||0)>budgetPrev?'var(--err)':'#059669'},
-            ].map((r,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',padding:'7px 0',borderBottom:i<2?'1px solid var(--cream2)':'none'}}>
-              <span style={{fontSize:13}}>{r.label}</span><span style={{fontSize:14,fontWeight:700,color:r.col}}>{r.val}</span>
-            </div>)}
-          </div>
-          <div className="stat-section">
-            <div className="stat-section-ttl">📋 Recommandations</div>
-            <textarea className="fi" rows={5} value={sel.bilanReco||''} onChange={e=>upd({bilanReco:e.target.value})}
-              placeholder="À améliorer pour la prochaine fois..."/>
-          </div>
-        </div>
-      </div>}
-    </div>
-  </>;
-}
-
 function App(){var _useState141=useState(null),_useState142=_slicedToArray(_useState141,2),cu=_useState142[0],setCu=_useState142[1];var _useState143=useState('dashboard'),_useState144=_slicedToArray(_useState143,2),page=_useState144[0],setPage=_useState144[1];var _useState145=useState(false),_useState146=_slicedToArray(_useState145,2),appReady=_useState146[0],setAppReady=_useState146[1];// true quand session vérifiée
 var _useState147=useState(false),_useState148=_slicedToArray(_useState147,2),dataReady=_useState148[0],setDataReady=_useState148[1];// true quand données chargées
 var _useState149=useState(SEED_USERS),_useState150=_slicedToArray(_useState149,2),users=_useState150[0],setUsers=_useState150[1];var _useState151=useState(SEED_RES),_useState152=_slicedToArray(_useState151,2),resources=_useState152[0],setResources=_useState152[1];var _useState153=useState(SEED_MOD),_useState154=_slicedToArray(_useState153,2),modules=_useState154[0],setModules=_useState154[1];var _useState155=useState(SEED_GRADES),_useState156=_slicedToArray(_useState155,2),grades=_useState156[0],setGrades=_useState156[1];var _useState157=useState(SEED_ENR),_useState158=_slicedToArray(_useState157,2),enrollments=_useState158[0],setEnrollments=_useState158[1];var _useState159=useState(SEED_COURS),_useState160=_slicedToArray(_useState159,2),cours=_useState160[0],setCours=_useState160[1];var _useState161=useState(SEED_APPEL),_useState162=_slicedToArray(_useState161,2),appel=_useState162[0],setAppel=_useState162[1];var _useState163=useState(SEED_FACTURES),_useState164=_slicedToArray(_useState163,2),factures=_useState164[0],setFactures=_useState164[1];var _useState165=useState(SEED_SALAIRES),_useState166=_slicedToArray(_useState165,2),salaires=_useState166[0],setSalaires=_useState166[1];var _useState167=useState([]),_useState168=_slicedToArray(_useState167,2),dispos=_useState168[0],setDispos=_useState168[1];var _useState169=useState([]),_useState170=_slicedToArray(_useState169,2),demandes=_useState170[0],setDemandes=_useState170[1];var _useState171=useState([]),_useState172=_slicedToArray(_useState171,2),inscriptions=_useState172[0],setInscriptions=_useState172[1];var _useState173=useState({}),_useState174=_slicedToArray(_useState173,2),compEtats=_useState174[0],setCompEtats=_useState174[1];var _useState175=useState([]),_useState176=_slicedToArray(_useState175,2),customComps=_useState176[0],setCustomComps=_useState176[1];var _useState177=useState([]),_useState178=_slicedToArray(_useState177,2),customTrophies=_useState178[0],setCustomTrophies=_useState178[1];var _useState179=useState({}),_useState180=_slicedToArray(_useState179,2),awardedTrophies=_useState180[0],setAwardedTrophies=_useState180[1];// ── Vérification session Supabase au démarrage ──
@@ -5499,6 +5011,494 @@ function Facturation({user,users,factures,setFactures,cours}){
 // ─── FACTURATION ───
 
 // ─── APP ───
+// ─── MODULE SORTIES SCOLAIRES ───────────────────────────────────────────────
+function Sorties({sorties,setSorties,users,cours}){
+  const STATUTS={
+    brouillon:{label:'Brouillon',color:'#6B7280',bg:'#F3F4F6',icon:'📝'},
+    validation:{label:'En validation',color:'#D97706',bg:'#FEF3C7',icon:'⏳'},
+    validee:{label:'Validée',color:'#059669',bg:'#D1FAE5',icon:'✅'},
+    realisee:{label:'Réalisée',color:'#1D4ED8',bg:'#DBEAFE',icon:'🎉'},
+    annulee:{label:'Annulée',color:'#9CA3AF',bg:'#F3F4F6',icon:'❌'},
+  };
+  const CHECKLIST_BASE=[
+    {id:'transport',label:'Transport réservé'},
+    {id:'autorisations',label:'Autorisations récupérées'},
+    {id:'paiement',label:'Paiement effectué'},
+    {id:'assurance',label:'Assurance vérifiée'},
+    {id:'programme',label:'Programme finalisé'},
+    {id:'repas',label:'Repas organisé'},
+    {id:'urgence',label:'Contacts d\'urgence établis'},
+  ];
+
+  const [view,setView]=useState('liste'); // liste | fiche
+  const [selId,setSelId]=useState(null);
+  const [tab,setTab]=useState('general');
+  const [showNew,setShowNew]=useState(false);
+  const [newForm,setNewForm]=useState({nom:'',objectif:'',classes:[],nbEleves:0,date:'',heureDepart:'09:00',heureRetour:'17:00',lieu:'',adresse:'',statut:'brouillon'});
+
+  const profs=users.filter(u=>u.role==='prof');
+  const sel=sorties.find(s=>s.id===selId);
+
+  const createSortie=()=>{
+    if(!newForm.nom.trim())return;
+    const s={
+      id:'sor'+Date.now(),
+      ...newForm,
+      // Transport
+      transportType:'bus',transportPrestataire:'',transportCoutEstime:0,transportCoutReel:0,
+      transportDepart:'',transportArrivee:'',transportTemps:0,
+      // Repas
+      repasType:'pique-nique',repasAllergies:'',repasBudget:0,repasResponsable:'',
+      // Encadrement
+      accompagnateurs:[],
+      // Budget prévisionnel
+      budgetTransport:0,budgetEntrees:0,budgetNourriture:0,budgetDivers:0,
+      budgetReel:0,
+      financementEtablissement:0,financementFamilles:0,financementSubventions:0,
+      // Autorisations par élève
+      autorisations:{},
+      // Checklist
+      checklist:{},
+      // Bilan
+      bilanPedago:'',bilanIncidents:'',bilanEcartBudget:'',
+      // Timeline
+      dateCreation:new Date().toISOString().split('T')[0],
+      dateValidation:'',dateTransportResa:'',datePaiement:'',
+    };
+    setSorties(p=>[s,...p]);
+    setSelId(s.id);setView('fiche');setTab('general');setShowNew(false);
+  };
+
+  const updateSortie=(id,patch)=>setSorties(p=>p.map(s=>s.id===id?{...s,...patch}:s));
+  const deleteSortie=id=>{if(window.confirm('Supprimer cette sortie ?')){setSorties(p=>p.filter(s=>s.id!==id));if(selId===id){setView('liste');setSelId(null);}}};
+  const dupliquerSortie=s=>{
+    const d={...s,id:'sor'+Date.now(),nom:s.nom+' (copie)',statut:'brouillon',dateCreation:new Date().toISOString().split('T')[0],dateValidation:'',checklist:{}};
+    setSorties(p=>[d,...p]);setSelId(d.id);setView('fiche');
+  };
+
+  // ── LISTE ──
+  if(view==='liste') return <>
+    <TB title="🚌 Sorties scolaires">
+      <button className="btn btn-p" onClick={()=>setShowNew(true)}>＋ Nouvelle sortie</button>
+    </TB>
+    <div className="pg">
+      {/* Dashboard rapide */}
+      <div className="sg" style={{marginBottom:20}}>
+        {Object.entries(STATUTS).map(([k,v])=>{
+          const n=sorties.filter(s=>s.statut===k).length;
+          return n>0?<div key={k} className="sc" style={{borderBottom:`3px solid ${v.color}`}}>
+            <div className="sc-ic">{v.icon}</div><div className="sc-v">{n}</div><div className="sc-l">{v.label}</div>
+          </div>:null;
+        })}
+        <div className="sc c-gold">
+          <div className="sc-ic">💰</div>
+          <div className="sc-v">{sorties.reduce((a,s)=>a+(s.budgetTransport||0)+(s.budgetEntrees||0)+(s.budgetNourriture||0)+(s.budgetDivers||0),0)}€</div>
+          <div className="sc-l">Budget total prévu</div>
+        </div>
+      </div>
+      {sorties.length===0?<div className="emp"><div className="emp-icon">🚌</div><h3>Aucune sortie planifiée</h3><p>Créez votre première fiche de sortie scolaire.</p></div>:
+      <div style={{display:'flex',flexDirection:'column',gap:10}}>
+        {sorties.map(s=>{
+          const st=STATUTS[s.statut]||STATUTS.brouillon;
+          const budgetTotal=(s.budgetTransport||0)+(s.budgetEntrees||0)+(s.budgetNourriture||0)+(s.budgetDivers||0);
+          const parEleve=s.nbEleves>0?Math.round(budgetTotal/s.nbEleves):0;
+          const nbAcc=s.accompagnateurs?.length||0;
+          const ratio=s.nbEleves&&nbAcc?Math.round(s.nbEleves/nbAcc)+'é/1a':'—';
+          const autoOk=Object.values(s.autorisations||{}).filter(v=>v==='autorise').length;
+          return <div key={s.id} style={{background:'white',border:`1.5px solid ${st.color}22`,borderLeft:`4px solid ${st.color}`,borderRadius:6,padding:'14px 18px',cursor:'pointer',transition:'box-shadow .15s'}}
+            onClick={()=>{setSelId(s.id);setView('fiche');setTab('general');}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',flexWrap:'wrap',gap:8}}>
+              <div style={{flex:1}}>
+                <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
+                  <span style={{background:st.bg,color:st.color,borderRadius:3,padding:'2px 8px',fontSize:11,fontWeight:700}}>{st.icon} {st.label}</span>
+                  {s.autoGenerated&&<span style={{fontSize:10,color:'var(--gold)',background:'#EEF5FF',borderRadius:2,padding:'1px 5px'}}>auto</span>}
+                </div>
+                <div style={{fontWeight:700,fontSize:15,color:'#1a2340',marginBottom:3}}>{s.nom}</div>
+                <div style={{fontSize:12,color:'var(--muted)'}}>{s.date&&`📅 ${s.date}`} {s.heureDepart&&`· ${s.heureDepart}–${s.heureRetour}`} {s.lieu&&`· 📍 ${s.lieu}`}</div>
+                {s.classes?.length>0&&<div style={{fontSize:11,color:'var(--muted)',marginTop:2}}>{s.classes.join(', ')} · {s.nbEleves} élève{s.nbEleves>1?'s':''}</div>}
+              </div>
+              <div style={{textAlign:'right',flexShrink:0}}>
+                <div style={{fontSize:18,fontWeight:700,color:'var(--navy)'}}>{budgetTotal>0?budgetTotal+'€':'—'}</div>
+                {parEleve>0&&<div style={{fontSize:11,color:'var(--muted)'}}>{parEleve}€/élève</div>}
+                <div style={{fontSize:11,color:'var(--muted)',marginTop:2}}>Ratio {ratio} · {autoOk} autor.</div>
+              </div>
+            </div>
+            <div style={{display:'flex',gap:8,marginTop:10}} onClick={e=>e.stopPropagation()}>
+              <button className="btn btn-sm" style={{fontSize:11}} onClick={()=>{setSelId(s.id);setView('fiche');setTab('general');}}>📋 Ouvrir</button>
+              <button className="btn btn-sm" style={{fontSize:11}} onClick={()=>dupliquerSortie(s)}>📋 Dupliquer</button>
+              <button className="btn btn-d btn-sm" style={{fontSize:11}} onClick={()=>deleteSortie(s.id)}>🗑️</button>
+            </div>
+          </div>;
+        })}
+      </div>}
+    </div>
+    {showNew&&<Modal title="Nouvelle sortie" onClose={()=>setShowNew(false)}>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+        <div className="fg" style={{gridColumn:'1/-1'}}><label className="fl">Nom de la sortie *</label>
+          <input className="fi" value={newForm.nom} onChange={e=>setNewForm(p=>({...p,nom:e.target.value}))} placeholder="Ex: Sortie musée des sciences"/>
+        </div>
+        <div className="fg" style={{gridColumn:'1/-1'}}><label className="fl">Objectif pédagogique</label>
+          <input className="fi" value={newForm.objectif} onChange={e=>setNewForm(p=>({...p,objectif:e.target.value}))} placeholder="Ex: Découverte des sciences naturelles"/>
+        </div>
+        <div className="fg"><label className="fl">Date prévue</label>
+          <input className="fi" type="date" value={newForm.date} onChange={e=>setNewForm(p=>({...p,date:e.target.value}))}/>
+        </div>
+        <div className="fg"><label className="fl">Nombre d'élèves</label>
+          <input className="fi" type="number" min="0" value={newForm.nbEleves} onChange={e=>setNewForm(p=>({...p,nbEleves:parseInt(e.target.value)||0}))}/>
+        </div>
+        <div className="fg"><label className="fl">Lieu</label>
+          <input className="fi" value={newForm.lieu} onChange={e=>setNewForm(p=>({...p,lieu:e.target.value}))} placeholder="Ex: Cité des sciences, Paris"/>
+        </div>
+        <div className="fg"><label className="fl">Classes concernées</label>
+          <div style={{display:'flex',flexWrap:'wrap',gap:5,padding:'6px',border:'1.5px solid var(--cream2)',borderRadius:4}}>
+            {NIVEAUX.filter(n=>n!=='Tous').map(n=>{
+              const on=(newForm.classes||[]).includes(n);
+              return <button key={n} type="button" onClick={()=>setNewForm(p=>({...p,classes:on?p.classes.filter(c=>c!==n):[...(p.classes||[]),n]}))}
+                style={{padding:'2px 8px',borderRadius:3,border:`1.5px solid ${on?'var(--navy)':'var(--cream2)'}`,background:on?'var(--navy)':'white',color:on?'white':'var(--text)',fontSize:11,cursor:'pointer'}}>
+                {n}
+              </button>;
+            })}
+          </div>
+        </div>
+      </div>
+      <div className="fa"><button className="btn btn-o" onClick={()=>setShowNew(false)}>Annuler</button><button className="btn btn-p" onClick={createSortie}>Créer la fiche</button></div>
+    </Modal>}
+  </>;
+
+  // ── FICHE DÉTAIL ──
+  if(!sel) return null;
+  const st=STATUTS[sel.statut]||STATUTS.brouillon;
+  const budgetPrev=(sel.budgetTransport||0)+(sel.budgetEntrees||0)+(sel.budgetNourriture||0)+(sel.budgetDivers||0);
+  const budgetReel=sel.budgetReel||0;
+  const parEleve=sel.nbEleves>0?Math.round(budgetPrev/sel.nbEleves):0;
+  const financement=(sel.financementEtablissement||0)+(sel.financementFamilles||0)+(sel.financementSubventions||0);
+  const deficit=budgetPrev-financement;
+  const upd=(patch)=>updateSortie(sel.id,patch);
+
+  const TABS=[
+    {id:'general',label:'📋 Général'},
+    {id:'logistique',label:'🚌 Logistique'},
+    {id:'encadrement',label:'👩‍🏫 Encadrement'},
+    {id:'budget',label:'💰 Budget'},
+    {id:'autorisations',label:'📄 Autorisations'},
+    {id:'checklist',label:'✅ Checklist'},
+    {id:'bilan',label:'📊 Bilan'},
+  ];
+
+  return <>
+    <TB title={`🚌 ${sel.nom}`}>
+      <div style={{display:'flex',gap:8,alignItems:'center'}}>
+        <span style={{background:st.bg,color:st.color,borderRadius:3,padding:'4px 10px',fontSize:12,fontWeight:700}}>{st.icon} {st.label}</span>
+        <select className="fi" style={{fontSize:11,padding:'4px 8px',width:140}} value={sel.statut}
+          onChange={e=>upd({statut:e.target.value})}>
+          {Object.entries(STATUTS).map(([k,v])=><option key={k} value={k}>{v.label}</option>)}
+        </select>
+        <button className="btn btn-sm" style={{fontSize:11}} onClick={()=>dupliquerSortie(sel)}>📋 Dupliquer</button>
+        <button className="btn btn-o btn-sm" onClick={()=>setView('liste')}>← Retour</button>
+      </div>
+    </TB>
+
+    {/* KPI rapide */}
+    <div style={{padding:'0 24px 0',display:'flex',gap:12,flexWrap:'wrap',marginBottom:0,background:'white',borderBottom:'1.5px solid var(--cream2)'}}>
+      {[
+        {icon:'📅',val:sel.date||'—',sub:'Date'},
+        {icon:'🎓',val:sel.nbEleves||0,sub:'Élèves'},
+        {icon:'💰',val:budgetPrev+'€',sub:'Budget prévu'},
+        {icon:'👤',val:parEleve>0?parEleve+'€/él':'—',sub:'Par élève'},
+        {icon:'📊',val:deficit===0?'Équilibré':deficit>0?`-${deficit}€`:`+${Math.abs(deficit)}€`,sub:'Solde',col:deficit===0?'#059669':deficit>0?'var(--err)':'#059669'},
+      ].map((k,i)=><div key={i} style={{padding:'10px 8px',textAlign:'center',minWidth:90}}>
+        <div style={{fontSize:13,fontWeight:700,color:k.col||'var(--navy)'}}>{k.icon} {k.val}</div>
+        <div style={{fontSize:10,color:'var(--muted)'}}>{k.sub}</div>
+      </div>)}
+    </div>
+
+    <div className="pg" style={{paddingTop:12}}>
+      <div className="tabs" style={{marginBottom:16}}>
+        {TABS.map(t=><button key={t.id} className={`tab ${tab===t.id?'on':''}`} onClick={()=>setTab(t.id)}>{t.label}</button>)}
+      </div>
+
+      {/* ── GÉNÉRAL ── */}
+      {tab==='general'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+        <div className="fg" style={{gridColumn:'1/-1'}}><label className="fl">Nom de la sortie</label>
+          <input className="fi" value={sel.nom} onChange={e=>upd({nom:e.target.value})}/>
+        </div>
+        <div className="fg" style={{gridColumn:'1/-1'}}><label className="fl">Objectif pédagogique</label>
+          <textarea className="fi" rows={2} value={sel.objectif||''} onChange={e=>upd({objectif:e.target.value})} placeholder="Lien avec le programme scolaire..."/>
+        </div>
+        <div className="fg"><label className="fl">Date prévue</label>
+          <input className="fi" type="date" value={sel.date||''} onChange={e=>upd({date:e.target.value})}/>
+        </div>
+        <div className="fg"><label className="fl">Nombre d'élèves</label>
+          <input className="fi" type="number" min="0" value={sel.nbEleves||0} onChange={e=>upd({nbEleves:parseInt(e.target.value)||0})}/>
+        </div>
+        <div className="fg"><label className="fl">Heure de départ</label>
+          <input className="fi" type="time" value={sel.heureDepart||'09:00'} onChange={e=>upd({heureDepart:e.target.value})}/>
+        </div>
+        <div className="fg"><label className="fl">Heure de retour</label>
+          <input className="fi" type="time" value={sel.heureRetour||'17:00'} onChange={e=>upd({heureRetour:e.target.value})}/>
+        </div>
+        <div className="fg"><label className="fl">Lieu</label>
+          <input className="fi" value={sel.lieu||''} onChange={e=>upd({lieu:e.target.value})} placeholder="Nom du lieu"/>
+        </div>
+        <div className="fg"><label className="fl">Adresse complète</label>
+          <input className="fi" value={sel.adresse||''} onChange={e=>upd({adresse:e.target.value})} placeholder="Adresse..."/>
+        </div>
+        <div className="fg" style={{gridColumn:'1/-1'}}><label className="fl">Classes concernées</label>
+          <div style={{display:'flex',flexWrap:'wrap',gap:6,padding:'8px',border:'1.5px solid var(--cream2)',borderRadius:4}}>
+            {NIVEAUX.filter(n=>n!=='Tous').map(n=>{
+              const on=(sel.classes||[]).includes(n);
+              const clr=nc(n);
+              return <button key={n} type="button" onClick={()=>upd({classes:on?(sel.classes||[]).filter(c=>c!==n):[...(sel.classes||[]),n]})}
+                style={{padding:'3px 10px',borderRadius:3,border:`1.5px solid ${on?clr.bd:'var(--cream2)'}`,background:on?clr.bg:'white',color:on?clr.tx:'var(--text)',fontSize:12,cursor:'pointer',fontWeight:on?700:400}}>
+                {n}
+              </button>;
+            })}
+          </div>
+        </div>
+        {sel.adresse&&<div className="fg" style={{gridColumn:'1/-1'}}>
+          <label className="fl">📍 Carte (aperçu)</label>
+          <div style={{borderRadius:6,overflow:'hidden',height:200,border:'1.5px solid var(--cream2)'}}>
+            <iframe title="map" width="100%" height="200" frameBorder="0" style={{border:0}}
+              src={`https://www.openstreetmap.org/export/embed.html?bbox=-0.5,48.5,3.0,49.0&layer=mapnik&marker=48.8566,2.3522`}
+              allowFullScreen/>
+          </div>
+          <div style={{fontSize:11,color:'var(--muted)',marginTop:4}}>
+            🔗 <a href={`https://www.google.com/maps/search/${encodeURIComponent(sel.adresse||sel.lieu||'')}`} target="_blank" rel="noopener noreferrer" style={{color:'var(--info)'}}>Ouvrir dans Google Maps</a>
+          </div>
+        </div>}
+      </div>}
+
+      {/* ── LOGISTIQUE ── */}
+      {tab==='logistique'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+        <div className="sh" style={{gridColumn:'1/-1'}}><h2 className="st">🚌 Transport</h2></div>
+        <div className="fg"><label className="fl">Type de transport</label>
+          <select className="fi" value={sel.transportType||'bus'} onChange={e=>upd({transportType:e.target.value})}>
+            <option value="bus">🚌 Bus</option><option value="metro">🚇 Métro</option>
+            <option value="train">🚆 Train</option><option value="pied">🚶 À pied</option><option value="autre">Autre</option>
+          </select>
+        </div>
+        <div className="fg"><label className="fl">Prestataire</label>
+          <input className="fi" value={sel.transportPrestataire||''} onChange={e=>upd({transportPrestataire:e.target.value})} placeholder="Nom de la société"/>
+        </div>
+        <div className="fg"><label className="fl">Point de départ</label>
+          <input className="fi" value={sel.transportDepart||''} onChange={e=>upd({transportDepart:e.target.value})} placeholder="Adresse de départ"/>
+        </div>
+        <div className="fg"><label className="fl">Point d'arrivée</label>
+          <input className="fi" value={sel.transportArrivee||''} onChange={e=>upd({transportArrivee:e.target.value})} placeholder="Adresse d'arrivée"/>
+        </div>
+        <div className="fg"><label className="fl">Temps de trajet (min)</label>
+          <input className="fi" type="number" min="0" value={sel.transportTemps||0} onChange={e=>upd({transportTemps:parseInt(e.target.value)||0})}/>
+        </div>
+        <div className="fg"><label className="fl">Coût estimé (€)</label>
+          <input className="fi" type="number" min="0" value={sel.transportCoutEstime||0} onChange={e=>upd({transportCoutEstime:parseFloat(e.target.value)||0})}/>
+        </div>
+        <div className="sh" style={{gridColumn:'1/-1',marginTop:8}}><h2 className="st">🍽️ Restauration</h2></div>
+        <div className="fg"><label className="fl">Type de repas</label>
+          <select className="fi" value={sel.repasType||'pique-nique'} onChange={e=>upd({repasType:e.target.value})}>
+            <option value="pique-nique">🧺 Pique-nique</option><option value="cantine">🏫 Cantine</option>
+            <option value="restaurant">🍽️ Restaurant</option><option value="fourni">✅ Fourni</option><option value="aucun">❌ Non prévu</option>
+          </select>
+        </div>
+        <div className="fg"><label className="fl">Responsable repas</label>
+          <select className="fi" value={sel.repasResponsable||''} onChange={e=>upd({repasResponsable:e.target.value})}>
+            <option value="">— Sélectionner —</option>
+            {profs.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+        </div>
+        <div className="fg"><label className="fl">Budget nourriture (€)</label>
+          <input className="fi" type="number" min="0" value={sel.repasBudget||0} onChange={e=>upd({repasBudget:parseFloat(e.target.value)||0})}/>
+        </div>
+        <div className="fg"><label className="fl">Allergies / régimes spéciaux</label>
+          <input className="fi" value={sel.repasAllergies||''} onChange={e=>upd({repasAllergies:e.target.value})} placeholder="Ex: 2 végétariens, 1 allergie gluten"/>
+        </div>
+      </div>}
+
+      {/* ── ENCADREMENT ── */}
+      {tab==='encadrement'&&(()=>{
+        const acc=sel.accompagnateurs||[];
+        const ratio=sel.nbEleves&&acc.length?`${(sel.nbEleves/acc.length).toFixed(1)} él/adult` : '—';
+        const addAcc=()=>{
+          const id='acc'+Date.now();
+          upd({accompagnateurs:[...acc,{id,nom:'',role:'accompagnateur',tel:'',email:''}]});
+        };
+        const updAcc=(id,patch)=>upd({accompagnateurs:acc.map(a=>a.id===id?{...a,...patch}:a)});
+        const delAcc=(id)=>upd({accompagnateurs:acc.filter(a=>a.id!==id)});
+        return <div>
+          <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16,padding:'10px 14px',background:'#EFF6FF',border:'1.5px solid #BFDBFE',borderRadius:6}}>
+            <div style={{fontSize:14,fontWeight:700,color:'var(--navy)'}}>👥 {acc.length} accompagnateur{acc.length>1?'s':''}</div>
+            <div style={{fontSize:14,fontWeight:700,color:acc.length>0&&sel.nbEleves/acc.length>8?'var(--err)':'#059669'}}>Ratio : {ratio}</div>
+            {sel.nbEleves/acc.length>8&&<span style={{fontSize:12,color:'var(--err)'}}>⚠️ Ratio trop élevé (max recommandé : 8él/1adult)</span>}
+          </div>
+          <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:12}}>
+            {acc.map((a,i)=><div key={a.id} style={{display:'grid',gridTemplateColumns:'140px 1fr 1fr 1fr auto',gap:8,alignItems:'center',background:a.role==='responsable'?'#EFF6FF':'white',border:'1.5px solid var(--cream2)',borderRadius:6,padding:'10px 12px'}}>
+              <select className="fi" style={{fontSize:11}} value={a.role} onChange={e=>updAcc(a.id,{role:e.target.value})}>
+                <option value="responsable">⭐ Responsable</option>
+                <option value="accompagnateur">👤 Accompagnateur</option>
+                <option value="secouriste">🩺 Secouriste</option>
+              </select>
+              <input className="fi" style={{fontSize:11}} value={a.nom} onChange={e=>updAcc(a.id,{nom:e.target.value})} placeholder="Nom"/>
+              <input className="fi" style={{fontSize:11}} value={a.tel||''} onChange={e=>updAcc(a.id,{tel:e.target.value})} placeholder="Téléphone"/>
+              <input className="fi" style={{fontSize:11}} value={a.email||''} onChange={e=>updAcc(a.id,{email:e.target.value})} placeholder="Email"/>
+              <button className="btn btn-d btn-sm" onClick={()=>delAcc(a.id)}>✕</button>
+            </div>)}
+          </div>
+          <button className="btn btn-sm" onClick={addAcc}>＋ Ajouter un accompagnateur</button>
+        </div>;
+      })()}
+
+      {/* ── BUDGET ── */}
+      {tab==='budget'&&<div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,marginBottom:20}}>
+          <div className="stat-section">
+            <div className="stat-section-ttl">💰 Coûts prévisionnels</div>
+            {[
+              {label:'🚌 Transport',key:'budgetTransport'},
+              {label:'🎟️ Entrées',key:'budgetEntrees'},
+              {label:'🍽️ Nourriture',key:'budgetNourriture'},
+              {label:'📦 Divers',key:'budgetDivers'},
+            ].map(r=><div key={r.key} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid var(--cream2)'}}>
+              <span style={{fontSize:13}}>{r.label}</span>
+              <div style={{display:'flex',alignItems:'center',gap:6}}>
+                <input type="number" min="0" className="fi" style={{width:90,textAlign:'right',fontSize:12,padding:'4px 8px'}} value={sel[r.key]||0}
+                  onChange={e=>upd({[r.key]:parseFloat(e.target.value)||0})}/>
+                <span style={{fontSize:12,color:'var(--muted)'}}>€</span>
+              </div>
+            </div>)}
+            <div style={{display:'flex',justifyContent:'space-between',padding:'10px 0',fontWeight:700,fontSize:14}}>
+              <span>Total prévu</span><span style={{color:'var(--navy)'}}>{budgetPrev}€</span>
+            </div>
+            {sel.nbEleves>0&&<div style={{background:'#EFF6FF',borderRadius:4,padding:'8px 12px',textAlign:'center',fontSize:13,color:'var(--info)',fontWeight:600}}>
+              💡 {parEleve}€ par élève ({sel.nbEleves} élèves)
+            </div>}
+          </div>
+          <div className="stat-section">
+            <div className="stat-section-ttl">📊 Financement prévu</div>
+            {[
+              {label:'🏫 Établissement',key:'financementEtablissement',col:'var(--info)'},
+              {label:'👨‍👩‍👧 Familles',key:'financementFamilles',col:'#059669'},
+              {label:'🏛️ Subventions',key:'financementSubventions',col:'#7C3AED'},
+            ].map(r=><div key={r.key} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid var(--cream2)'}}>
+              <span style={{fontSize:13}}>{r.label}</span>
+              <div style={{display:'flex',alignItems:'center',gap:6}}>
+                <input type="number" min="0" className="fi" style={{width:90,textAlign:'right',fontSize:12,padding:'4px 8px'}} value={sel[r.key]||0}
+                  onChange={e=>upd({[r.key]:parseFloat(e.target.value)||0})}/>
+                <span style={{fontSize:12,color:'var(--muted)'}}>€</span>
+              </div>
+            </div>)}
+            <div style={{display:'flex',justifyContent:'space-between',padding:'10px 0',fontWeight:700,fontSize:14}}>
+              <span>Total financé</span><span style={{color:'#059669'}}>{financement}€</span>
+            </div>
+            <div style={{background:deficit===0?'#D1FAE5':deficit>0?'#FEF2F2':'#D1FAE5',borderRadius:4,padding:'10px 14px',textAlign:'center'}}>
+              <div style={{fontSize:12,color:'var(--muted)'}}>Solde (financement - coût)</div>
+              <div style={{fontSize:22,fontWeight:700,color:deficit===0?'#059669':deficit>0?'var(--err)':'#059669'}}>
+                {deficit===0?'✅ Équilibré':deficit>0?`-${deficit}€ à trouver`:`+${Math.abs(deficit)}€ excédent`}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="stat-section">
+          <div className="stat-section-ttl">📋 Coût réel (après sortie)</div>
+          <div style={{display:'flex',gap:12,alignItems:'center'}}>
+            <input type="number" min="0" className="fi" style={{width:120}} value={sel.budgetReel||0}
+              onChange={e=>upd({budgetReel:parseFloat(e.target.value)||0})}/>
+            <span style={{fontSize:13,color:'var(--muted)'}}>€ réel</span>
+            {sel.budgetReel>0&&<span style={{fontSize:13,fontWeight:700,color:sel.budgetReel>budgetPrev?'var(--err)':'#059669'}}>
+              Écart : {sel.budgetReel>budgetPrev?'+':''}{sel.budgetReel-budgetPrev}€
+            </span>}
+          </div>
+        </div>
+      </div>}
+
+      {/* ── AUTORISATIONS ── */}
+      {tab==='autorisations'&&(()=>{
+        const elevesClasses=users.filter(u=>u.role==='eleve'&&(sel.classes||[]).includes(u.niveau));
+        const aut=sel.autorisations||{};
+        const countAut=Object.values(aut).filter(v=>v==='autorise').length;
+        const countRef=Object.values(aut).filter(v=>v==='refuse').length;
+        const countAtt=elevesClasses.length-countAut-countRef;
+        return <div>
+          <div style={{display:'flex',gap:10,marginBottom:14,flexWrap:'wrap'}}>
+            <span style={{background:'#D1FAE5',color:'#059669',borderRadius:4,padding:'4px 12px',fontWeight:700,fontSize:12}}>✅ Autorisés : {countAut}</span>
+            <span style={{background:'#FEE2E2',color:'var(--err)',borderRadius:4,padding:'4px 12px',fontWeight:700,fontSize:12}}>❌ Refusés : {countRef}</span>
+            <span style={{background:'#FEF3C7',color:'#D97706',borderRadius:4,padding:'4px 12px',fontWeight:700,fontSize:12}}>⏳ En attente : {countAtt}</span>
+          </div>
+          {elevesClasses.length===0?<div style={{fontSize:13,color:'var(--muted)',padding:'20px 0',textAlign:'center'}}>
+            Aucun élève des classes sélectionnées (onglet Général → Classes).
+          </div>:
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))',gap:8}}>
+            {elevesClasses.map(e=>{
+              const status=aut[e.id]||'attente';
+              return <div key={e.id} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 12px',background:status==='autorise'?'#ECFDF5':status==='refuse'?'#FFF0F0':'#FFFCE8',border:`1.5px solid ${status==='autorise'?'#86EFAC':status==='refuse'?'#FECACA':'#FDE68A'}`,borderRadius:4}}>
+                <div style={{flex:1}}>
+                  <div style={{fontWeight:600,fontSize:12}}>{e.name}</div>
+                  <div style={{fontSize:11,color:'var(--muted)'}}>{e.niveau}</div>
+                </div>
+                <div style={{display:'flex',gap:4}}>
+                  {['autorise','attente','refuse'].map(s=>(
+                    <button key={s} type="button" onClick={()=>upd({autorisations:{...aut,[e.id]:s}})}
+                      style={{padding:'3px 7px',borderRadius:3,border:'none',cursor:'pointer',fontSize:11,fontWeight:status===s?700:400,background:status===s?(s==='autorise'?'#059669':s==='refuse'?'var(--err)':'#D97706'):'var(--cream2)',color:status===s?'white':'var(--text)'}}>
+                      {s==='autorise'?'✅':s==='refuse'?'❌':'⏳'}
+                    </button>
+                  ))}
+                </div>
+              </div>;
+            })}
+          </div>}
+        </div>;
+      })()}
+
+      {/* ── CHECKLIST ── */}
+      {tab==='checklist'&&<div>
+        <div style={{display:'flex',flexDirection:'column',gap:8}}>
+          {CHECKLIST_BASE.map(item=>{
+            const done=!!(sel.checklist||{})[item.id];
+            return <div key={item.id} onClick={()=>upd({checklist:{...(sel.checklist||{}),[item.id]:!done}})}
+              style={{display:'flex',alignItems:'center',gap:12,padding:'12px 16px',background:done?'#ECFDF5':'white',border:`1.5px solid ${done?'#86EFAC':'var(--cream2)'}`,borderRadius:6,cursor:'pointer',transition:'all .15s'}}>
+              <div style={{width:22,height:22,borderRadius:4,border:`2px solid ${done?'#059669':'#CBD5E0'}`,background:done?'#059669':'white',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                {done&&<span style={{color:'white',fontSize:14,fontWeight:700}}>✓</span>}
+              </div>
+              <span style={{fontSize:13,fontWeight:done?600:400,color:done?'#059669':'var(--text)',textDecoration:done?'none':'none'}}>{item.label}</span>
+              {done&&<span style={{marginLeft:'auto',fontSize:11,color:'#059669'}}>✅ Fait</span>}
+            </div>;
+          })}
+        </div>
+        <div style={{marginTop:12,padding:'10px 14px',background:'#F0F6FF',border:'1.5px solid #C8D8F5',borderRadius:6,fontSize:13,color:'var(--info)'}}>
+          {Object.values(sel.checklist||{}).filter(Boolean).length}/{CHECKLIST_BASE.length} tâches complétées
+        </div>
+      </div>}
+
+      {/* ── BILAN ── */}
+      {tab==='bilan'&&<div style={{display:'grid',gridTemplateColumns:'1fr',gap:14}}>
+        <div className="fg"><label className="fl">📝 Bilan pédagogique</label>
+          <textarea className="fi" rows={4} value={sel.bilanPedago||''} onChange={e=>upd({bilanPedago:e.target.value})}
+            placeholder="Objectifs atteints, réactions des élèves, points forts de la sortie..."/>
+        </div>
+        <div className="fg"><label className="fl">⚠️ Incidents éventuels</label>
+          <textarea className="fi" rows={3} value={sel.bilanIncidents||''} onChange={e=>upd({bilanIncidents:e.target.value})}
+            placeholder="Retards, problèmes logistiques, comportements..."/>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+          <div className="stat-section">
+            <div className="stat-section-ttl">💰 Bilan budgétaire</div>
+            {[
+              {label:'Budget prévu',val:budgetPrev+'€',col:'var(--navy)'},
+              {label:'Coût réel',val:(sel.budgetReel||0)+'€',col:sel.budgetReel>budgetPrev?'var(--err)':'#059669'},
+              {label:'Écart',val:(sel.budgetReel||0)-budgetPrev+'€',col:(sel.budgetReel||0)>budgetPrev?'var(--err)':'#059669'},
+            ].map((r,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',padding:'7px 0',borderBottom:i<2?'1px solid var(--cream2)':'none'}}>
+              <span style={{fontSize:13}}>{r.label}</span><span style={{fontSize:14,fontWeight:700,color:r.col}}>{r.val}</span>
+            </div>)}
+          </div>
+          <div className="stat-section">
+            <div className="stat-section-ttl">📋 Recommandations</div>
+            <textarea className="fi" rows={5} value={sel.bilanReco||''} onChange={e=>upd({bilanReco:e.target.value})}
+              placeholder="À améliorer pour la prochaine fois..."/>
+          </div>
+        </div>
+      </div>}
+    </div>
+  </>;
+}
+
 function App(){
   const [cu,setCu]=useState(null);
   const [page,setPage]=useState('dashboard');
