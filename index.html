@@ -3455,7 +3455,7 @@ function Admin({user,users,setUsers,resources,setResources,modules,setModules,co
         const eleve=users.find(u=>u.id===eleveId);
         if(eleve){
           const ln=eleve.name.trim().split(/\s+/).slice(-1)[0];
-          const famId='fam_'+ln.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+          const famId='fam_'+ln.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
           const allGroups=updated.filter(c=>c.eleveIds.includes(eleveId));
           const mats=[...new Set(allGroups.map(c=>c.matiere))];
           const montant=mats.length*TARIF_BASE;
@@ -5544,35 +5544,48 @@ function App(){
   useEffect(()=>{
     if(!cu) return;
     (async()=>{
-      setDataReady(false);
-      const [u,r,mo,fa,di,de,ct,
-             ap,g,en,sa,at,ce,cc] = await Promise.all([
-        // tableaux normalisés
-        sbLoad('users',            SEED_USERS),
-        sbLoad('ressources',       SEED_RES),
-        sbLoad('modules',          SEED_MOD),
-        sbLoad('factures',         SEED_FACTURES),
-        sbLoad('dispos',           []),
-        sbLoad('demandes',         []),
-        sbLoad('trophees_custom',  []),
-        // objets JSON stockés dans kv_store
-        sbLoadKV('appel',           'global', SEED_APPEL),
-        sbLoadKV('grades',          'global', SEED_GRADES),
-        sbLoadKV('enrollments',     'global', SEED_ENR),
-        sbLoadKV('salaires',        'global', SEED_SALAIRES),
-        sbLoadKV('trophees_awarded','global', {}),
-        sbLoadKV('inscriptions',     'global', []),
-        sbLoadKV('comp_etats',      cu.id,    {}),
-        sbLoadKV('custom_comps',    cu.id,    []),
-      ]);
-      // cours dans kv_store également (eleveIds est un tableau JSON)
-      const [co,ins_data,so] = await Promise.all([sbLoadKV('cours','global',SEED_COURS),sbLoadKV('inscriptions','global',[]),sbLoadKV('sorties','global',[])]);
-      setUsers(u); setResources(r); setModules(mo); setFactures(fa);
-      setDispos(di); setDemandes(de); setCustomTrophies(ct);
-      setAppel(ap); setGrades(g); setEnrollments(en); setSalaires(sa);
-      setAwardedTrophies(at); setCompEtats(ce); setCustomComps(cc);
-      setCours(co); setInscriptions(ins_data); setSorties(so);
-      setDataReady(true);
+      try {
+        setDataReady(false);
+        const [u,r,mo,fa,di,de,ct,
+               ap,g,en,sa,at,ce,cc] = await Promise.all([
+          // tableaux normalisés
+          sbLoad('users',            SEED_USERS),
+          sbLoad('ressources',       SEED_RES),
+          sbLoad('modules',          SEED_MOD),
+          sbLoad('factures',         SEED_FACTURES),
+          sbLoad('dispos',           []),
+          sbLoad('demandes',         []),
+          sbLoad('trophees_custom',  []),
+          // objets JSON stockés dans kv_store
+          sbLoadKV('appel',           'global', SEED_APPEL),
+          sbLoadKV('grades',          'global', SEED_GRADES),
+          sbLoadKV('enrollments',     'global', SEED_ENR),
+          sbLoadKV('salaires',        'global', SEED_SALAIRES),
+          sbLoadKV('trophees_awarded','global', {}),
+          sbLoadKV('inscriptions',     'global', []),
+          sbLoadKV('comp_etats',      cu.id,    {}),
+          sbLoadKV('custom_comps',    cu.id,    []),
+        ]);
+        // cours + sorties dans kv_store (eleveIds est un tableau JSON)
+        const [co,ins_data] = await Promise.all([
+          sbLoadKV('cours','global',SEED_COURS),
+          sbLoadKV('inscriptions','global',[]),
+        ]);
+        // sorties dans kv_store (chargé séparément pour isoler les erreurs)
+        let so = [];
+        try { so = await sbLoadKV('sorties','global',[]); } catch(_) { so = []; }
+        setUsers(u); setResources(r); setModules(mo); setFactures(fa);
+        setDispos(di); setDemandes(de); setCustomTrophies(ct);
+        setAppel(ap); setGrades(g); setEnrollments(en); setSalaires(sa);
+        setAwardedTrophies(at); setCompEtats(ce); setCustomComps(cc);
+        setCours(co); setInscriptions(ins_data); setSorties(so);
+        setDataReady(true);
+      } catch(loadErr) {
+        console.error('[App] Erreur chargement données:', loadErr);
+        // Charger les données seed en cas d'erreur pour ne pas bloquer
+        setUsers(SEED_USERS); setCours(SEED_COURS); setFactures(SEED_FACTURES);
+        setDataReady(true);
+      }
     })();
   },[cu?.id]);
 
