@@ -1088,11 +1088,10 @@ function generatePlanningPDF(cours, users, filtres){
   if(filtres.matiere&&filtres.matiere!=='toutes') filtered=filtered.filter(c=>c.matiere===filtres.matiere);
   if(filtres.niveau&&filtres.niveau!=='tous') filtered=filtered.filter(c=>c.niveau===filtres.niveau);
 
-  // Plage horaire
-  const allDebuts=filtered.map(c=>c.debut);const allFins=filtered.map(c=>c.fin);
-  const H_START=filtered.length?Math.max(8,Math.floor(Math.min(...allDebuts))):9;
-  const H_END  =filtered.length?Math.min(22,Math.ceil(Math.max(...allFins))):21;
-  const nHours =H_END-H_START;
+  // Plage horaire FIXE — toute la journée pour avoir un template cohérent
+  const H_START=8;
+  const H_END=22;
+  const nHours=H_END-H_START;
   const today=new Date().toLocaleDateString('fr-FR');
 
   // ── Layout ──
@@ -1247,18 +1246,40 @@ function generatePlanningPDF(cours, users, filtres){
     });
   });
 
-  // ── LÉGENDE NIVEAUX ──
-  const nivPresents=[...new Set(filtered.map(c=>c.niveau))];
-  const legItems=Object.entries(NCLR).filter(([k])=>nivPresents.includes(k));
-  let lx=ML+TIME_W;const ly=GRID_BOT+2;
-  legItems.forEach(([niv,clr])=>{
-    const tw=doc.getTextWidth(niv)*5.5/10+3;
-    doc.setFillColor(...clr.bg);doc.roundedRect(lx,ly,tw+8,4.5,0.5,0.5,'F');
-    doc.setFillColor(...clr.bd);doc.rect(lx,ly,1.8,4.5,'F');
-    doc.setDrawColor(...clr.bd);doc.setLineWidth(0.2);doc.roundedRect(lx,ly,tw+8,4.5,0.5,0.5,'S');
-    doc.setFont('helvetica','bold');doc.setFontSize(5.5);doc.setTextColor(...clr.tx);
-    doc.text(niv,lx+3,ly+3.2);
-    lx+=tw+11;
+  // ── LÉGENDE COMPLÈTE PAR NIVEAU ──
+  // Titre légende
+  const ly=GRID_BOT+2;
+  doc.setFont('helvetica','bold');doc.setFontSize(6);doc.setTextColor(80,90,110);
+  doc.text('LÉGENDE — Couleurs par niveau :',ML,ly+3.5);
+
+  // Tous les niveaux affichés, avec ceux présents mis en avant
+  const nivPresents=new Set(filtered.map(c=>c.niveau));
+  const allLegItems=Object.entries(NCLR);
+  let lx=ML+TIME_W+2;const legY=ly;
+  allLegItems.forEach(([niv,clr])=>{
+    const isPresent=nivPresents.has(niv);
+    const alpha=isPresent?1:0.45;
+    // Box
+    const boxW=doc.getTextWidth(niv)*(6/10)+10;
+    // Background (lighter if not present)
+    const bg=isPresent?clr.bg:clr.bg.map(v=>Math.round(v+(255-v)*0.5));
+    doc.setFillColor(...bg);
+    doc.roundedRect(lx,legY,boxW,5.5,0.8,0.8,'F');
+    // Left accent
+    doc.setFillColor(...(isPresent?clr.bd:clr.bd.map(v=>Math.round(v+(255-v)*0.5))));
+    doc.rect(lx,legY,2,5.5,'F');
+    // Border
+    doc.setDrawColor(...(isPresent?clr.bd:clr.bd.map(v=>Math.round(v+(255-v)*0.5))));
+    doc.setLineWidth(isPresent?0.3:0.15);
+    doc.roundedRect(lx,legY,boxW,5.5,0.8,0.8,'S');
+    // Gold shimmer for Terminale
+    if(niv==='Terminale'&&isPresent){doc.setFillColor(255,215,0);doc.rect(lx+2,legY,boxW-2,1,'F');}
+    // Text
+    doc.setFont('helvetica',isPresent?'bold':'normal');
+    doc.setFontSize(isPresent?6:5.5);
+    doc.setTextColor(...(isPresent?clr.tx:clr.tx.map(v=>Math.round(v+(180-v)*0.5))));
+    doc.text(niv,lx+3,legY+3.8);
+    lx+=boxW+3;
   });
 
   // ── FOOTER ──
