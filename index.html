@@ -1298,6 +1298,30 @@ function EmploiDuTemps({user,users,cours,setCours,modules,enrollments,dispos=[]}
   const byDay=DAYS.reduce((acc,d)=>{acc[d]=filteredCours.filter(c=>c.jour===d);return acc;},{});
   const hasData=filteredCours.length>0||myMods.length>0;
 
+  // ── Overlap layout pour le Visualiser (même logique que PlanningEditor) ──
+  const ttOverlapLayout=useMemo(()=>{
+    const map={};
+    DAYS.forEach(jour=>{
+      const slots=filteredCours.filter(c=>c.jour===jour).sort((a,b)=>a.debut-b.debut);
+      const colEnd=[];
+      slots.forEach(s=>{
+        let col=colEnd.findIndex(end=>end<=s.debut);
+        if(col===-1)col=colEnd.length;
+        colEnd[col]=s.fin;map[s.id]={col};
+      });
+      slots.forEach(s=>{
+        const ov=slots.filter(o=>o.debut<s.fin&&o.fin>s.debut);
+        map[s.id].total=Math.max(...ov.map(o=>map[o.id]?.col??0))+1;
+      });
+      slots.forEach(s=>{
+        const ov=slots.filter(o=>o.debut<s.fin&&o.fin>s.debut);
+        const maxT=Math.max(...ov.map(o=>map[o.id].total));
+        ov.forEach(o=>{map[o.id].total=maxT;});
+      });
+    });
+    return map;
+  },[filteredCours]);
+
   const [weekOffset,setWeekOffset]=useState(0);
   const getWeekStart=(off=0)=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-d.getDay()+1+off*7);return d;};
   const weekStart=getWeekStart(weekOffset);
@@ -1398,7 +1422,15 @@ function EmploiDuTemps({user,users,cours,setCours,modules,enrollments,dispos=[]}
                     const clr=nc(c.niveau);const top=(c.debut-H_START)*CH+1;const height=(c.fin-c.debut)*CH-2;
                     const eleveNames=users.filter(u=>c.eleveIds.includes(u.id)).map(u=>u.name.split(' ').slice(-1)[0]);
                     const profName=users.find(u=>u.id===c.profId)?.name.split(' ').slice(-1)[0];
-                    return <div key={c.id} className="tt-event" style={{top,height,background:clr.bg,border:`1.5px solid ${clr.bd}`,borderLeft:`3px solid ${clr.bd}`}}>
+                    const ol=ttOverlapLayout[c.id]||{col:0,total:1};
+                    const pct=100/ol.total;
+                    return <div key={c.id} className="tt-event" style={{
+                      top,height,background:clr.bg,
+                      border:`1.5px solid ${clr.bd}`,borderLeft:`3px solid ${clr.bd}`,
+                      left:`calc(${ol.col*pct}% + 2px)`,
+                      width:`calc(${pct}% - 4px)`,
+                      right:'auto'
+                    }}>
                       <div className="tt-ev-ttl" style={{color:clr.tx}}>{c.matiere}</div>
                       <div className="tt-ev-sub" style={{color:clr.tx,opacity:.85,fontWeight:700}}>{c.niveau}</div>
                       <div className="tt-ev-time" style={{color:'var(--muted)'}}>{hs(c.debut)}–{hs(c.fin)}</div>
@@ -2648,19 +2680,74 @@ function PlanningEditor({users,cours,setCours}){
           );})}
         </div>
       </div>
-      {/* Conflict preview */}
+      {/* ── Panneau d'impact ── */}
       {(()=>{
-        const preview={...slotForm,id:editSlot||'__new__',debut:parseFloat(slotForm.debut),fin:parseFloat(slotForm.fin)};
-        const others=cours.filter(c=>c.id!==editSlot&&c.jour===preview.jour&&preview.debut<c.fin&&c.debut<preview.fin);
-        const pConflicts=[];
-        others.forEach(c=>{
-          if(c.profId===preview.profId){const p=users.find(u=>u.id===c.profId);pConflicts.push(`⚠️ Prof ${p?.name.split(' ').slice(-1)[0]} déjà sur ${c.matiere} ${c.niveau}`);}
+        const deb=parseFloat(slotForm.debut);const fin=parseFloat(slotForm.fin);
+        if(!slotForm.profId||isNaN(deb)||isNaN(fin)||deb>=fin)return null;
+        const preview={...slotForm,id:editSlot||'__new__',debut:deb,fin};
+        const duree=fin-deb;
+        const tarifH=35; // €/h par élève (taux moyen)
+
+        // ── Conflits simultanés ──
+        const simult=cours.filter(c=>c.id!==editSlot&&c.jour===preview.jour&&deb<c.fin&&c.debut<fin);
+        const conflicts=[];
+        simult.forEach(c=>{
+          if(c.profId===preview.profId){const p=users.find(u=>u.id===c.profId);conflicts.push({type:'err',msg:`${p?.name.split(' ').slice(-1)[0]} simultané sur ${c.matiere} ${c.niveau} (${hs(c.debut)}–${hs(c.fin)})`});}
           const shared=preview.eleveIds.filter(id=>c.eleveIds.includes(id));
-          shared.forEach(id=>{const e=users.find(u=>u.id===id);pConflicts.push(`⚠️ ${e?.name} déjà inscrit sur ${c.matiere} ${c.niveau}`);});
+          shared.forEach(id=>{const e=users.find(u=>u.id===id);conflicts.push({type:'err',msg:`${e?.name} simultané sur ${c.matiere} ${c.niveau}`});});
         });
-        return pConflicts.length>0?<div style={{background:'#FFF0F0',border:'1.5px solid var(--err)',borderRadius:2,padding:'9px 12px',marginTop:4}}>
-          {pConflicts.map((c,i)=><div key={i} style={{fontSize:12,color:'var(--err)'}}>{c}</div>)}
-        </div>:null;
+
+        // ── Enchaînements serrés (<30min de battement) ──
+        const nearby=cours.filter(c=>c.id!==editSlot&&c.jour===preview.jour&&(
+          (c.fin<=deb&&deb-c.fin<0.5) || (c.debut>=fin&&c.debut-fin<0.5)
+        ));
+        nearby.forEach(c=>{
+          const gap=c.debut>=fin?c.debut-fin:deb-c.fin;
+          const gapMin=Math.round(gap*60);
+          if(c.profId===preview.profId){const p=users.find(u=>u.id===c.profId);conflicts.push({type:'warn',msg:`${p?.name.split(' ').slice(-1)[0]} enchaîne ${c.matiere} ${c.niveau} avec seulement ${gapMin}min de battement`});}
+          const shared=preview.eleveIds.filter(id=>c.eleveIds.includes(id));
+          shared.forEach(id=>{const e=users.find(u=>u.id===id);conflicts.push({type:'warn',msg:`${e?.name} enchaîne avec ${c.matiere} ${c.niveau} (${gapMin}min)`});});
+        });
+
+        // ── Rentabilité prévisionnelle ──
+        const nbEleves=preview.eleveIds.length;
+        const revMois=nbEleves*tarifH*duree*4; // ~4 semaines/mois
+        const prevC=editSlot?cours.find(c=>c.id===editSlot):null;
+        const prevEleves=prevC?prevC.eleveIds.length:0;
+        const prevRev=prevEleves*tarifH*(prevC?prevC.fin-prevC.debut:0)*4;
+        const deltaRev=revMois-prevRev;
+
+        return <div style={{marginTop:12,borderTop:'1.5px solid var(--cream2)',paddingTop:10}}>
+          {/* Rentabilité */}
+          <div style={{display:'flex',gap:10,marginBottom:8,flexWrap:'wrap'}}>
+            <div style={{flex:1,background:'#F0F6FF',border:'1.5px solid #C8D8F5',borderRadius:4,padding:'10px 14px'}}>
+              <div style={{fontSize:10,color:'#6b7ab5',textTransform:'uppercase',letterSpacing:.5,marginBottom:4,fontWeight:700}}>💰 Rentabilité prévisionnelle</div>
+              <div style={{fontSize:18,fontWeight:700,color:'#1a3a8c'}}>{revMois}€<span style={{fontSize:11,fontWeight:400,color:'#6b7ab5'}}>/mois</span></div>
+              <div style={{fontSize:11,color:'#6b7ab5',marginTop:2}}>{nbEleves} élève{nbEleves>1?'s':''} × {tarifH}€/h × {duree}h × 4 sem.</div>
+              {editSlot&&prevC&&deltaRev!==0&&<div style={{marginTop:4,fontSize:12,fontWeight:700,color:deltaRev>0?'#059669':'#DC2626'}}>
+                {deltaRev>0?'↑':''}{deltaRev<0?'↓':''} {deltaRev>0?'+':''}{deltaRev}€/mois vs actuel ({prevRev}€)
+              </div>}
+            </div>
+            <div style={{flex:1,background:conflicts.length?'#FFF8E0':'#F0FDF4',border:`1.5px solid ${conflicts.length?'#F5D882':'#86EFAC'}`,borderRadius:4,padding:'10px 14px'}}>
+              <div style={{fontSize:10,textTransform:'uppercase',letterSpacing:.5,marginBottom:4,fontWeight:700,color:conflicts.length?'#C47A00':'#059669'}}>
+                {conflicts.length?'⚠️':'✅'} Analyse des conflits
+              </div>
+              <div style={{fontSize:13,fontWeight:700,color:conflicts.length?'#C47A00':'#059669'}}>
+                {conflicts.filter(c=>c.type==='err').length} conflit{conflicts.filter(c=>c.type==='err').length>1?'s':''} direct{conflicts.filter(c=>c.type==='err').length>1?'s':''}
+              </div>
+              <div style={{fontSize:11,color:'var(--muted)',marginTop:2}}>
+                {conflicts.filter(c=>c.type==='warn').length} enchaînement{conflicts.filter(c=>c.type==='warn').length>1?'s':''} serré{conflicts.filter(c=>c.type==='warn').length>1?'s':''}
+              </div>
+            </div>
+          </div>
+          {/* Détail conflits */}
+          {conflicts.length>0&&<div style={{display:'flex',flexDirection:'column',gap:4}}>
+            {conflicts.map((c,i)=><div key={i} style={{display:'flex',alignItems:'flex-start',gap:7,padding:'6px 10px',background:c.type==='err'?'#FFF0F0':'#FFFCE8',border:`1px solid ${c.type==='err'?'#FECACA':'#FDE68A'}`,borderRadius:3,fontSize:12,color:c.type==='err'?'#B91C1C':'#92400E'}}>
+              <span style={{flexShrink:0}}>{c.type==='err'?'🔴':'🟡'}</span>{c.msg}
+            </div>)}
+          </div>}
+          {conflicts.length===0&&<div style={{fontSize:12,color:'#059669',padding:'4px 0'}}>✅ Aucun conflit ni enchaînement problématique détecté.</div>}
+        </div>;
       })()}
       <div className="fa">
         {editSlot&&<button className="btn btn-d" onClick={()=>{deleteSlot(editSlot);setShowSlot(false);}}>🗑️ Supprimer</button>}
