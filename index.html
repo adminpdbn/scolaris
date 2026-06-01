@@ -7861,6 +7861,11 @@ function App(){
   const [pub,setPub]=useState('landing'); // landing | login | inscription
   const [demandesWeb,setDemandesWeb]=useState([]);
   useEffect(()=>{ try{window.scrollTo(0,0);}catch(_){ } },[pub]);
+  const openPub=(v)=>{ try{window.history.pushState({pubView:v},'');}catch(_){ } setPub(v); };
+  const backPub=()=>{ try{ if(window.history.state&&window.history.state.pubView){window.history.back();}else{setPub('landing');} }catch(_){ setPub('landing'); } };
+  const skipPushRef=React.useRef(false);
+  useEffect(()=>{ if(!cu)return; if(skipPushRef.current){skipPushRef.current=false;return;} try{window.history.pushState({appPage:page},'');}catch(_){ } },[page,cu]);
+  useEffect(()=>{ const onPop=(e)=>{ const st=(e&&e.state)||{}; if(st.appPage){ skipPushRef.current=true; setPage(st.appPage); } else if(st.pubView){ setPub(st.pubView); } else { setPub('landing'); } }; window.addEventListener('popstate',onPop); return ()=>window.removeEventListener('popstate',onPop); },[]);
   const [dataReady,setDataReady]=useState(false); // true quand données chargées
 
   const [users,setUsers]=useState(SEED_USERS);
@@ -7989,11 +7994,11 @@ function App(){
   useEffect(()=>{ if(dataReady) sbDebounce('sv_chg',   ()=>sbSaveKV('charges',      charges,     'global')); },[charges]);
 
   const login=(u)=>{ setCu(u); setPage('dashboard'); };
-  const logout=async()=>{ await sb.auth.signOut(); setCu(null); };
+  const logout=async()=>{ await sb.auth.signOut(); setCu(null); setPub('landing'); };
 
   if(!appReady) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',background:'#111',color:'var(--gold)',fontFamily:'var(--ff-mono)',fontSize:14,letterSpacing:1}}>⟳ Chargement…</div>;
 
-  if(!cu){ if(pub==='login') return <Login onLogin={login} onBack={()=>setPub('landing')}/>; if(pub==='inscription') return <Inscription onBack={()=>setPub('landing')} onLogin={()=>setPub('login')}/>; return <Landing onLogin={()=>setPub('login')} onInscription={()=>setPub('inscription')}/>; }
+  if(!cu){ if(pub==='login') return <Login onLogin={login} onBack={backPub}/>; if(pub==='inscription') return <Inscription onBack={backPub} onLogin={()=>openPub('login')}/>; return <Landing onLogin={()=>openPub('login')} onInscription={()=>openPub('inscription')}/>; }
 
   if(!dataReady) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',background:'var(--cream2)',color:'var(--navy)',fontFamily:'var(--ff-mono)',fontSize:13,letterSpacing:.5}}>
     <div style={{textAlign:'center'}}>
