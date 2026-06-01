@@ -484,6 +484,38 @@ textarea.lp-in{resize:vertical;}
 .lp-mission-pt .ic{font-size:18px;}
 .lp-mission-pt h4{font-family:var(--ff-serif);font-size:13.5px;margin:5px 0 3px;color:var(--cream);}
 .lp-mission-pt p{font-size:12px;color:rgba(245,240,232,.65);margin:0;line-height:1.6;}
+
+/* ══ OPTIMISATION SMARTPHONE (iOS / Android) ══ */
+html{-webkit-text-size-adjust:100%;}
+@media(max-width:600px){
+  /* Empêche le zoom auto d'iOS au focus des champs */
+  input, select, textarea, .lp-in, .fi { font-size:16px !important; }
+  /* Barre du haut compacte, autorise le retour à la ligne */
+  .lp-nav{flex-wrap:wrap;gap:8px;padding:10px 14px;}
+  .lp-nav-brand{font-size:15px;}
+  .lp-nav .lp-btn{padding:9px 13px;font-size:12px;}
+  /* Hero plus court, boutons empilés pleine largeur */
+  .lp-hero{padding:46px 18px 52px;}
+  .lp-hero-cta{flex-direction:column;align-items:stretch;}
+  .lp-stats{gap:18px 22px;}
+  .lp-stat-n{font-size:28px;}
+  /* Sections resserrées */
+  .lp-sec{padding:40px 18px;}
+  .lp-mission{padding:34px 18px;}
+  .lp-cta-band{padding:42px 18px;}
+  /* Cibles tactiles plus grandes */
+  .lp-btn{min-height:46px;display:inline-flex;align-items:center;justify-content:center;}
+  /* Bouton flottant : respecte la zone sûre iPhone */
+  .lp-fab{bottom:calc(14px + env(safe-area-inset-bottom));right:14px;}
+  /* Blocs tarifs / dégressif en pleine largeur */
+  .lp-deg{max-width:100%;}
+  .lp-form-sec{margin:18px 0 10px;}
+  .lp-contact-grid{gap:14px 22px;}
+}
+@media(max-width:380px){
+  .lp-nav-brand{font-size:14px;}
+  .lp-nav .lp-btn{padding:8px 10px;font-size:11px;}
+}
 </style>
 </head>
 <body>
@@ -7290,10 +7322,10 @@ function Landing({onLogin,onInscription}){
       kicker:'Notre engagement',
       titre1:'Le talent est partout,',
       titreEm:'le réseau non.',
-      texte:"En complément des cours, nous bâtissons un réseau d'entreprises partenaires pour trouver à nos élèves des stages de qualité dès le collège — parce qu'en zone d'éducation prioritaire, le manque de réseau ne doit jamais primer sur le mérite.",
+      texte:"En complément des cours, nous mettons notre réseau de contacts au service de nos élèves pour les aider à trouver de bons stages dès le collège — parce qu'en zone d'éducation prioritaire, les relations ne devraient jamais compter plus que le mérite.",
       texte2:"Nous refusons cette inégalité de départ. Nous tissons un réseau d'entreprises partenaires et accompagnons nos élèves, dès le collège et le lycée, vers des stages de qualité et bien placés — pour qu'ils découvrent le monde du travail dans les meilleures conditions, quel que soit leur milieu d'origine.",
       points:[
-        {ic:'🤝',t:'Un réseau ouvert',d:'Des entreprises partenaires qui accueillent réellement nos élèves.'},
+        {ic:'🤝',t:'Nos contacts à leur service',d:'Nous activons notre réseau pour aider nos élèves à décrocher un stage.'},
         {ic:'🎓',t:'Des stages qui comptent',d:'Collège et lycée : de vraies expériences, pas du remplissage.'},
         {ic:'⚖️',t:'Le mérite, pas le carnet d\'adresses',d:'Donner à chacun les mêmes chances au départ.'},
       ],
