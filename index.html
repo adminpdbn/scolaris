@@ -491,9 +491,11 @@ html{-webkit-text-size-adjust:100%;}
   /* Empêche le zoom auto d'iOS au focus des champs */
   input, select, textarea, .lp-in, .fi { font-size:16px !important; }
   /* Barre du haut compacte, autorise le retour à la ligne */
-  .lp-nav{flex-wrap:wrap;gap:8px;padding:10px 14px;}
-  .lp-nav-brand{font-size:15px;}
-  .lp-nav .lp-btn{padding:9px 13px;font-size:12px;}
+  .lp-nav{flex-direction:column;align-items:stretch;gap:9px;padding:10px 14px;}
+  .lp-nav>div:last-child{display:flex;gap:8px;}
+  .lp-nav>div:last-child .lp-btn{flex:1;padding:11px 6px;font-size:12px;white-space:nowrap;}
+  .lp-nav-brand{justify-content:center;font-size:15px;}
+  
   /* Hero plus court, boutons empilés pleine largeur */
   .lp-hero{padding:46px 18px 52px;}
   .lp-hero-cta{flex-direction:column;align-items:stretch;}
@@ -514,7 +516,7 @@ html{-webkit-text-size-adjust:100%;}
 }
 @media(max-width:380px){
   .lp-nav-brand{font-size:14px;}
-  .lp-nav .lp-btn{padding:8px 10px;font-size:11px;}
+  .lp-nav>div:last-child .lp-btn{font-size:11px;padding:10px 4px;}
 }
 </style>
 </head>
