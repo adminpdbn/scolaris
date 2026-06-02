@@ -1994,7 +1994,8 @@ function MonProgramme({user,users,cours,resources,compEtats,setCompEtats,customC
   ];
 
   // Resources filtered by student's matières
-  const myResources=resources.filter(r=>myMats.has(r.matiere)||r.matiere==='Multi');
+  const myCoursIds=new Set(myCours.map(c=>c.id));
+  const myResources=resources.filter(r=>r.coursId?myCoursIds.has(r.coursId):(myMats.has(r.matiere)||r.matiere==='Multi'));
 
   const getEtat=(tid)=>(compEtats[user.id]||{})[tid]||{statut:'non_commence'};
   const requestWork=(tid)=>setCompEtats(p=>({...p,[user.id]:{...(p[user.id]||{}),[tid]:{...getEtat(tid),statut:'en_cours',date:new Date().toISOString().split('T')[0]}}}));
@@ -2150,12 +2151,15 @@ function Bibliotheque({user,users,resources,setResources,cours=[],compEtats={}})
   const [q,setQ]=useState('');
   const [show,setShow]=useState(false);
   const [showGN,setShowGN]=useState(false);
-  const [form,setForm]=useState({title:'',type:'trace',matiere:'Mathématiques',niveau:'3ème',desc:'',devoirs:'',commentaires:''});
+  const [form,setForm]=useState({title:'',type:'trace',matiere:'Mathématiques',niveau:'3ème',desc:'',devoirs:'',commentaires:'',coursId:''});
   const [gnStep,setGnStep]=useState('upload');
   const [gnFile,setGnFile]=useState(null);
   const [gnPreview,setGnPreview]=useState(null);
   const [gnError,setGnError]=useState('');
   const canM=user.role==='admin'||user.role==='prof';
+  const myGroupes=user.role==='admin'?cours:cours.filter(c=>c.profId===user.id);
+  const coursLabelB=(id)=>{const c=cours.find(x=>x.id===id);return c?(c.matiere+' '+c.niveau+' — '+c.jour):'';};
+  const myCoursIdsB=useMemo(()=>new Set(cours.filter(c=>c.eleveIds.includes(user.id)).map(c=>c.id)),[cours,user]);
   // Élève : ses matières + son niveau uniquement
   const myMatieres=useMemo(()=>{
     if(user.role!=='eleve')return null; // null = no filter
@@ -2176,7 +2180,7 @@ function Bibliotheque({user,users,resources,setResources,cours=[],compEtats={}})
   const TYPES=['Tous','fiche','exercice','trace','cours'];
   const filtered=useMemo(()=>resources.filter(r=>{
     // Élève : voir seulement ses matières
-    if(myMatieres&&!myMatieres.has(r.matiere)&&r.matiere!=='Multi'&&r.matiere!=='Général')return false;
+    if(myMatieres){ if(r.coursId){ if(!myCoursIdsB.has(r.coursId))return false; } else if(!myMatieres.has(r.matiere)&&r.matiere!=='Multi'&&r.matiere!=='Général')return false; }
     if(ft!=='Tous'&&r.type!==ft)return false;
     if(fm!=='Toutes'&&r.matiere!==fm)return false;
     if(q&&!r.title.toLowerCase().includes(q.toLowerCase()))return false;
@@ -2254,7 +2258,7 @@ function Bibliotheque({user,users,resources,setResources,cours=[],compEtats={}})
             <span style={{fontSize:11,color:'var(--muted)'}}>{r.date}</span>
           </div>
           <div className="rc-ttl">{r.title}</div>
-          <div className="rc-meta"><span>📖 {r.matiere}</span><span>🎯 {r.niveau}</span>{a&&<span>👤 {a.name.split(' ').slice(-1)[0]}</span>}</div>
+          <div className="rc-meta"><span>📖 {r.matiere}</span><span>🎯 {r.niveau}</span>{r.coursId&&<span>👥 {coursLabelB(r.coursId)}</span>}{a&&<span>👤 {a.name.split(' ').slice(-1)[0]}</span>}</div>
           <p style={{fontSize:12,color:'var(--muted)',margin:'8px 0 0',lineHeight:1.5}}>{r.desc}</p>
           {r.devoirs&&<div className="gn-devoir">📌 <strong>Devoirs :</strong> {r.devoirs}</div>}
           {r.commentaires&&<div style={{background:'#EEF5FF',borderRadius:2,padding:'7px 10px',fontSize:12,borderLeft:'3px solid var(--gold)',marginTop:6}}>💬 <strong>Commentaires :</strong> {r.commentaires}</div>}
@@ -2271,6 +2275,7 @@ function Bibliotheque({user,users,resources,setResources,cours=[],compEtats={}})
     </div>
     {show&&<Modal title="Ajouter une ressource" onClose={()=>setShow(false)}>
       <div className="fg"><label className="fl">Titre *</label><input className="fi" value={form.title} onChange={e=>setForm({...form,title:e.target.value})} placeholder="Ex: Fiche — Les dérivées"/></div>
+      <div className="fg"><label className="fl">Groupe / cours</label><select className="fi" value={form.coursId||''} onChange={e=>{const id=e.target.value;const c=myGroupes.find(x=>x.id===id);setForm(f=>({...f,coursId:id,...(c?{matiere:c.matiere,niveau:c.niveau}:{})}));}}><option value="">— Ressource générale (par matière) —</option>{myGroupes.map(c=><option key={c.id} value={c.id}>{c.matiere} {c.niveau} — {c.jour}{c.salle?(' · '+c.salle):''}</option>)}</select></div>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
         <div className="fg"><label className="fl">Type</label><select className="fi" value={form.type} onChange={e=>setForm({...form,type:e.target.value})}>{['fiche','exercice','trace','cours'].map(t=><option key={t} value={t}>{TL[t]}</option>)}</select></div>
         <div className="fg"><label className="fl">Matière</label><select className="fi" value={form.matiere} onChange={e=>setForm({...form,matiere:e.target.value})}>{MATIERES.filter(m=>m!=='Toutes').map(m=><option key={m}>{m}</option>)}</select></div>
@@ -2309,6 +2314,7 @@ function Bibliotheque({user,users,resources,setResources,cours=[],compEtats={}})
       {gnStep==='result'&&<>
         <div style={{background:'#EEFFF6',border:'1.5px solid #2D9B6F',borderRadius:0,padding:'8px 14px',marginBottom:14,fontSize:12,color:'#1a6b46'}}>✅ Analyse terminée — vérifiez avant de publier.</div>
         <div className="fg"><label className="fl">Titre</label><input className="fi" value={form.title} onChange={e=>setForm({...form,title:e.target.value})}/></div>
+        <div className="fg"><label className="fl">Groupe / cours</label><select className="fi" value={form.coursId||''} onChange={e=>{const id=e.target.value;const c=myGroupes.find(x=>x.id===id);setForm(f=>({...f,coursId:id,...(c?{matiere:c.matiere,niveau:c.niveau}:{})}));}}><option value="">— Ressource générale (par matière) —</option>{myGroupes.map(c=><option key={c.id} value={c.id}>{c.matiere} {c.niveau} — {c.jour}{c.salle?(' · '+c.salle):''}</option>)}</select></div>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
           <div className="fg"><label className="fl">Matière</label><select className="fi" value={form.matiere} onChange={e=>setForm({...form,matiere:e.target.value})}>{MATIERES.filter(m=>m!=='Toutes').map(m=><option key={m}>{m}</option>)}</select></div>
           <div className="fg"><label className="fl">Niveau</label><select className="fi" value={form.niveau} onChange={e=>setForm({...form,niveau:e.target.value})}>{NIVEAUX.filter(n=>n!=='Tous').map(n=><option key={n}>{n}</option>)}</select></div>
@@ -3431,6 +3437,16 @@ function Inscriptions({user,users,setUsers,cours,setCours,inscriptions=[],setIns
   };
 
   // Activer : crée user + facture auto si déjà des cours possibles + ouvre assignation
+  const [showAcces,setShowAcces]=useState(false);
+  const [accesEmail,setAccesEmail]=useState('');
+  const [accesPwd,setAccesPwd]=useState('');
+  const [accesBusy,setAccesBusy]=useState(false);
+  const [accesErr,setAccesErr]=useState('');
+  const [accesMsg,setAccesMsg]=useState('');
+  const genPwd=()=>{ const c='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'; let s=''; for(let i=0;i<10;i++)s+=c[Math.floor(Math.random()*c.length)]; return s; };
+  const slugMail=s=>(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'.').replace(/^\.+|\.+$/g,'');
+  const ouvrirAcces=(eu)=>{ const base=eu.email||(slugMail(eu.name).slice(0,22)+'.'+String(eu.id||'').replace(/[^0-9]/g,'').slice(-4)+'@eleve.plusdebonnesnotes.com'); setAccesEmail(base); setAccesPwd(genPwd()); setAccesErr(''); setAccesMsg(''); setShowAcces(true); };
+  const creerAcces=async(eu)=>{ setAccesErr(''); setAccesMsg(''); const mail=accesEmail.toLowerCase().trim(); if(!mail||accesPwd.length<6){ setAccesErr('Indique un identifiant (email) et un mot de passe d\'au moins 6 caractères.'); return; } setAccesBusy(true); try{ const tmp=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:false,autoRefreshToken:false}}); const {data,error}=await tmp.auth.signUp({email:mail,password:accesPwd}); if(error){ setAccesErr('Échec : '+error.message); setAccesBusy(false); return; } if(!data||!data.session){ setAccesErr('Le compte n\'est pas actif immédiatement. Dans Supabase \u2192 Authentication \u2192 Providers \u2192 Email, désactive « Confirm email » puis recommence (ou cet email est déjà utilisé).'); setAccesBusy(false); return; } const authId=data.user.id; setUsers(p=>p.map(u=>u.id===eu.id?{...u,auth_id:authId}:u)); const note='Accès élève: '+mail; setInscriptions(p=>p.map(i=>i.id===selIns.id?{...i,notes:((i.notes&&i.notes.trim())?i.notes.trim()+' · ':'')+note}:i)); setSelIns(prev=>prev?{...prev,notes:((prev.notes&&prev.notes.trim())?prev.notes.trim()+' · ':'')+note}:prev); try{await tmp.auth.signOut();}catch(_){ } setAccesMsg('Accès créé. Transmets ces identifiants à la famille.'); }catch(e){ setAccesErr('Erreur : '+((e&&e.message)||'')); } setAccesBusy(false); };
   const activerIns=ins=>{
     if(ins.userId){alert("Cet élève est déjà dans l'effectif.");return;}
     const fullName=ins.prenom+' '+ins.nom;
@@ -3638,6 +3654,13 @@ function Inscriptions({user,users,setUsers,cours,setCours,inscriptions=[],setIns
               </>}
 
               {selIns.userId&&<>
+                {(()=>{ const eu=users.find(u=>u.id===selIns.userId); return <div style={{background:'#F3EEFF',border:'1.5px solid #d8d0ff',padding:'12px 16px',borderRadius:6,marginBottom:12}}>
+                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+                    <div style={{fontWeight:700,fontSize:13,color:'#7c3aed'}}>🔑 Accès élève</div>
+                    {eu&&eu.auth_id?<span style={{fontSize:12,color:'#1a7a4a',fontWeight:600}}>✓ Accès créé</span>:<button className="btn btn-p btn-sm" onClick={()=>{ if(eu)ouvrirAcces(eu); }}>Créer identifiant + mot de passe</button>}
+                  </div>
+                  <div style={{fontSize:11.5,color:'#6b5b95',marginTop:6}}>{eu&&eu.auth_id?'L\'élève peut se connecter à son profil avec cet identifiant.':'Crée un compte de connexion pour que l\'élève accède à son profil.'}</div>
+                </div>; })()}
                 <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
                   <div style={{fontSize:11,fontWeight:700,color:'#1a2340',textTransform:'uppercase',letterSpacing:.5}}>📚 Groupes assignés ({groupes.length})</div>
                   <button className="btn btn-p btn-sm" onClick={()=>setShowAssign(true)}>＋ Assigner / Modifier groupes</button>
@@ -3722,6 +3745,18 @@ function Inscriptions({user,users,setUsers,cours,setCours,inscriptions=[],setIns
     </Modal>}
 
     {/* Modal Assignation aux groupes */}
+    {showAcces&&selIns?.userId&&(()=>{ const eu=users.find(u=>u.id===selIns.userId); return <Modal title={'Accès élève — '+(eu?eu.name:'')} onClose={()=>setShowAcces(false)}>
+      <div className="fg"><label className="fl">Identifiant (email de connexion)</label>
+        <input className="fi" value={accesEmail} onChange={e=>setAccesEmail(e.target.value)} placeholder="prenom.nom@eleve.plusdebonnesnotes.com"/></div>
+      <div className="fg"><label className="fl">Mot de passe</label>
+        <div style={{display:'flex',gap:8}}>
+          <input className="fi" style={{flex:1}} value={accesPwd} onChange={e=>setAccesPwd(e.target.value)}/>
+          <button className="btn btn-o btn-sm" onClick={()=>setAccesPwd(genPwd())}>↻ Générer</button>
+        </div></div>
+      {accesErr?<div style={{background:'#fdecef',border:'1.5px solid #f3b8c2',color:'#b3243b',padding:'9px 13px',borderRadius:5,fontSize:12.5,marginBottom:8}}>{accesErr}</div>:null}
+      {accesMsg?<div style={{background:'#EEFFF6',border:'1.5px solid #b8dbb8',color:'#1a7a4a',padding:'9px 13px',borderRadius:5,fontSize:12.5,marginBottom:8}}>✓ {accesMsg}<div style={{marginTop:6,fontFamily:'monospace',color:'#1a2340',wordBreak:'break-all'}}>Identifiant : {accesEmail}<br/>Mot de passe : {accesPwd}</div></div>:null}
+      <div className="fa">{accesMsg?<button className="btn btn-p" onClick={()=>setShowAcces(false)}>Terminé</button>:<button className="btn btn-p" disabled={accesBusy} onClick={()=>{ const eu2=users.find(u=>u.id===selIns.userId); if(eu2)creerAcces(eu2); }}>{accesBusy?'Création…':'Créer l\'accès'}</button>}</div>
+    </Modal>; })()}
     {showAssign&&selIns?.userId&&<Modal title={`Assigner ${selIns.prenom} ${selIns.nom} aux groupes`} onClose={()=>setShowAssign(false)}>
       <div style={{background:'#EEF3FF',border:'1.5px solid #c8d8f5',padding:'10px 14px',borderRadius:4,marginBottom:14,fontSize:12,color:'#1a4fc4'}}>
         💡 La facture mensuelle se recalcule automatiquement à chaque modification : <strong>55€ par matière</strong>.
