@@ -3818,6 +3818,13 @@ function Admin({user,users,setUsers,resources,setResources,modules,setModules,co
   const [tab,setTab]=useState('users');
   const [show,setShow]=useState(false);
   const [form,setForm]=useState({name:'',role:'eleve',niveau:'3ème',matiere:''});
+  const [showAcces,setShowAcces]=useState(false);
+  const [accesUser,setAccesUser]=useState(null);
+  const [accesEmail,setAccesEmail]=useState('');
+  const [accesPwd,setAccesPwd]=useState('');
+  const [accesBusy,setAccesBusy]=useState(false);
+  const [accesErr,setAccesErr]=useState('');
+  const [accesMsg,setAccesMsg]=useState('');
   // Gestion groupes
   const [selCours,setSelCours]=useState(null);
   const [searchGroupe,setSearchGroupe]=useState('');
@@ -3829,6 +3836,7 @@ function Admin({user,users,setUsers,resources,setResources,modules,setModules,co
   const [usrNiveau,setUsrNiveau]=useState('tous');
   const [usrSort,setUsrSort]=useState('name');
   const [usrPage,setUsrPage]=useState(1);
+  const [usrSansGroupe,setUsrSansGroupe]=useState(false);
   const PAGE_SIZE=50;
   // Inscriptions
   const [showIns,setShowIns]=useState(false);
@@ -3875,6 +3883,11 @@ function Admin({user,users,setUsers,resources,setResources,modules,setModules,co
     setUsers(p=>[...p,{id:'u'+Date.now(),...form,initials}]);
     setShow(false);setForm({name:'',role:'eleve',niveau:'3ème',matiere:''});
   };
+  const genPwd=()=>{ const c='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'; let s=''; for(let i=0;i<10;i++)s+=c[Math.floor(Math.random()*c.length)]; return s; };
+  const slugMail=s=>(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'.').replace(/^\.+|\.+$/g,'');
+  const domByRole=r=>r==='prof'?'prof.plusdebonnesnotes.com':r==='admin'?'plusdebonnesnotes.com':'eleve.plusdebonnesnotes.com';
+  const ouvrirAccesU=(u)=>{ const base=u.email||(slugMail(u.name).slice(0,24)+'@'+domByRole(u.role)); setAccesUser(u); setAccesEmail(base); setAccesPwd(genPwd()); setAccesErr(''); setAccesMsg(''); setShowAcces(true); };
+  const creerAccesU=async()=>{ const u=accesUser; if(!u)return; setAccesErr(''); setAccesMsg(''); const mail=accesEmail.toLowerCase().trim(); if(!mail||accesPwd.length<6){ setAccesErr('Indique un identifiant (email) et un mot de passe d\'au moins 6 caractères.'); return; } setAccesBusy(true); try{ const tmp=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:false,autoRefreshToken:false}}); const {data,error}=await tmp.auth.signUp({email:mail,password:accesPwd}); if(error){ setAccesErr('Échec : '+error.message); setAccesBusy(false); return; } if(!data||!data.session){ setAccesErr('Compte non actif immédiatement : désactive « Confirm email » dans Supabase (Auth → Providers → Email) puis recommence (ou cet email est déjà utilisé).'); setAccesBusy(false); return; } const authId=data.user.id; setUsers(p=>p.map(x=>x.id===u.id?{...x,auth_id:authId}:x)); try{await tmp.auth.signOut();}catch(_){ } setAccesMsg('Accès créé. Transmets ces identifiants à la personne.'); }catch(e){ setAccesErr('Erreur : '+((e&&e.message)||'')); } setAccesBusy(false); };
   const delUser=(id)=>{if(id===user.id){alert('Impossible de supprimer votre propre compte.');return;}setUsers(p=>p.filter(u=>u.id!==id));sbDelete('users',id);};
 
   // Toggle élève dans un cours → propagé instantanément aux listes d'appel + facture auto recalculée
@@ -3918,6 +3931,7 @@ function Admin({user,users,setUsers,resources,setResources,modules,setModules,co
         const q=usrSearch.toLowerCase();
         let list=users.filter(u=>{
           if(usrRole!=='tous'&&u.role!==usrRole)return false;
+          if(usrSansGroupe&&(u.role!=='eleve'||cours.some(c=>c.eleveIds.includes(u.id))))return false;
           if(usrNiveau!=='tous'&&u.role==='eleve'&&u.niveau!==usrNiveau)return false;
           if(!q)return true;
           return (u.name||'').toLowerCase().includes(q)||
@@ -3956,12 +3970,12 @@ function Admin({user,users,setUsers,resources,setResources,modules,setModules,co
           {/* Mini-stats */}
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(130px,1fr))',gap:8,marginBottom:14}}>
             {[
-              {icon:'🎓',val:cntEleves,label:'Élèves',col:'#1a4fc4',bg:'#f4f7ff',action:()=>setUsrRole('eleve')},
-              {icon:'👨‍🏫',val:cntProfs,label:'Professeurs',col:'#1a2340',bg:'#f5f3ff',action:()=>setUsrRole('prof')},
-              {icon:'⚙️',val:cntAdmins,label:'Admins',col:'#c47a00',bg:'#fff8e0',action:()=>setUsrRole('admin')},
-              {icon:'⚠️',val:sansGroupe,label:'Élèves sans groupe',col:'#b02020',bg:'#fff0f0',action:null},
+              {icon:'🎓',val:cntEleves,label:'Élèves',col:'#1a4fc4',bg:'#f4f7ff',active:usrRole==='eleve'&&!usrSansGroupe,action:()=>{setUsrSansGroupe(false);setUsrRole('eleve');setUsrPage(1);}},
+              {icon:'👨‍🏫',val:cntProfs,label:'Professeurs',col:'#1a2340',bg:'#f5f3ff',active:usrRole==='prof',action:()=>{setUsrSansGroupe(false);setUsrRole('prof');setUsrPage(1);}},
+              {icon:'⚙️',val:cntAdmins,label:'Admins',col:'#c47a00',bg:'#fff8e0',active:usrRole==='admin',action:()=>{setUsrSansGroupe(false);setUsrRole('admin');setUsrPage(1);}},
+              {icon:'⚠️',val:sansGroupe,label:'Élèves sans groupe',col:'#b02020',bg:'#fff0f0',active:usrSansGroupe,action:()=>{setUsrRole('eleve');setUsrSansGroupe(true);setUsrNiveau('tous');setUsrPage(1);}},
             ].map((k,i)=>(
-              <div key={i} onClick={k.action||(()=>{})} style={{background:k.bg,border:`1.5px solid ${k.col}40`,borderRadius:6,padding:'10px 12px',cursor:k.action?'pointer':'default',transition:'all .15s'}}>
+              <div key={i} onClick={k.action||(()=>{})} style={{background:k.bg,border:`1.5px solid ${k.active?k.col:k.col+'40'}`,borderRadius:6,padding:'10px 12px',cursor:k.action?'pointer':'default',transition:'all .15s',boxShadow:k.active?`0 0 0 2px ${k.col}33`:'none'}}>
                 <div style={{display:'flex',alignItems:'center',gap:8}}>
                   <span style={{fontSize:18}}>{k.icon}</span>
                   <div>
@@ -3980,7 +3994,7 @@ function Admin({user,users,setUsers,resources,setResources,modules,setModules,co
                 style={{width:'100%',padding:'7px 30px 7px 12px',border:'1.5px solid #dde3f0',borderRadius:4,fontSize:12,fontFamily:'var(--ff-mono)'}}/>
               {usrSearch&&<button onClick={()=>setUsrSearch('')} style={{position:'absolute',right:8,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',color:'#aaa',fontSize:12}}>✕</button>}
             </div>
-            <select value={usrRole} onChange={e=>{setUsrRole(e.target.value);setUsrPage(1);}} style={{padding:'6px 10px',border:'1.5px solid #dde3f0',borderRadius:4,fontSize:11,background:'white',fontFamily:'var(--ff-mono)'}}>
+            <select value={usrRole} onChange={e=>{setUsrRole(e.target.value);setUsrSansGroupe(false);setUsrPage(1);}} style={{padding:'6px 10px',border:'1.5px solid #dde3f0',borderRadius:4,fontSize:11,background:'white',fontFamily:'var(--ff-mono)'}}>
               <option value="tous">Tous rôles</option>
               <option value="eleve">🎓 Élèves</option>
               <option value="prof">👨‍🏫 Professeurs</option>
@@ -3997,7 +4011,7 @@ function Admin({user,users,setUsers,resources,setResources,modules,setModules,co
               <option value="niveau">Tri : Niveau</option>
               <option value="groupes">Tri : Nb groupes ↓</option>
             </select>
-            {(usrSearch||usrRole!=='tous'||usrNiveau!=='tous')&&<button onClick={()=>{setUsrSearch('');setUsrRole('tous');setUsrNiveau('tous');setUsrPage(1);}} style={{padding:'5px 10px',background:'#fff0f0',color:'#b02020',border:'1.5px solid #f5b8b8',borderRadius:4,fontSize:11,cursor:'pointer',fontWeight:600}}>✕ Réinitialiser</button>}
+            {(usrSearch||usrRole!=='tous'||usrNiveau!=='tous'||usrSansGroupe)&&<button onClick={()=>{setUsrSearch('');setUsrRole('tous');setUsrNiveau('tous');setUsrSansGroupe(false);setUsrPage(1);}} style={{padding:'5px 10px',background:'#fff0f0',color:'#b02020',border:'1.5px solid #f5b8b8',borderRadius:4,fontSize:11,cursor:'pointer',fontWeight:600}}>✕ Réinitialiser</button>}
           </div>
           {/* Bandeau résultats */}
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',fontSize:11,color:'var(--muted)',marginBottom:8,padding:'0 4px'}}>
@@ -4007,12 +4021,12 @@ function Admin({user,users,setUsers,resources,setResources,modules,setModules,co
           {/* Tableau compact */}
           {total===0?<div className="emp" style={{padding:'40px 20px'}}><div className="emp-icon">🔍</div><h3>Aucun résultat</h3><p>Essayez d'élargir vos filtres.</p></div>:
           <div style={{background:'white',border:'1.5px solid #e0e8f5',borderRadius:6,overflow:'hidden'}}>
-            <div style={{display:'grid',gridTemplateColumns:'2fr 90px 1fr 120px 110px',gap:0,padding:'8px 14px',background:'#f8faff',borderBottom:'2px solid #e8ecf5',fontSize:10,fontWeight:700,textTransform:'uppercase',letterSpacing:.6,color:'#8892b0'}}>
+            <div style={{display:'grid',gridTemplateColumns:'2fr 90px 1fr 120px 150px',gap:0,padding:'8px 14px',background:'#f8faff',borderBottom:'2px solid #e8ecf5',fontSize:10,fontWeight:700,textTransform:'uppercase',letterSpacing:.6,color:'#8892b0'}}>
               <span>Nom</span><span>Rôle</span><span>Détails</span><span>Groupes / Contact</span><span style={{textAlign:'right'}}>Actions</span>
             </div>
             {visible.map(u=>{
               const groupes=cours.filter(c=>c.eleveIds.includes(u.id));
-              return<div key={u.id} style={{display:'grid',gridTemplateColumns:'2fr 90px 1fr 120px 110px',gap:0,padding:'8px 14px',borderBottom:'1px solid #f0f4fc',alignItems:'center',background:'white',transition:'background .15s'}}
+              return<div key={u.id} style={{display:'grid',gridTemplateColumns:'2fr 90px 1fr 120px 150px',gap:0,padding:'8px 14px',borderBottom:'1px solid #f0f4fc',alignItems:'center',background:'white',transition:'background .15s'}}
                 onMouseEnter={e=>e.currentTarget.style.background='#fafbff'}
                 onMouseLeave={e=>e.currentTarget.style.background='white'}>
                 <div style={{display:'flex',alignItems:'center',gap:9,minWidth:0}}>
@@ -4031,6 +4045,7 @@ function Admin({user,users,setUsers,resources,setResources,modules,setModules,co
                 </div>
                 <div style={{display:'flex',gap:4,justifyContent:'flex-end'}}>
                   {u.role==='eleve'&&<button className="btn btn-sm" style={{background:'#EEF3FF',border:'1.5px solid #C8D8F5',color:'var(--info)',fontSize:10,padding:'3px 7px'}} onClick={()=>{setFicheForm({name:u.name,niveau:u.niveau||'3ème',etablissement:u.etablissement||'',dateNaissance:u.dateNaissance||'',parentNom:u.parentNom||'',parentTel:u.parentTel||'',parentEmail:u.parentEmail||'',adresse:u.adresse||'',notes:u.notes||''});setFicheEleve(u);}}>📋</button>}
+                  {u.auth_id?<span title="Accès de connexion créé" style={{fontSize:11,color:'#1a7a4a',fontWeight:700,alignSelf:'center'}}>🔑✓</span>:<button className="btn btn-sm" style={{background:'#F3EEFF',border:'1.5px solid #d8d0ff',color:'#7c3aed',fontSize:10,padding:'3px 7px'}} onClick={()=>ouvrirAccesU(u)} title="Créer un accès de connexion">🔑</button>}
                   <button className="btn btn-d btn-sm" style={{fontSize:10,padding:'3px 7px'}} onClick={()=>delUser(u.id)}>🗑️</button>
                 </div>
               </div>;
@@ -4265,6 +4280,14 @@ function Admin({user,users,setUsers,resources,setResources,modules,setModules,co
       </div>
     </Modal>}
 
+    {showAcces&&accesUser&&<Modal title={'Accès de connexion — '+accesUser.name} onClose={()=>setShowAcces(false)} width="460px">
+      <div style={{fontSize:12,color:'var(--muted)',marginBottom:12}}>Rôle : <strong>{RL[accesUser.role]||accesUser.role}</strong></div>
+      <div className="fg"><label className="fl">Identifiant (email de connexion)</label><input className="fi" value={accesEmail} onChange={e=>setAccesEmail(e.target.value)}/></div>
+      <div className="fg"><label className="fl">Mot de passe</label><div style={{display:'flex',gap:8}}><input className="fi" style={{flex:1}} value={accesPwd} onChange={e=>setAccesPwd(e.target.value)}/><button className="btn btn-o btn-sm" onClick={()=>setAccesPwd(genPwd())}>↻ Générer</button></div></div>
+      {accesErr?<div style={{background:'#fdecef',border:'1.5px solid #f3b8c2',color:'#b3243b',padding:'9px 13px',borderRadius:5,fontSize:12.5,marginBottom:8}}>{accesErr}</div>:null}
+      {accesMsg?<div style={{background:'#EEFFF6',border:'1.5px solid #b8dbb8',color:'#1a7a4a',padding:'9px 13px',borderRadius:5,fontSize:12.5,marginBottom:8}}>✓ {accesMsg}<div style={{marginTop:6,fontFamily:'monospace',color:'#1a2340',wordBreak:'break-all'}}>Identifiant : {accesEmail}<br/>Mot de passe : {accesPwd}</div></div>:null}
+      <div className="fa">{accesMsg?<button className="btn btn-p" onClick={()=>setShowAcces(false)}>Terminé</button>:<button className="btn btn-p" disabled={accesBusy} onClick={creerAccesU}>{accesBusy?'Création…':'Créer l\'accès'}</button>}</div>
+    </Modal>}
     {show&&<Modal title="Ajouter un utilisateur" onClose={()=>setShow(false)}>
       <div className="fg"><label className="fl">Nom complet *</label><input className="fi" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Ex: Lucas Moreau"/></div>
       <div className="fg"><label className="fl">Rôle</label><select className="fi" value={form.role} onChange={e=>setForm({...form,role:e.target.value})}><option value="eleve">Élève</option><option value="prof">Professeur</option><option value="admin">Administrateur</option></select></div>
