@@ -910,13 +910,47 @@ const COMP_STATUTS={
 
 
 // ─── MODAL ───
-function Modal({title,onClose,children}){
+function Modal({title,onClose,children,width}){
   return <div className="mo" onClick={e=>e.target===e.currentTarget&&onClose()}>
-    <div className="mo-box">
+    <div className="mo-box" style={width?{maxWidth:width}:undefined}>
       <div className="mo-hd"><h2 className="mo-ttl">{title}</h2><button className="mo-x" onClick={onClose}>✕</button></div>
       {children}
     </div>
   </div>;
+}
+
+function PlanningPicker({cours=[],users=[],isSelected,onPick,niveauHint}){
+  const [fa,setFa]=useState('Toutes');
+  const [fm,setFm]=useState('Toutes');
+  const JOURS=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+  const annees=['Toutes',...Array.from(new Set(cours.map(c=>c.anneeScolaire).filter(Boolean)))];
+  const matsF=['Toutes',...Array.from(new Set(cours.map(c=>c.matiere)))];
+  const filtered=cours.filter(c=>(fa==='Toutes'||c.anneeScolaire===fa)&&(fm==='Toutes'||c.matiere===fm));
+  const block=c=>{
+    const ins=isSelected?isSelected(c):false;
+    const prof=users.find(u=>u.id===c.profId);
+    const sug=niveauHint&&c.niveau===niveauHint;
+    return <div key={c.id} onClick={()=>onPick&&onPick(c)} style={{cursor:'pointer',border:`2px solid ${ins?'var(--gold)':'var(--cream2)'}`,background:ins?'#EEF5FF':'white',borderRadius:4,padding:'6px 8px',marginBottom:6,position:'relative'}}>
+      <div style={{fontSize:11,fontWeight:700,color:'var(--navy)'}}>{hs(c.debut)}–{hs(c.fin)}{sug?<span title="Niveau de l'élève" style={{marginLeft:5}}>💡</span>:null}</div>
+      <div style={{marginTop:2}}><span style={{...getCoursBadge(c.matiere),fontSize:10,padding:'1px 6px',borderRadius:2,fontWeight:700}}>{c.matiere}</span></div>
+      <div style={{fontSize:10.5,color:'var(--muted)',marginTop:2}}>{c.niveau} · 📍 {c.salle||'—'}</div>
+      <div style={{fontSize:10.5,color:'var(--muted)'}}>👨‍🏫 {prof?prof.name.split(' ').slice(-1)[0]:'—'} · {(c.eleveIds||[]).length} él.</div>
+      {ins?<span style={{position:'absolute',top:6,right:7,color:'var(--gold)',fontWeight:700}}>✓</span>:null}
+    </div>;
+  };
+  return <>
+    <div style={{display:'flex',gap:12,marginBottom:12,flexWrap:'wrap'}}>
+      <div><div style={{fontSize:10,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',marginBottom:3}}>Année scolaire</div><select value={fa} onChange={e=>setFa(e.target.value)} style={{padding:'6px 9px',border:'1.5px solid var(--cream2)',borderRadius:4,fontSize:12}}>{annees.map(a=><option key={a} value={a}>{a}</option>)}</select></div>
+      <div><div style={{fontSize:10,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',marginBottom:3}}>Matière</div><select value={fm} onChange={e=>setFm(e.target.value)} style={{padding:'6px 9px',border:'1.5px solid var(--cream2)',borderRadius:4,fontSize:12}}>{matsF.map(m=><option key={m} value={m}>{m}</option>)}</select></div>
+    </div>
+    <div style={{display:'flex',gap:8,overflowX:'auto',paddingBottom:6}}>
+      {JOURS.map(j=>{const dayC=filtered.filter(c=>c.jour===j).sort((a,b)=>a.debut-b.debut);if(dayC.length===0)return null;return <div key={j} style={{minWidth:158,flex:'1 1 0'}}>
+        <div style={{fontSize:11,fontWeight:700,textTransform:'uppercase',letterSpacing:.5,color:'var(--navy)',borderBottom:'2px solid var(--cream2)',paddingBottom:4,marginBottom:6}}>{j}</div>
+        {dayC.map(block)}
+      </div>;})}
+      {filtered.length===0?<div style={{padding:'16px',color:'var(--muted)',fontSize:12}}>Aucun créneau pour ce filtre.</div>:null}
+    </div>
+  </>;
 }
 
 // ─── LOGIN ───
@@ -3383,6 +3417,7 @@ function Inscriptions({user,users,setUsers,cours,setCours,inscriptions=[],setIns
   const MATIERES_INS=['Mathématiques','Français','Physique','Histoire','Anglais','SVT','Philosophie','Informatique'];
   const STATUT_LBL={nouveau:{l:'Nouveau',c:'#1a4fc4',bg:'#EEF3FF',border:'#c8d8f5',icon:'🆕'},
                     actif:{l:'Actif',c:'#1a7a4a',bg:'#EEFFF6',border:'#b8dbb8',icon:'✓'},
+                    inactif:{l:'Inactif',c:'#b3243b',bg:'#fdecef',border:'#f3b8c2',icon:'⏸'},
                     archive:{l:'Archivé',c:'#888',bg:'#f5f5f5',border:'#ddd',icon:'📦'}};
 
   // KPIs
@@ -3500,7 +3535,7 @@ function Inscriptions({user,users,setUsers,cours,setCours,inscriptions=[],setIns
         <button className={`tab ${vue==='web'?'on':''}`} onClick={()=>setVue('web')}>🌐 Demandes web{nbWebNouveau>0?<span style={{marginLeft:6,background:'#1a4fc4',color:'#fff',borderRadius:10,padding:'1px 7px',fontSize:10}}>{nbWebNouveau}</span>:null}</button>
         <button className={`tab ${vue==='gestion'?'on':''}`} onClick={()=>setVue('gestion')}>📋 Inscriptions gérées</button>
       </div>
-      {vue==='web' && <DemandesWeb demandes={demandesWeb} setDemandes={setDemandesWeb} cours={cours} setInscriptions={setInscriptions} goGestion={()=>setVue('gestion')}/>}
+      {vue==='web' && <DemandesWeb demandes={demandesWeb} setDemandes={setDemandesWeb} cours={cours} setInscriptions={setInscriptions} goGestion={()=>setVue('gestion')} users={users}/>}
       {vue==='gestion' && <>
       {/* KPIs */}
       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:10,marginBottom:18}}>
@@ -3658,6 +3693,10 @@ function Inscriptions({user,users,setUsers,cours,setCours,inscriptions=[],setIns
               </>}
 
               {selIns.userId&&<>
+                {(()=>{ const ina=selIns.statut==='inactif'; return <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:8,background:ina?'#fdecef':'#EEFFF6',border:`1.5px solid ${ina?'#f3b8c2':'#b8dbb8'}`,padding:'10px 14px',borderRadius:6,marginBottom:12}}>
+                  <div style={{fontSize:12.5,fontWeight:700,color:ina?'#b3243b':'#1a7a4a'}}>{ina?'⏸ Élève inactif':'✓ Élève actif'}</div>
+                  <button className={ina?'btn btn-p btn-sm':'btn btn-o btn-sm'} onClick={()=>{const ns=ina?'actif':'inactif'; setInscriptions(p=>p.map(i=>i.id===selIns.id?{...i,statut:ns}:i)); setSelIns(prev=>prev?{...prev,statut:ns}:prev);}}>{ina?'Réactiver':'Passer en inactif'}</button>
+                </div>; })()}
                 {(()=>{ const eu=users.find(u=>u.id===selIns.userId); return <div style={{background:'#F3EEFF',border:'1.5px solid #d8d0ff',padding:'12px 16px',borderRadius:6,marginBottom:12}}>
                   <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:8,flexWrap:'wrap'}}>
                     <div style={{fontWeight:700,fontSize:13,color:'#7c3aed'}}>🔑 Accès élève</div>
@@ -3761,47 +3800,15 @@ function Inscriptions({user,users,setUsers,cours,setCours,inscriptions=[],setIns
       {accesMsg?<div style={{background:'#EEFFF6',border:'1.5px solid #b8dbb8',color:'#1a7a4a',padding:'9px 13px',borderRadius:5,fontSize:12.5,marginBottom:8}}>✓ {accesMsg}<div style={{marginTop:6,fontFamily:'monospace',color:'#1a2340',wordBreak:'break-all'}}>Identifiant : {accesEmail}<br/>Mot de passe : {accesPwd}</div></div>:null}
       <div className="fa">{accesMsg?<button className="btn btn-p" onClick={()=>setShowAcces(false)}>Terminé</button>:<button className="btn btn-p" disabled={accesBusy} onClick={()=>{ const eu2=users.find(u=>u.id===selIns.userId); if(eu2)creerAcces(eu2); }}>{accesBusy?'Création…':'Créer l\'accès'}</button>}</div>
     </Modal>; })()}
-    {showAssign&&selIns?.userId&&<Modal title={`Assigner ${selIns.prenom} ${selIns.nom} aux groupes`} onClose={()=>setShowAssign(false)}>
+    {showAssign&&selIns?.userId&&<Modal title={`Attribuer des créneaux à ${selIns.prenom} ${selIns.nom}`} onClose={()=>setShowAssign(false)} width="min(1100px, 94vw)">
       <div style={{background:'#EEF3FF',border:'1.5px solid #c8d8f5',padding:'10px 14px',borderRadius:4,marginBottom:14,fontSize:12,color:'#1a4fc4'}}>
         💡 La facture mensuelle se recalcule automatiquement selon la grille dégressive de la page d'accueil, <strong>au nombre de créneaux</strong> (65 € pour 1 créneau, puis dégressif).
       </div>
-      {(()=>{
-        const JOURS=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
-        const annees=['Toutes',...Array.from(new Set(cours.map(c=>c.anneeScolaire).filter(Boolean)))];
-        const matsF=['Toutes',...Array.from(new Set(cours.map(c=>c.matiere)))];
-        const filtered=cours.filter(c=>(filAnnee==='Toutes'||c.anneeScolaire===filAnnee)&&(filMat==='Toutes'||c.matiere===filMat));
-        const selectedCours=cours.filter(c=>c.eleveIds.includes(selIns.userId));
-        const block=c=>{
-          const ins=c.eleveIds.includes(selIns.userId);
-          const prof=users.find(u=>u.id===c.profId);
-          const sug=c.niveau===selIns.niveau;
-          return <div key={c.id} onClick={()=>toggleAssign(c.id,selIns.userId)} style={{cursor:'pointer',border:`2px solid ${ins?'var(--gold)':'var(--cream2)'}`,background:ins?'#EEF5FF':'white',borderRadius:4,padding:'6px 8px',marginBottom:6,position:'relative'}}>
-            <div style={{fontSize:11,fontWeight:700,color:'var(--navy)'}}>{hs(c.debut)}–{hs(c.fin)}{sug&&<span title="Niveau de l'élève" style={{marginLeft:5}}>💡</span>}</div>
-            <div style={{marginTop:2}}><span style={{...getCoursBadge(c.matiere),fontSize:10,padding:'1px 6px',borderRadius:2,fontWeight:700}}>{c.matiere}</span></div>
-            <div style={{fontSize:10.5,color:'var(--muted)',marginTop:2}}>{c.niveau} · 📍 {c.salle||'—'}</div>
-            <div style={{fontSize:10.5,color:'var(--muted)'}}>👨‍🏫 {prof?prof.name.split(' ').slice(-1)[0]:'—'} · {c.eleveIds.length} él.</div>
-            {ins&&<span style={{position:'absolute',top:6,right:7,color:'var(--gold)',fontWeight:700}}>✓</span>}
-          </div>;
-        };
-        return <>
-          <div style={{display:'flex',gap:12,marginBottom:12,flexWrap:'wrap'}}>
-            <div><div style={{fontSize:10,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',marginBottom:3}}>Année scolaire</div><select value={filAnnee} onChange={e=>setFilAnnee(e.target.value)} style={{padding:'6px 9px',border:'1.5px solid var(--cream2)',borderRadius:4,fontSize:12}}>{annees.map(a=><option key={a} value={a}>{a}</option>)}</select></div>
-            <div><div style={{fontSize:10,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',marginBottom:3}}>Matière</div><select value={filMat} onChange={e=>setFilMat(e.target.value)} style={{padding:'6px 9px',border:'1.5px solid var(--cream2)',borderRadius:4,fontSize:12}}>{matsF.map(m=><option key={m} value={m}>{m}</option>)}</select></div>
-          </div>
-          <div style={{fontSize:11,color:'var(--muted)',marginBottom:8}}>Clique sur un créneau pour l'attribuer (ou le retirer). Tu peux en sélectionner plusieurs.</div>
-          <div style={{display:'flex',gap:8,overflowX:'auto',paddingBottom:6}}>
-            {JOURS.map(j=>{const dayC=filtered.filter(c=>c.jour===j).sort((a,b)=>a.debut-b.debut);if(dayC.length===0)return null;return <div key={j} style={{minWidth:158,flex:'0 0 auto'}}>
-              <div style={{fontSize:11,fontWeight:700,textTransform:'uppercase',letterSpacing:.5,color:'var(--navy)',borderBottom:'2px solid var(--cream2)',paddingBottom:4,marginBottom:6}}>{j}</div>
-              {dayC.map(block)}
-            </div>;})}
-            {filtered.length===0&&<div style={{padding:'16px',color:'var(--muted)',fontSize:12}}>Aucun créneau pour ce filtre.</div>}
-          </div>
-          <div style={{marginTop:12,padding:'10px 12px',background:'#F3EEFF',border:'1.5px solid #d8d0ff',borderRadius:4,fontSize:12}}>
-            <strong>{selectedCours.length}</strong> créneau{selectedCours.length>1?'x':''} attribué{selectedCours.length>1?'s':''}{selectedCours.length>0?' : ':''}{selectedCours.map(c=>c.matiere+' '+c.jour+' '+hs(c.debut)).join(' · ')}
-            {selectedCours.length>0&&<div style={{marginTop:4,color:'#7c3aed',fontWeight:600}}>Forfait : {tarifMensuel(selectedCours.length)} €/mois</div>}
-          </div>
-        </>;
-      })()}
+      <PlanningPicker cours={cours} users={users} niveauHint={selIns.niveau} isSelected={c=>c.eleveIds.includes(selIns.userId)} onPick={c=>toggleAssign(c.id,selIns.userId)}/>
+      {(()=>{ const selectedCours=cours.filter(c=>c.eleveIds.includes(selIns.userId)); return <div style={{marginTop:12,padding:'10px 12px',background:'#F3EEFF',border:'1.5px solid #d8d0ff',borderRadius:4,fontSize:12}}>
+        <strong>{selectedCours.length}</strong> créneau{selectedCours.length>1?'x':''} attribué{selectedCours.length>1?'s':''}{selectedCours.length>0?' : ':''}{selectedCours.map(c=>c.matiere+' '+c.jour+' '+hs(c.debut)).join(' · ')}
+        {selectedCours.length>0?<div style={{marginTop:4,color:'#7c3aed',fontWeight:600}}>Forfait : {tarifMensuel(selectedCours.length)} €/mois</div>:null}
+      </div>; })()}
       <div className="fa"><button className="btn btn-p" onClick={()=>setShowAssign(false)}>✓ Terminé</button></div>
     </Modal>}
   </>;
@@ -7675,7 +7682,7 @@ function Inscription({onBack,onLogin}){
 }
 
 // ═══════════════════ GESTION DES DEMANDES WEB (admin) ═══════════════════
-function DemandesWeb({demandes=[],setDemandes,cours=[],setInscriptions,goGestion}){
+function DemandesWeb({demandes=[],setDemandes,cours=[],setInscriptions,goGestion,users=[]}){
   const [filt,setFilt]=useState('tous');
   const [busy,setBusy]=useState(false);
   const ST={
@@ -7695,6 +7702,7 @@ function DemandesWeb({demandes=[],setDemandes,cours=[],setInscriptions,goGestion
   const fmtH=h=>{ if(h==null||isNaN(h))return''; const hh=Math.floor(h),mm=Math.round((h-hh)*60); return hh+'h'+(mm?String(mm).padStart(2,'0'):''); };
   const coursLabel=c=>c?`${c.matiere} — ${c.jour} ${fmtH(c.debut)}${c.fin?'-'+fmtH(c.fin):''}${c.niveau?' ('+c.niveau+')':''}${c.salle?' · '+c.salle:''}`:'';
   const coursById=id=>cours.find(c=>c.id===id);
+  const [planFor,setPlanFor]=useState(null);
   const fmtDate=d=>{ if(!d.created_at)return''; try{return new Date(d.created_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});}catch(_){return'';} };
   return <div>
     <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center',marginBottom:14}}>
@@ -7738,10 +7746,7 @@ function DemandesWeb({demandes=[],setDemandes,cours=[],setInscriptions,goGestion
               </div>
               <div style={{display:'flex',flexDirection:'column',gap:4,flex:1,minWidth:160}}>
                 <label style={{fontSize:10,textTransform:'uppercase',color:'var(--muted)',letterSpacing:.5}}>Créneau attribué</label>
-                <select value={d.creneau||''} onChange={e=>patch(d.id,{creneau:e.target.value, statut:e.target.value?'creneau':(d.statut||'nouveau')})} style={{padding:'6px 10px',border:'1.5px solid #dde3f0',borderRadius:4,fontSize:12,fontFamily:'var(--ff-mono)',maxWidth:'100%'}}>
-                  <option value="">— Aucun créneau —</option>
-                  {cours.map(c=><option key={c.id} value={c.id}>{coursLabel(c)}</option>)}
-                </select>
+                <button onClick={()=>setPlanFor(d)} style={{padding:'6px 10px',border:'1.5px solid #dde3f0',borderRadius:4,fontSize:12,fontFamily:'var(--ff-mono)',background:'white',cursor:'pointer',textAlign:'left',maxWidth:'100%'}}>📅 {d.creneau&&coursById(d.creneau)?coursLabel(coursById(d.creneau)):'Choisir un créneau…'}</button>
               </div>
               <div style={{display:'flex',flexDirection:'column',gap:4,flex:1,minWidth:160}}>
                 <label style={{fontSize:10,textTransform:'uppercase',color:'var(--muted)',letterSpacing:.5}}>Note interne</label>
@@ -7753,6 +7758,10 @@ function DemandesWeb({demandes=[],setDemandes,cours=[],setInscriptions,goGestion
           </div>
         );})}
       </div>}
+      {planFor&&<Modal title="Attribuer un créneau" onClose={()=>setPlanFor(null)} width="min(1100px, 94vw)">
+        <div style={{fontSize:12,color:'var(--muted)',marginBottom:10}}>Clique sur le créneau à attribuer à <strong>{planFor.prenom} {planFor.nom}</strong>. Cela passe la demande en « Créneau attribué ».</div>
+        <PlanningPicker cours={cours} users={users} niveauHint={planFor.niveau} isSelected={c=>c.id===planFor.creneau} onPick={c=>{patch(planFor.id,{creneau:c.id,statut:'creneau'}); setPlanFor(null);}}/>
+      </Modal>}
   </div>;
 }
 
