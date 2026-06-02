@@ -3,13 +3,16 @@
 <html lang="fr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <title>Plus de bonnes notes — Soutien Scolaire v4</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Special+Elite&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
 <style>
 /* ── LO-FI THEME ── */
@@ -535,10 +538,11 @@ html{-webkit-text-size-adjust:100%;}
   .lp-wa-wrap{bottom:calc(14px + env(safe-area-inset-bottom));left:14px;}
   .lp-wa{font-size:12px;padding:10px 13px;}
 }
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
-<div id="root"></div>
+<div id="root"><div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f5f0e8;gap:16px;font-family:monospace;color:#1a1a1a"><div style="width:36px;height:36px;border:3px solid #d8d2c4;border-top-color:#1a4fc4;border-radius:50%;animation:spin .8s linear infinite"></div><div style="font-size:13px;letter-spacing:1px;opacity:.7">Chargement…</div></div></div>
 <script type="text/babel">
 const { useState, useEffect, useMemo } = React;
 
@@ -3476,7 +3480,7 @@ function Inscriptions({user,users,setUsers,cours,setCours,inscriptions=[],setIns
         <button className={`tab ${vue==='web'?'on':''}`} onClick={()=>setVue('web')}>🌐 Demandes web{nbWebNouveau>0?<span style={{marginLeft:6,background:'#1a4fc4',color:'#fff',borderRadius:10,padding:'1px 7px',fontSize:10}}>{nbWebNouveau}</span>:null}</button>
         <button className={`tab ${vue==='gestion'?'on':''}`} onClick={()=>setVue('gestion')}>📋 Inscriptions gérées</button>
       </div>
-      {vue==='web' && <DemandesWeb demandes={demandesWeb} setDemandes={setDemandesWeb} cours={cours}/>}
+      {vue==='web' && <DemandesWeb demandes={demandesWeb} setDemandes={setDemandesWeb} cours={cours} setInscriptions={setInscriptions} goGestion={()=>setVue('gestion')}/>}
       {vue==='gestion' && <>
       {/* KPIs */}
       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:10,marginBottom:18}}>
@@ -7366,9 +7370,9 @@ function Landing({onLogin,onInscription}){
       {l:'Primaire — 4×1h30/sem',v:"90 € / mois (3,75 €/h) + 10 € la 1re fois"},
     ],
     adresse:'75, rue Rateau, 93120 La Courneuve',
-    horaires:[{j:'Lundi – Vendredi',h:"fin d'après-midi"},{j:'Samedi & Dimanche',h:'matin (créneaux prisés)'},{j:'Vacances scolaires',h:'stages de révision'}],
+    horaires:[{j:'Lundi – Vendredi',h:'17h – 21h15'},{j:'Samedi & Dimanche',h:'9h – 20h'}],
     dates:[
-      {j:'Fin des cours',h:'Dim. 28 juin 2026'},
+      {j:'Fin des cours',h:'Dim. 28 juin 2026'},{j:'Fermeture estivale',h:'29 juin → 24 août inclus'},
       {j:'Reprise admin.',h:'24–30 août, 15h–19h'},
       {j:'Rentrée pédago.',h:'Mar. 1er sept. 2026'},
     ],
@@ -7518,7 +7522,7 @@ function Landing({onLogin,onInscription}){
 
 // ═══════════════════ FORMULAIRE D'INSCRIPTION PUBLIC ═══════════════════
 function Inscription({onBack,onLogin}){
-  const NIV=['Primaire','6ème','5ème','4ème','3ème','Seconde','Première','Terminale','Supérieur / Post-bac'];
+  const NIV=['CP','CE1','CE2','CM1','CM2','6ème','5ème','4ème','3ème','Seconde','Première','Terminale','Supérieur / Post-bac'];
   const MAT=['Mathématiques','Maths expertes','Physique-Chimie','Français','Histoire-Géo','SVT','Philosophie','Anglais','Anglais Cambridge','Arabe','Tamoul','Orthophonie','Aide aux devoirs','Prépa scientifique'];
   const OBJ=['Remise à niveau','Perfectionnement / approfondissement','Préparation examen (Brevet, Bac…)','Aide aux devoirs','Cours particuliers','Autre'];
   const SRC=['Bouche à oreille','Recherche Google','Réseaux sociaux','Élève / ancien élève','Flyer / affiche','Autre'];
@@ -7526,6 +7530,7 @@ function Inscription({onBack,onLogin}){
   const [sent,setSent]=useState(false);
   const [err,setErr]=useState('');
   const [busy,setBusy]=useState(false);
+  const [file,setFile]=useState(null);
   const upd=(k,v)=>setF(p=>({...p,[k]:v}));
   const toggleM=m=>setF(p=>({...p,matieres:p.matieres.includes(m)?p.matieres.filter(x=>x!==m):[...p.matieres,m]}));
   const submit=async()=>{
@@ -7541,6 +7546,7 @@ function Inscription({onBack,onLogin}){
       details:{date_naissance:f.date_naissance,etablissement:f.etablissement.trim(),parent_prenom:f.parent_prenom.trim(),parent_tel2:f.parent_tel2.trim(),ville:f.ville.trim(),code_postal:f.code_postal.trim(),objectif:f.objectif,source:f.source},
     };
     try{
+      if(file){ try{ const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_'); const path=rec.id+'_'+safe; const up=await sb.storage.from('justificatifs').upload(path,file,{upsert:true}); if(!up.error){ rec.details.justificatif_path=path; rec.details.justificatif_nom=file.name; } }catch(_){ } }
       const {error}=await sb.from('inscriptions_web').insert([rec]);
       if(error){console.error("[inscription] Supabase:",error);setErr("L'envoi a échoué : "+(error.message||"erreur inconnue")+". Réessayez ou contactez-nous par téléphone.");setBusy(false);return;}
       setSent(true);
@@ -7560,7 +7566,9 @@ function Inscription({onBack,onLogin}){
       <div className="lp-ok">
         <div className="lp-ok-ic">✓</div>
         <h2>Demande envoyée !</h2>
-        <p>Merci, votre demande d'inscription a bien été enregistrée. Notre équipe vous recontactera très rapidement pour finaliser l'inscription et attribuer un créneau. Pour un retour plus rapide, privilégiez le SMS au 06 37 23 88 50.</p>
+        <p>Merci, votre demande a bien été enregistrée. Vous serez prochainement contacté par nos services de secrétariat et de comptabilité, et vos identifiants de connexion (identifiant et mot de passe) vous seront transmis.</p>
+        <p style={{marginTop:12}}>S'il s'agit d'une première inscription chez nous, nous vous contacterons pour convenir d'un premier rendez-vous obligatoire de présentation de l'établissement, afin de finaliser et sécuriser le paiement.</p>
+        <p style={{marginTop:12}}>Pour un retour plus rapide, privilégiez le SMS au 06 37 23 88 50.</p>
         <button className="lp-btn" onClick={onBack}>Retour à l'accueil</button>
       </div>
     ) : (
@@ -7598,8 +7606,14 @@ function Inscription({onBack,onLogin}){
           <div className="lp-form-grid">
             <div className="lp-fg"><label>Objectif principal</label><select className="lp-in" value={f.objectif} onChange={e=>upd('objectif',e.target.value)}><option value="">— Choisir —</option>{OBJ.map(o=><option key={o} value={o}>{o}</option>)}</select></div>
             <div className="lp-fg"><label>Comment nous avez-vous connus ?</label><select className="lp-in" value={f.source} onChange={e=>upd('source',e.target.value)}><option value="">— Choisir —</option>{SRC.map(o=><option key={o} value={o}>{o}</option>)}</select></div>
-            <div className="lp-fg full"><label>Créneau / jours souhaités</label><input className="lp-in" value={f.creneau_souhaite} onChange={e=>upd('creneau_souhaite',e.target.value)} placeholder="Ex : mercredi après-midi, samedi matin…"/></div>
+            
             <div className="lp-fg full"><label>Message (facultatif)</label><textarea className="lp-in" rows={3} value={f.message} onChange={e=>upd('message',e.target.value)} placeholder="Objectifs, difficultés, questions…"/></div>
+          </div>
+
+          <div className="lp-form-sec">4 · Pièce justificative (facultatif)</div>
+          <div className="lp-fg full"><label>Justificatif de domicile ou bulletin scolaire (PDF ou image)</label>
+            <input className="lp-in" type="file" accept=".pdf,image/*" onChange={e=>{const x=e.target.files&&e.target.files[0]; if(x&&x.size>8*1024*1024){setErr('Fichier trop volumineux (8 Mo maximum).'); e.target.value=''; setFile(null); return;} setErr(''); setFile(x||null);}}/>
+            {file?<div style={{fontFamily:'var(--ff-mono)',fontSize:11.5,color:'var(--muted)',marginTop:6}}>📎 {file.name}</div>:null}
           </div>
 
           {/* anti-spam : champ caché */}
@@ -7615,7 +7629,7 @@ function Inscription({onBack,onLogin}){
 }
 
 // ═══════════════════ GESTION DES DEMANDES WEB (admin) ═══════════════════
-function DemandesWeb({demandes=[],setDemandes,cours=[]}){
+function DemandesWeb({demandes=[],setDemandes,cours=[],setInscriptions,goGestion}){
   const [filt,setFilt]=useState('tous');
   const [busy,setBusy]=useState(false);
   const ST={
@@ -7630,7 +7644,11 @@ function DemandesWeb({demandes=[],setDemandes,cours=[]}){
   const refresh=async()=>{ setBusy(true); try{ const r=await sb.from('inscriptions_web').select('*'); if(!r.error&&r.data) setDemandes(r.data);}catch(_){ } setBusy(false); };
   const patch=async(id,fields)=>{ setDemandes(p=>p.map(d=>d.id===id?{...d,...fields}:d)); try{ await sb.from('inscriptions_web').update(fields).eq('id',id);}catch(_){ } };
   const del=async(id)=>{ if(!window.confirm('Supprimer définitivement cette demande ?'))return; setDemandes(p=>p.filter(d=>d.id!==id)); try{ await sb.from('inscriptions_web').delete().eq('id',id);}catch(_){ } };
+  const convertir=async(d)=>{ if(d.details&&d.details.transfere){ if(!window.confirm('Cette demande a déjà été transférée. Recréer une inscription ?'))return; } if(!setInscriptions)return; const ins={ id:'ins'+Date.now(), prenom:d.prenom||'', nom:d.nom||'', dateNaissance:(d.details&&d.details.date_naissance)||'', niveau:d.niveau||'3ème', matieres:d.matieres||[], parentNom:d.parent_nom||'', parentTel:d.parent_tel||'', parentEmail:d.parent_email||'', adresse:[(d.details&&d.details.code_postal)||'',(d.details&&d.details.ville)||''].filter(Boolean).join(' '), notes:['(Demande web)', d.creneau_souhaite&&('Souhait: '+d.creneau_souhaite), d.message||'', (d.details&&d.details.etablissement)&&('Étab: '+d.details.etablissement), (d.details&&d.details.objectif)&&('Objectif: '+d.details.objectif)].filter(Boolean).join(' · '), statut:'nouveau', dateInscription:new Date().toISOString().split('T')[0] }; setInscriptions(p=>[...p, ins]); patch(d.id,{statut:'valide', details:{...(d.details||{}), transfere:true}}); if(goGestion)goGestion(); };
   const list=demandes.filter(d=>filt==='tous'||(d.statut||'nouveau')===filt).sort((a,b)=>(b.created_at||b.id||'').localeCompare(a.created_at||a.id||''));
+  const fmtH=h=>{ if(h==null||isNaN(h))return''; const hh=Math.floor(h),mm=Math.round((h-hh)*60); return hh+'h'+(mm?String(mm).padStart(2,'0'):''); };
+  const coursLabel=c=>c?`${c.matiere} — ${c.jour} ${fmtH(c.debut)}${c.fin?'-'+fmtH(c.fin):''}${c.niveau?' ('+c.niveau+')':''}${c.salle?' · '+c.salle:''}`:'';
+  const coursById=id=>cours.find(c=>c.id===id);
   const fmtDate=d=>{ if(!d.created_at)return''; try{return new Date(d.created_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});}catch(_){return'';} };
   return <div>
     <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center',marginBottom:14}}>
@@ -7660,9 +7678,10 @@ function DemandesWeb({demandes=[],setDemandes,cours=[]}){
               {d.details.etablissement?<span>🏫 {d.details.etablissement}</span>:null}
               {(d.details.ville||d.details.code_postal)?<span>📍 {d.details.code_postal} {d.details.ville}</span>:null}
               {d.details.objectif?<span>🎯 {d.details.objectif}</span>:null}
-              {d.details.source?<span>👋 {d.details.source}</span>:null}
+              {d.details.source?<span>👋 {d.details.source}</span>:null}{d.details&&d.details.justificatif_path?<button onClick={async()=>{try{const r=await sb.storage.from('justificatifs').createSignedUrl(d.details.justificatif_path,3600);if(r.data&&r.data.signedUrl)window.open(r.data.signedUrl,'_blank');else alert('Document indisponible (vérifiez le bucket Storage justificatifs).');}catch(e){alert('Document indisponible.');}}} style={{background:'none',border:'none',color:'#1a4fc4',cursor:'pointer',fontFamily:'inherit',fontSize:'inherit',padding:0,textDecoration:'underline'}}>📎 {d.details.justificatif_nom||'Justificatif'}</button>:null}
             </div>:null}
             {d.creneau_souhaite?<div style={{fontSize:12,color:'#555'}}>🕒 Souhait : {d.creneau_souhaite}</div>:null}
+            {d.creneau&&coursById(d.creneau)?<div style={{fontSize:12,color:'#7c3aed',fontWeight:600,marginTop:4}}>📅 Créneau attribué : {coursLabel(coursById(d.creneau))}</div>:null}
             {d.message?<div style={{fontSize:12,color:'#555',marginTop:4,fontStyle:'italic'}}>« {d.message} »</div>:null}
             <div style={{display:'flex',gap:10,flexWrap:'wrap',alignItems:'flex-end',marginTop:12,borderTop:'1px dotted #e0e0e0',paddingTop:12}}>
               <div style={{display:'flex',flexDirection:'column',gap:4}}>
@@ -7673,12 +7692,16 @@ function DemandesWeb({demandes=[],setDemandes,cours=[]}){
               </div>
               <div style={{display:'flex',flexDirection:'column',gap:4,flex:1,minWidth:160}}>
                 <label style={{fontSize:10,textTransform:'uppercase',color:'var(--muted)',letterSpacing:.5}}>Créneau attribué</label>
-                <input defaultValue={d.creneau||''} onBlur={e=>{if(e.target.value!==(d.creneau||''))patch(d.id,{creneau:e.target.value});}} placeholder="Ex : Mercredi 17h — Maths" style={{padding:'6px 10px',border:'1.5px solid #dde3f0',borderRadius:4,fontSize:12,fontFamily:'var(--ff-mono)'}}/>
+                <select value={d.creneau||''} onChange={e=>patch(d.id,{creneau:e.target.value, statut:e.target.value?'creneau':(d.statut||'nouveau')})} style={{padding:'6px 10px',border:'1.5px solid #dde3f0',borderRadius:4,fontSize:12,fontFamily:'var(--ff-mono)',maxWidth:'100%'}}>
+                  <option value="">— Aucun créneau —</option>
+                  {cours.map(c=><option key={c.id} value={c.id}>{coursLabel(c)}</option>)}
+                </select>
               </div>
               <div style={{display:'flex',flexDirection:'column',gap:4,flex:1,minWidth:160}}>
                 <label style={{fontSize:10,textTransform:'uppercase',color:'var(--muted)',letterSpacing:.5}}>Note interne</label>
                 <input defaultValue={d.notes||''} onBlur={e=>{if(e.target.value!==(d.notes||''))patch(d.id,{notes:e.target.value});}} placeholder="Remarque…" style={{padding:'6px 10px',border:'1.5px solid #dde3f0',borderRadius:4,fontSize:12,fontFamily:'var(--ff-mono)'}}/>
               </div>
+              {(d.details&&d.details.transfere)?<span style={{fontSize:11,color:'#1a7a4a',fontWeight:700,alignSelf:'center'}} title="Déjà transférée">✓ Transférée</span>:<button className="btn btn-p btn-sm" onClick={()=>convertir(d)} title="Créer une inscription à partir de cette demande">→ Inscription</button>}
               <button className="btn btn-d btn-sm" onClick={()=>del(d.id)} title="Supprimer">🗑</button>
             </div>
           </div>
