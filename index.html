@@ -1857,7 +1857,7 @@ function Dashboard({user,users,resources,modules,grades,enrollments,cours,factur
   const impayes=factures.filter(f=>f.statut==='retard'||f.statut==='attente');
   const montantImpayes=impayes.reduce((a,f)=>a+(f.montant-(f.reduction||0)),0);
   // MRR prévisionnel
-  const mrrTotal=eleves.reduce((a,e)=>{const mats=new Set(cours.filter(c=>c.eleveIds.includes(e.id)).map(c=>c.matiere));return a+mats.size*TARIF;},0);
+  const mrrTotal=eleves.reduce((a,e)=>{const nbc=cours.filter(c=>c.eleveIds.includes(e.id)).length;return a+tarifMensuel(nbc);},0);
   // Salaires
   const totalSal=salaires.reduce((a,s)=>{const h=cours.filter(c=>c.profId===s.profId).reduce((x,c)=>x+(c.fin-c.debut),0);return a+Math.round(s.tauxHoraire*h*4.33);},0);
   const marge=mrrTotal-totalSal;
@@ -3336,6 +3336,8 @@ function PlanningEditor({users,cours,setCours}){
 // - 0 cours : supprime sa facture auto en attente
 // - sinon : crée ou met à jour la facture auto du mois suivant (échéance le 5 du mois suivant)
 const TARIF_BASE_AUTO=55;
+const PRIX_PALIERS=[0,65,120,165,210,245,290,335,380,425];
+function tarifMensuel(n){ n=Math.max(0,n|0); if(n===0)return 0; if(n<PRIX_PALIERS.length)return PRIX_PALIERS[n]; return 425+(n-9)*45; }
 function recalcAutoInvoice({eleveId,coursArr,users,setFactures}){
   if(!eleveId||!setFactures)return;
   const eleve=users.find(u=>u.id===eleveId);
@@ -3344,7 +3346,7 @@ function recalcAutoInvoice({eleveId,coursArr,users,setFactures}){
   const famId='fam_'+ln.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   const allGroups=coursArr.filter(c=>c.eleveIds.includes(eleveId));
   const mats=[...new Set(allGroups.map(c=>c.matiere))];
-  const montant=mats.length*TARIF_BASE_AUTO;
+  const montant=tarifMensuel(allGroups.length);
   const ed=new Date();ed.setDate(5);ed.setMonth(ed.getMonth()+1);
   const monthKey=ed.toISOString().slice(0,7);
   const mo=ed.toLocaleString('fr-FR',{month:'long',year:'numeric'});
@@ -3438,6 +3440,8 @@ function Inscriptions({user,users,setUsers,cours,setCours,inscriptions=[],setIns
 
   // Activer : crée user + facture auto si déjà des cours possibles + ouvre assignation
   const [showAcces,setShowAcces]=useState(false);
+  const [filAnnee,setFilAnnee]=useState('Toutes');
+  const [filMat,setFilMat]=useState('Toutes');
   const [accesEmail,setAccesEmail]=useState('');
   const [accesPwd,setAccesPwd]=useState('');
   const [accesBusy,setAccesBusy]=useState(false);
@@ -3594,7 +3598,7 @@ function Inscriptions({user,users,setUsers,cours,setCours,inscriptions=[],setIns
           const st=STATUT_LBL[selIns.statut]||STATUT_LBL.nouveau;
           const groupes=selIns.userId?cours.filter(c=>c.eleveIds.includes(selIns.userId)):[];
           const mats=[...new Set(groupes.map(g=>g.matiere))];
-          const mrr=mats.length*55;
+          const mrr=tarifMensuel(groupes.length);
           const sugg=suggestCours(selIns);
           return<div style={{background:'white',border:'1.5px solid var(--cream2)',borderRadius:6,padding:'18px 22px'}}>
             {/* Header */}
@@ -3759,35 +3763,42 @@ function Inscriptions({user,users,setUsers,cours,setCours,inscriptions=[],setIns
     </Modal>; })()}
     {showAssign&&selIns?.userId&&<Modal title={`Assigner ${selIns.prenom} ${selIns.nom} aux groupes`} onClose={()=>setShowAssign(false)}>
       <div style={{background:'#EEF3FF',border:'1.5px solid #c8d8f5',padding:'10px 14px',borderRadius:4,marginBottom:14,fontSize:12,color:'#1a4fc4'}}>
-        💡 La facture mensuelle se recalcule automatiquement à chaque modification : <strong>55€ par matière</strong>.
+        💡 La facture mensuelle se recalcule automatiquement selon la grille dégressive de la page d'accueil, <strong>au nombre de créneaux</strong> (65 € pour 1 créneau, puis dégressif).
       </div>
       {(()=>{
-        const sugg=suggestCours(selIns);
-        const suggIds=new Set(sugg.map(c=>c.id));
-        const autres=cours.filter(c=>!suggIds.has(c.id));
-        const renderCours=c=>{
+        const JOURS=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+        const annees=['Toutes',...Array.from(new Set(cours.map(c=>c.anneeScolaire).filter(Boolean)))];
+        const matsF=['Toutes',...Array.from(new Set(cours.map(c=>c.matiere)))];
+        const filtered=cours.filter(c=>(filAnnee==='Toutes'||c.anneeScolaire===filAnnee)&&(filMat==='Toutes'||c.matiere===filMat));
+        const selectedCours=cours.filter(c=>c.eleveIds.includes(selIns.userId));
+        const block=c=>{
           const ins=c.eleveIds.includes(selIns.userId);
           const prof=users.find(u=>u.id===c.profId);
-          return<div key={c.id} onClick={()=>toggleAssign(c.id,selIns.userId)} style={{padding:'10px 12px',border:`2px solid ${ins?'var(--gold)':'var(--cream2)'}`,background:ins?'#EEF5FF':'white',cursor:'pointer',display:'flex',alignItems:'center',gap:10,borderRadius:3,marginBottom:5}}>
-            <div style={{width:24,height:24,background:ins?'var(--navy)':'var(--cream2)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,color:ins?'white':'var(--muted)',borderRadius:2,flexShrink:0,fontWeight:700}}>{ins?'✓':'＋'}</div>
-            <div style={{flex:1,minWidth:0}}>
-              <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:2}}>
-                <span style={{...getCoursBadge(c.matiere),fontSize:10}}>{c.matiere}</span>
-                <span style={{fontSize:13,fontWeight:600}}>{c.niveau}</span>
-              </div>
-              <div style={{fontSize:11,color:'var(--muted)'}}>{c.jour} {hs(c.debut)}–{hs(c.fin)} · 📍 {c.salle} · 👨‍🏫 {prof?.name||'—'}</div>
-            </div>
-            <span style={{fontSize:11,color:ins?'#1a7a4a':'var(--muted)',fontWeight:700,flexShrink:0}}>{c.eleveIds.length} él.</span>
+          const sug=c.niveau===selIns.niveau;
+          return <div key={c.id} onClick={()=>toggleAssign(c.id,selIns.userId)} style={{cursor:'pointer',border:`2px solid ${ins?'var(--gold)':'var(--cream2)'}`,background:ins?'#EEF5FF':'white',borderRadius:4,padding:'6px 8px',marginBottom:6,position:'relative'}}>
+            <div style={{fontSize:11,fontWeight:700,color:'var(--navy)'}}>{hs(c.debut)}–{hs(c.fin)}{sug&&<span title="Niveau de l'élève" style={{marginLeft:5}}>💡</span>}</div>
+            <div style={{marginTop:2}}><span style={{...getCoursBadge(c.matiere),fontSize:10,padding:'1px 6px',borderRadius:2,fontWeight:700}}>{c.matiere}</span></div>
+            <div style={{fontSize:10.5,color:'var(--muted)',marginTop:2}}>{c.niveau} · 📍 {c.salle||'—'}</div>
+            <div style={{fontSize:10.5,color:'var(--muted)'}}>👨‍🏫 {prof?prof.name.split(' ').slice(-1)[0]:'—'} · {c.eleveIds.length} él.</div>
+            {ins&&<span style={{position:'absolute',top:6,right:7,color:'var(--gold)',fontWeight:700}}>✓</span>}
           </div>;
         };
-        return<>
-          {sugg.length>0&&<div>
-            <div style={{fontSize:11,fontWeight:700,color:'#7c3aed',marginBottom:6,textTransform:'uppercase',letterSpacing:.5}}>💡 Suggestions (matières {selIns.niveau})</div>
-            <div style={{maxHeight:200,overflowY:'auto',marginBottom:14}}>{sugg.map(renderCours)}</div>
-          </div>}
-          <div>
-            <div style={{fontSize:11,fontWeight:700,color:'var(--muted)',marginBottom:6,textTransform:'uppercase',letterSpacing:.5}}>Tous les autres cours</div>
-            <div style={{maxHeight:240,overflowY:'auto'}}>{autres.length===0?<div style={{padding:'10px',color:'var(--muted)',fontSize:12,textAlign:'center'}}>Aucun autre cours</div>:autres.map(renderCours)}</div>
+        return <>
+          <div style={{display:'flex',gap:12,marginBottom:12,flexWrap:'wrap'}}>
+            <div><div style={{fontSize:10,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',marginBottom:3}}>Année scolaire</div><select value={filAnnee} onChange={e=>setFilAnnee(e.target.value)} style={{padding:'6px 9px',border:'1.5px solid var(--cream2)',borderRadius:4,fontSize:12}}>{annees.map(a=><option key={a} value={a}>{a}</option>)}</select></div>
+            <div><div style={{fontSize:10,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',marginBottom:3}}>Matière</div><select value={filMat} onChange={e=>setFilMat(e.target.value)} style={{padding:'6px 9px',border:'1.5px solid var(--cream2)',borderRadius:4,fontSize:12}}>{matsF.map(m=><option key={m} value={m}>{m}</option>)}</select></div>
+          </div>
+          <div style={{fontSize:11,color:'var(--muted)',marginBottom:8}}>Clique sur un créneau pour l'attribuer (ou le retirer). Tu peux en sélectionner plusieurs.</div>
+          <div style={{display:'flex',gap:8,overflowX:'auto',paddingBottom:6}}>
+            {JOURS.map(j=>{const dayC=filtered.filter(c=>c.jour===j).sort((a,b)=>a.debut-b.debut);if(dayC.length===0)return null;return <div key={j} style={{minWidth:158,flex:'0 0 auto'}}>
+              <div style={{fontSize:11,fontWeight:700,textTransform:'uppercase',letterSpacing:.5,color:'var(--navy)',borderBottom:'2px solid var(--cream2)',paddingBottom:4,marginBottom:6}}>{j}</div>
+              {dayC.map(block)}
+            </div>;})}
+            {filtered.length===0&&<div style={{padding:'16px',color:'var(--muted)',fontSize:12}}>Aucun créneau pour ce filtre.</div>}
+          </div>
+          <div style={{marginTop:12,padding:'10px 12px',background:'#F3EEFF',border:'1.5px solid #d8d0ff',borderRadius:4,fontSize:12}}>
+            <strong>{selectedCours.length}</strong> créneau{selectedCours.length>1?'x':''} attribué{selectedCours.length>1?'s':''}{selectedCours.length>0?' : ':''}{selectedCours.map(c=>c.matiere+' '+c.jour+' '+hs(c.debut)).join(' · ')}
+            {selectedCours.length>0&&<div style={{marginTop:4,color:'#7c3aed',fontWeight:600}}>Forfait : {tarifMensuel(selectedCours.length)} €/mois</div>}
           </div>
         </>;
       })()}
@@ -4287,7 +4298,7 @@ function Statistiques({users,cours,setCours,factures,salaires,setSalaires,charge
   const tauxRetard=totalBille>0?Math.round((totalRetard/totalBille)*100):0;
 
   // MRR
-  const mrrParEleve=eleves.map(e=>{const mats=new Set(cours.filter(c=>c.eleveIds.includes(e.id)).map(c=>c.matiere));return{id:e.id,name:e.name,niveau:e.niveau,matieres:[...mats],mrr:mats.size*TARIF};}).filter(e=>e.mrr>0);
+  const mrrParEleve=eleves.map(e=>{const mats=new Set(cours.filter(c=>c.eleveIds.includes(e.id)).map(c=>c.matiere));const nbc=cours.filter(c=>c.eleveIds.includes(e.id)).length;return{id:e.id,name:e.name,niveau:e.niveau,matieres:[...mats],mrr:tarifMensuel(nbc)};}).filter(e=>e.mrr>0);
   const mrrTotal=mrrParEleve.reduce((a,e)=>a+e.mrr,0);
 
   // Salaires profs
@@ -4325,7 +4336,7 @@ function Statistiques({users,cours,setCours,factures,salaires,setSalaires,charge
     eleves.forEach(e=>{const ln=e.name.trim().split(/\s+/).slice(-1)[0];const id='fam_'+ln.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');if(!map[id])map[id]={id,nom:'Famille '+ln,eleveIds:[e.id]};else map[id].eleveIds.push(e.id);});
     return Object.values(map);
   },[eleves]);
-  const famStats=familles.map(fam=>{const ff=factures.filter(f=>f.familleId===fam.id);const total=ff.reduce((a,f)=>a+netOf(f),0);const paye=ff.filter(f=>f.statut==='paye').reduce((a,f)=>a+netOf(f),0);const retard=ff.filter(f=>f.statut==='retard').reduce((a,f)=>a+netOf(f),0);const mats=new Set(cours.filter(c=>c.eleveIds.some(eid=>fam.eleveIds.includes(eid))).map(c=>c.matiere));return{...fam,total,paye,retard,taux:total>0?Math.round((paye/total)*100):0,mrr:mats.size*TARIF};}).filter(f=>f.total>0||f.mrr>0).sort((a,b)=>b.retard-a.retard);
+  const famStats=familles.map(fam=>{const ff=factures.filter(f=>f.familleId===fam.id);const total=ff.reduce((a,f)=>a+netOf(f),0);const paye=ff.filter(f=>f.statut==='paye').reduce((a,f)=>a+netOf(f),0);const retard=ff.filter(f=>f.statut==='retard').reduce((a,f)=>a+netOf(f),0);const mats=new Set(cours.filter(c=>c.eleveIds.some(eid=>fam.eleveIds.includes(eid))).map(c=>c.matiere));return{...fam,total,paye,retard,taux:total>0?Math.round((paye/total)*100):0,mrr:(fam.eleveIds||[]).reduce((s,id)=>s+tarifMensuel(cours.filter(c=>c.eleveIds.includes(id)).length),0)};}).filter(f=>f.total>0||f.mrr>0).sort((a,b)=>b.retard-a.retard);
 
   // Évolution CA 12 mois
   const evolution=useMemo(()=>{
@@ -6071,10 +6082,10 @@ function Facturation({user,users,factures,setFactures,cours}){
   },[users,famOverrides]);
 
   const getSessions=eid=>cours.filter(c=>c.eleveIds.includes(eid));
-  const getMontant=eid=>{const mats=new Set(getSessions(eid).map(c=>c.matiere));return mats.size*55;};
+  const getMontant=eid=>tarifMensuel(getSessions(eid).length);
   const getLabel=eid=>{const e=users.find(u=>u.id===eid);const mats=[...new Set(getSessions(eid).map(c=>c.matiere))];const mo=new Date().toLocaleString('fr-FR',{month:'long',year:'numeric'});return e?`Forfait ${mats.join(' + ')} — ${e.name} — ${mo}`:'';}; 
   const getFamMats=fam=>[...new Set(cours.filter(c=>c.eleveIds.some(id=>fam.eleveIds.includes(id))).map(c=>c.matiere))];
-  const getFamTarif=fam=>getFamMats(fam).length*55;
+  const getFamTarif=fam=>(fam.eleveIds||[]).reduce((a,id)=>a+getMontant(id),0);
   const famFacts=fid=>factures.filter(f=>f.familleId===fid);
   const totalFam=fid=>famFacts(fid).reduce((a,f)=>a+f.montant,0);
   const payeFam=fid=>famFacts(fid).filter(f=>f.statut==='paye').reduce((a,f)=>a+f.montant,0);
@@ -6128,7 +6139,7 @@ function Facturation({user,users,factures,setFactures,cours}){
       famEleves.forEach(e=>{
         const mats=[...new Set(cours.filter(c=>c.eleveIds.includes(e.id)).map(c=>c.matiere))];
         if(mats.length===0)return;
-        const montant=mats.length*55;
+        const montant=tarifMensuel(cours.filter(c=>c.eleveIds.includes(e.id)).length);
         newFacts.push({
           id:'fc'+Date.now()+'_'+e.id,
           familleId:fam.id,eleveId:e.id,
