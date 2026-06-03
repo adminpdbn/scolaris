@@ -1715,7 +1715,7 @@ function Dashboard({user,users,resources,modules,grades,enrollments,cours,factur
           {/* Radar chart */}
           <div style={{background:'white',border:'1.5px solid var(--cream2)',borderRadius:0,padding:'20px',textAlign:'center'}}>
             <div style={{fontFamily:'Cormorant Garamond,serif',fontSize:16,fontWeight:600,marginBottom:14,color:'var(--navy)'}}>Profil de compétences</div>
-            <svg viewBox="0 0 320 320" style={{width:'100%',maxWidth:280,margin:'0 auto',display:'block'}}>
+            <svg viewBox="-82 0 484 322" style={{width:'100%',maxWidth:360,margin:'0 auto',display:'block'}}>
               {/* Grid rings */}
               {[0.25,0.5,0.75,1].map(pct=>(
                 <polygon key={pct} points={gridPts(pct)} fill="none" stroke={pct===1?'var(--cream2)':'var(--cream2)'} strokeWidth={pct===1?1.5:1} strokeDasharray={pct===1?'none':'4 3'}/>
