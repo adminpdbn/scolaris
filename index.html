@@ -1589,7 +1589,7 @@ function EmploiDuTemps({user,users,cours,setCours,modules,enrollments,dispos=[]}
 function getCoursBadge(matiere){const c=mc(matiere);return{background:c.bg,color:c.tx,padding:'2px 8px',borderRadius:2,fontSize:11,fontWeight:700};}
 
 // ─── DASHBOARD ───
-function Dashboard({user,users,resources,modules,grades,enrollments,cours,factures=[],salaires=[],appel={}}){
+function Dashboard({user,users,resources,modules,grades,enrollments,cours,factures=[],salaires=[],appel={},compEtats={},customComps=[]}){
   const eg=grades[user.id]||[];
   const ee=enrollments[user.id]||[];
   const m=moy(eg);
@@ -1646,6 +1646,61 @@ function Dashboard({user,users,resources,modules,grades,enrollments,cours,factur
         <div className="wb">
           <h2>Bonjour, <span className="gold">{user.name.split(' ')[0]}</span> 👋</h2>
           <p>{user.niveau} · {myCoursList.length} cours hebdo · {enrMods.length} module{enrMods.length!==1?'s':''}</p>
+        </div>
+
+        {/* Agenda + compétences (élève) */}
+        <div style={{display:'grid',gridTemplateColumns:'1fr',gap:14,marginBottom:18}}>
+          {(()=>{
+            const JOURN={'Dimanche':0,'Lundi':1,'Mardi':2,'Mercredi':3,'Jeudi':4,'Vendredi':5,'Samedi':6};
+            const now=new Date();
+            const occ=myCoursList.map(c=>{ const wd=JOURN[c.jour]; if(wd===undefined)return null; const d=new Date(now); let add=(wd-now.getDay()+7)%7; const h=Math.floor(c.debut),mn=Math.round((c.debut-h)*60); d.setDate(now.getDate()+add); d.setHours(h,mn,0,0); if(d<now)d.setDate(d.getDate()+7); return {c,d}; }).filter(Boolean).sort((a,b)=>a.d-b.d).slice(0,6);
+            const J=['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
+            const fmtDate=d=>J[d.getDay()]+' '+d.getDate()+'/'+(d.getMonth()+1);
+            return <div style={{background:'white',border:'2px solid var(--navy)',borderRadius:8,padding:'16px 18px'}}>
+              <div style={{fontSize:13,fontWeight:700,color:'var(--navy)',textTransform:'uppercase',letterSpacing:.5,marginBottom:12}}>📅 Mes prochains cours</div>
+              {occ.length===0?<div style={{fontSize:12.5,color:'var(--muted)'}}>Aucun cours programmé pour l'instant. Demande à être inscrit dans un groupe.</div>:
+              <div style={{display:'flex',flexDirection:'column',gap:10}}>
+                {occ.map(({c,d},i)=>{
+                  const prof=users.find(u=>u.id===c.profId);
+                  const grp=resources.filter(r=>r.coursId?r.coursId===c.id:r.matiere===c.matiere).slice().sort((a,b)=>(''+(b.date||b.id||'')).localeCompare(''+(a.date||a.id||'')));
+                  const theme=grp[0]?grp[0].title:null;
+                  const dev=grp.find(r=>r.devoirs);
+                  const note=grp.find(r=>r.commentaires);
+                  return <div key={i} style={{borderLeft:'3px solid var(--gold)',background:'var(--cream)',borderRadius:'0 6px 6px 0',padding:'9px 12px'}}>
+                    <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+                      <span style={{fontSize:11,fontWeight:700,color:'var(--navy)',background:'#EEF5FF',padding:'2px 8px',borderRadius:3}}>{fmtDate(d)} · {hs(c.debut)}</span>
+                      <span style={{...getCoursBadge(c.matiere),fontSize:11,padding:'2px 8px',borderRadius:3,fontWeight:700}}>{c.matiere}</span>
+                      <span style={{fontSize:11,color:'var(--muted)'}}>{c.salle?('📍 '+c.salle+' '):''}{prof?('· 👨‍🏫 '+prof.name.split(' ').slice(-1)[0]):''}</span>
+                    </div>
+                    {theme&&<div style={{fontSize:11.5,color:'#555',marginTop:5}}>📖 Thème : {theme}</div>}
+                    {dev&&<div style={{fontSize:11.5,color:'#b45309',background:'#FFF7E6',border:'1px solid #ffe0a3',borderRadius:3,padding:'5px 8px',marginTop:5}}>📌 Devoirs : {dev.devoirs}</div>}
+                    {note&&<div style={{fontSize:11.5,color:'#1a4fc4',background:'#EEF5FF',borderRadius:3,padding:'5px 8px',marginTop:5}}>📝 Note du prof : {note.commentaires}</div>}
+                  </div>;
+                })}
+              </div>}
+            </div>;
+          })()}
+          {(()=>{
+            const myMats=new Set(myCoursList.map(c=>c.matiere));
+            const rel=[...COMP_TEMPLATES,...(customComps||[])].filter(tp=>tp.niveau===user.niveau&&(myMats.size===0||myMats.has(tp.matiere)));
+            if(rel.length===0)return null;
+            const et=compEtats[user.id]||{};
+            const cnt={valide:0,en_cours:0,a_revoir:0,non_commence:0};
+            rel.forEach(tp=>{const s=(et[tp.id]&&et[tp.id].statut)||'non_commence'; cnt[s]=(cnt[s]||0)+1;});
+            const pct=Math.round((cnt.valide/rel.length)*100);
+            const order=['valide','en_cours','a_revoir','non_commence'];
+            return <div style={{background:'white',border:'2px solid var(--navy)',borderRadius:8,padding:'16px 18px'}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12,gap:8,flexWrap:'wrap'}}>
+                <div style={{fontSize:13,fontWeight:700,color:'var(--navy)',textTransform:'uppercase',letterSpacing:.5}}>🎯 Mes compétences</div>
+                <div style={{fontSize:11,color:'var(--muted)'}}>Détail dans « Mon Programme »</div>
+              </div>
+              <div style={{height:10,background:'#eee',borderRadius:6,overflow:'hidden',marginBottom:6}}><div style={{height:'100%',width:pct+'%',background:'#059669'}}/></div>
+              <div style={{fontSize:12,color:'var(--navy)',fontWeight:600,marginBottom:10}}>{cnt.valide}/{rel.length} compétences validées ({pct}%)</div>
+              <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+                {order.map(k=>{const st=COMP_STATUTS[k];return <span key={k} style={{fontSize:11,fontWeight:600,color:st.color,background:st.bg,border:'1px solid '+st.color+'40',padding:'3px 9px',borderRadius:4}}>{st.icon} {st.label} : {cnt[k]||0}</span>;})}
+              </div>
+            </div>;
+          })()}
         </div>
         <div className="sg">
           <div className="sc c-gold"><div className="sc-ic">📊</div><div className="sc-v">{m||'—'}</div><div className="sc-l">Moyenne /20</div></div>
