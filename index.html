@@ -561,6 +561,17 @@ html{-webkit-text-size-adjust:100%;}
 .lp-comm-tag{display:inline-block;font-family:var(--ff-mono);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);background:rgba(26,79,196,.08);border:1px solid rgba(26,79,196,.25);padding:4px 12px;border-radius:20px;margin-bottom:12px;}
 .lp-comm-ttl{font-family:var(--ff-serif);font-size:clamp(20px,3vw,28px);color:var(--navy);margin:0 0 10px;}
 .lp-comm-txt{font-size:15px;line-height:1.7;color:#333;white-space:pre-line;margin:0 0 16px;}
+
+.lp-hero-in.has-aside{max-width:1200px;display:grid;grid-template-columns:300px minmax(0,1fr);gap:44px;align-items:center;}
+.lp-hero-news{order:-1;display:flex;flex-direction:column;gap:14px;}
+.lp-news-h{font-family:var(--ff-mono);font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--gold2);opacity:.9;}
+.lp-news-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-left:3px solid var(--gold2);border-radius:6px;padding:14px 16px;text-align:left;}
+.lp-news-tag{display:inline-block;font-family:var(--ff-mono);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold2);margin-bottom:6px;}
+.lp-news-ttl{font-family:var(--ff-serif);font-size:17px;color:#fff;line-height:1.2;margin-bottom:6px;}
+.lp-news-txt{font-size:13px;line-height:1.55;color:rgba(245,240,232,.85);white-space:pre-line;}
+.lp-news-link{display:inline-block;margin-top:10px;background:none;border:none;padding:0;cursor:pointer;font-family:var(--ff-mono);font-size:12.5px;font-weight:700;color:var(--gold2);text-decoration:none;}
+.lp-news-link:hover{text-decoration:underline;}
+@media(max-width:900px){.lp-hero-in.has-aside{display:block;max-width:880px;}.lp-hero-news{margin-top:34px;}}
 </style>
 </head>
 <body>
@@ -7596,7 +7607,8 @@ function Landing({onLogin,onInscription}){
     </nav>
 
     <header className="lp-hero">
-      <div className="lp-hero-in">
+      <div className={"lp-hero-in"+(annonces.length?" has-aside":"")}>
+        <div className="lp-hero-main">
         <div className="lp-badge"><span className="lp-badge-dot"/><span className="lp-badge-txt">{SITE.baseline}</span></div>
         <h1>L'avance<br/>qui <em>change tout</em>.</h1>
         <p>{SITE.pitch}</p>
@@ -7614,10 +7626,12 @@ function Landing({onLogin,onInscription}){
           <span className="lp-trust-chip">✓ Centre Cambridge agréé</span>
         </div>
         <div className="lp-stats">{SITE.stats.map((s,i)=><div key={i}><div className="lp-stat-n">{s.n}</div><div className="lp-stat-l">{s.l}</div></div>)}</div>
+        </div>
+        {annonces.length?<aside className="lp-hero-news"><div className="lp-news-h">📢 Annonces</div>{annonces.map((a,i)=><div key={a.id||i} className="lp-news-card">{a.tag?<div className="lp-news-tag">{a.tag}</div>:null}{a.titre?<div className="lp-news-ttl">{a.titre}</div>:null}{a.corps?<div className="lp-news-txt">{a.corps}</div>:null}{a.cta_label?(a.cta_url?<a className="lp-news-link" href={a.cta_url} target="_blank" rel="noreferrer">{a.cta_label} →</a>:<button className="lp-news-link" onClick={onInscription}>{a.cta_label} →</button>):null}</div>)}</aside>:null}
       </div>
     </header>
 
-    {annonces.length?<section className="lp-communique"><div className="lp-comm-inner">{annonces.map((a,i)=><div key={a.id||i} style={i>0?{marginTop:28,paddingTop:28,borderTop:"1px solid var(--cream2)"}:undefined}><div className="lp-comm-tag">📢 {a.tag||"Annonce"}</div>{a.titre?<h2 className="lp-comm-ttl">{a.titre}</h2>:null}{a.corps?<p className="lp-comm-txt">{a.corps}</p>:null}{a.cta_label?(a.cta_url?<a className="lp-btn" href={a.cta_url} target="_blank" rel="noreferrer">{a.cta_label}</a>:<button className="lp-btn" onClick={onInscription}>{a.cta_label}</button>):null}</div>)}</div></section>:null}
+    
     <section className="lp-sec" id="activite">
       <div className="lp-kicker">Notre activité</div>
       <h2 className="lp-h2">Un accompagnement scolaire de proximité</h2>
