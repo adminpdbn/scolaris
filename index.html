@@ -555,6 +555,12 @@ html{-webkit-text-size-adjust:100%;}
 .lp-profil h3{font-family:var(--ff-serif);font-size:16px;color:var(--navy);margin:0 0 4px;line-height:1.2;}
 .lp-profil-f{font-family:var(--ff-mono);font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px;}
 .lp-profil p{font-size:13px;color:var(--muted);line-height:1.5;margin:0;}
+
+.lp-communique{background:linear-gradient(180deg,#fff,var(--cream));border-top:3px solid var(--gold);border-bottom:1px solid var(--cream2);padding:32px 28px;}
+.lp-comm-inner{max-width:820px;margin:0 auto;text-align:center;}
+.lp-comm-tag{display:inline-block;font-family:var(--ff-mono);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);background:rgba(26,79,196,.08);border:1px solid rgba(26,79,196,.25);padding:4px 12px;border-radius:20px;margin-bottom:12px;}
+.lp-comm-ttl{font-family:var(--ff-serif);font-size:clamp(20px,3vw,28px);color:var(--navy);margin:0 0 10px;}
+.lp-comm-txt{font-size:15px;line-height:1.7;color:#333;white-space:pre-line;margin:0 0 16px;}
 </style>
 </head>
 <body>
@@ -1120,6 +1126,7 @@ function Sidebar({user,page,setPage,onLogout,pinned,setPinned}){
     {id:'coursparticuliers',icon:'🎯',label:'Cours particuliers',roles:['admin','prof','eleve']},
     {id:'sorties',icon:'🚌',label:'Sorties scolaires',roles:['admin']},
     {id:'stages',icon:'🤝',label:'Stages & Réseau',roles:['admin']},
+    {id:'communique',icon:'📢',label:'Communiqué',roles:['admin']},
     {id:'admin',icon:'⚙️',label:'Administration',roles:['admin']},
   ].filter(i=>i.roles.includes(user.role));
   return <div className={`sidebar ${pinned?'pinned':''}`}>
@@ -7473,6 +7480,8 @@ function Sorties({sorties,setSorties,users,cours}){
 // ▼▼ Tout le contenu éditable est ici : modifie librement ▼▼
 function Landing({onLogin,onInscription}){
   const [faq,setFaq]=useState(null);
+  const [comm,setComm]=useState(null);
+  useEffect(()=>{(async()=>{try{const r=await sb.from('site_content').select('data').eq('id','communique').maybeSingle();if(r&&r.data&&r.data.data&&r.data.data.actif)setComm(r.data.data);}catch(_){}})();},[]);
   const [waOpen,setWaOpen]=useState(false);
   const SITE={
     nom:'PlusdeBonnesNotes',
@@ -7608,6 +7617,7 @@ function Landing({onLogin,onInscription}){
       </div>
     </header>
 
+    {comm&&(comm.titre||comm.corps)?<section className="lp-communique"><div className="lp-comm-inner"><div className="lp-comm-tag">📢 Communiqué</div>{comm.titre?<h2 className="lp-comm-ttl">{comm.titre}</h2>:null}{comm.corps?<p className="lp-comm-txt">{comm.corps}</p>:null}{comm.cta_label?(comm.cta_url?<a className="lp-btn" href={comm.cta_url} target="_blank" rel="noreferrer">{comm.cta_label}</a>:<button className="lp-btn" onClick={onInscription}>{comm.cta_label}</button>):null}</div></section>:null}
     <section className="lp-sec" id="activite">
       <div className="lp-kicker">Notre activité</div>
       <h2 className="lp-h2">Un accompagnement scolaire de proximité</h2>
@@ -7700,11 +7710,13 @@ function Inscription({onBack,onLogin}){
   const MAT=['Mathématiques','Maths expertes','Physique-Chimie','Français','Histoire-Géo','SVT','Philosophie','Anglais','Anglais Cambridge','Arabe','Tamoul','Orthophonie','Aide aux devoirs','Prépa scientifique'];
   const OBJ=['Remise à niveau','Perfectionnement / approfondissement','Préparation examen (Brevet, Bac…)','Aide aux devoirs','Cours particuliers','Autre'];
   const SRC=['Bouche à oreille','Recherche Google','Réseaux sociaux','Élève / ancien élève','Flyer / affiche','Autre'];
-  const [f,setF]=useState({prenom:'',nom:'',date_naissance:'',niveau:'3ème',etablissement:'',matieres:[],parent_nom:'',parent_prenom:'',parent_tel:'',parent_tel2:'',parent_email:'',ville:'',code_postal:'',objectif:'',source:'',creneau_souhaite:'',message:'',hp:''});
+  const LIEN=['Mère','Père','Frère','Sœur','Tuteur légal','Autre'];
+  const [f,setF]=useState({prenom:'',nom:'',date_naissance:'',niveau:'3ème',etablissement:'',matieres:[],parent_nom:'',parent_prenom:'',tuteur1_lien:'',parent_tel:'',parent_email:'',t2_nom:'',t2_prenom:'',t2_lien:'',t2_tel:'',t2_email:'',adresse:'',ville:'',code_postal:'',objectif:'',source:'',creneau_souhaite:'',message:'',hp:''});
   const [sent,setSent]=useState(false);
   const [err,setErr]=useState('');
   const [busy,setBusy]=useState(false);
-  const [file,setFile]=useState(null);
+  const [fileDom,setFileDom]=useState(null);
+  const [fileBul,setFileBul]=useState(null);
   const upd=(k,v)=>setF(p=>({...p,[k]:v}));
   const toggleM=m=>setF(p=>({...p,matieres:p.matieres.includes(m)?p.matieres.filter(x=>x!==m):[...p.matieres,m]}));
   const submit=async()=>{
@@ -7717,10 +7729,10 @@ function Inscription({onBack,onLogin}){
       prenom:f.prenom.trim(),nom:f.nom.trim(),niveau:f.niveau,matieres:f.matieres,
       parent_nom:f.parent_nom.trim(),parent_tel:f.parent_tel.trim(),parent_email:f.parent_email.trim(),
       creneau_souhaite:f.creneau_souhaite.trim(),message:f.message.trim(),statut:'nouveau',
-      details:{date_naissance:f.date_naissance,etablissement:f.etablissement.trim(),parent_prenom:f.parent_prenom.trim(),parent_tel2:f.parent_tel2.trim(),ville:f.ville.trim(),code_postal:f.code_postal.trim(),objectif:f.objectif,source:f.source},
+      details:{date_naissance:f.date_naissance,etablissement:f.etablissement.trim(),parent_prenom:f.parent_prenom.trim(),tuteur1_lien:f.tuteur1_lien,t2_nom:f.t2_nom.trim(),t2_prenom:f.t2_prenom.trim(),t2_lien:f.t2_lien,t2_tel:f.t2_tel.trim(),t2_email:f.t2_email.trim(),adresse:f.adresse.trim(),ville:f.ville.trim(),code_postal:f.code_postal.trim(),objectif:f.objectif,source:f.source},
     };
     try{
-      if(file){ try{ const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_'); const path=rec.id+'_'+safe; const up=await sb.storage.from('justificatifs').upload(path,file,{upsert:true}); if(!up.error){ rec.details.justificatif_path=path; rec.details.justificatif_nom=file.name; } }catch(_){ } }
+      const upOne=async(fl,key)=>{ if(!fl) return; try{ const safe=fl.name.replace(/[^a-zA-Z0-9._-]/g,'_'); const path=rec.id+'_'+key+'_'+safe; const up=await sb.storage.from('justificatifs').upload(path,fl,{upsert:true}); if(!up.error){ rec.details[key+'_path']=path; rec.details[key+'_nom']=fl.name; } }catch(_){ } }; await upOne(fileDom,'domicile'); await upOne(fileBul,'bulletin');
       const {error}=await sb.from('inscriptions_web').insert([rec]);
       if(error){console.error("[inscription] Supabase:",error);setErr("L'envoi a échoué : "+(error.message||"erreur inconnue")+". Réessayez ou contactez-nous par téléphone.");setBusy(false);return;}
       setSent(true);
@@ -7742,7 +7754,8 @@ function Inscription({onBack,onLogin}){
         <h2>Demande envoyée !</h2>
         <p>Merci, votre demande a bien été enregistrée. Vous serez prochainement contacté par nos services de secrétariat et de comptabilité, et vos identifiants de connexion (identifiant et mot de passe) vous seront transmis.</p>
         <p style={{marginTop:12}}>S'il s'agit d'une première inscription chez nous, nous vous contacterons pour convenir d'un premier rendez-vous obligatoire de présentation de l'établissement, afin de finaliser et sécuriser le paiement.</p>
-        <p style={{marginTop:12}}>Pour un retour plus rapide, privilégiez le SMS au 06 37 23 88 50.</p>
+        <p style={{marginTop:12}}>Pour un retour plus rapide, privilégiez le SMS à l'un de nos contacts :</p>
+        <p style={{marginTop:4,fontFamily:'var(--ff-mono)',fontSize:13,lineHeight:1.9}}>Raja&nbsp;: 06 64 09 48 81<br/>Sipi&nbsp;: 07 51 62 31 62<br/>Youssef&nbsp;: 06 37 23 88 50</p>
         <button className="lp-btn" onClick={onBack}>Retour à l'accueil</button>
       </div>
     ) : (
@@ -7765,18 +7778,32 @@ function Inscription({onBack,onLogin}){
             <div className="lp-chips" style={{marginTop:4}}>{MAT.map(m=><span key={m} className={"lp-chip"+(f.matieres.includes(m)?" lp-chip-sel":"")} style={{cursor:'pointer'}} onClick={()=>toggleM(m)}>{m}</span>)}</div>
           </div>
 
-          <div className="lp-form-sec">2 · Le responsable</div>
+          <div className="lp-form-sec">2 · Tuteur légal 1 *</div>
           <div className="lp-form-grid">
-            <div className="lp-fg"><label>Nom du responsable *</label><input className="lp-in" value={f.parent_nom} onChange={e=>upd('parent_nom',e.target.value)}/></div>
+            <div className="lp-fg"><label>Nom *</label><input className="lp-in" value={f.parent_nom} onChange={e=>upd('parent_nom',e.target.value)}/></div>
             <div className="lp-fg"><label>Prénom</label><input className="lp-in" value={f.parent_prenom} onChange={e=>upd('parent_prenom',e.target.value)}/></div>
+            <div className="lp-fg"><label>Lien avec l'élève</label><select className="lp-in" value={f.tuteur1_lien} onChange={e=>upd('tuteur1_lien',e.target.value)}><option value="">— Choisir —</option>{LIEN.map(o=><option key={o} value={o}>{o}</option>)}</select></div>
             <div className="lp-fg"><label>Téléphone *</label><input className="lp-in" type="tel" value={f.parent_tel} onChange={e=>upd('parent_tel',e.target.value)}/></div>
-            <div className="lp-fg"><label>Autre téléphone</label><input className="lp-in" type="tel" value={f.parent_tel2} onChange={e=>upd('parent_tel2',e.target.value)}/></div>
             <div className="lp-fg full"><label>Email</label><input className="lp-in" type="email" value={f.parent_email} onChange={e=>upd('parent_email',e.target.value)}/></div>
-            <div className="lp-fg"><label>Ville</label><input className="lp-in" value={f.ville} onChange={e=>upd('ville',e.target.value)}/></div>
-            <div className="lp-fg"><label>Code postal</label><input className="lp-in" value={f.code_postal} onChange={e=>upd('code_postal',e.target.value)}/></div>
           </div>
 
-          <div className="lp-form-sec">3 · Besoin & disponibilités</div>
+          <div className="lp-form-sec">3 · Tuteur légal 2 (facultatif)</div>
+          <div className="lp-form-grid">
+            <div className="lp-fg"><label>Nom</label><input className="lp-in" value={f.t2_nom} onChange={e=>upd('t2_nom',e.target.value)}/></div>
+            <div className="lp-fg"><label>Prénom</label><input className="lp-in" value={f.t2_prenom} onChange={e=>upd('t2_prenom',e.target.value)}/></div>
+            <div className="lp-fg"><label>Lien avec l'élève</label><select className="lp-in" value={f.t2_lien} onChange={e=>upd('t2_lien',e.target.value)}><option value="">— Choisir —</option>{LIEN.map(o=><option key={o} value={o}>{o}</option>)}</select></div>
+            <div className="lp-fg"><label>Téléphone</label><input className="lp-in" type="tel" value={f.t2_tel} onChange={e=>upd('t2_tel',e.target.value)}/></div>
+            <div className="lp-fg full"><label>Email</label><input className="lp-in" type="email" value={f.t2_email} onChange={e=>upd('t2_email',e.target.value)}/></div>
+          </div>
+
+          <div className="lp-form-sec">4 · Adresse du foyer</div>
+          <div className="lp-form-grid">
+            <div className="lp-fg full"><label>Adresse complète</label><input className="lp-in" value={f.adresse} onChange={e=>upd('adresse',e.target.value)} placeholder="N° et nom de rue, complément…"/></div>
+            <div className="lp-fg"><label>Code postal</label><input className="lp-in" value={f.code_postal} onChange={e=>upd('code_postal',e.target.value)}/></div>
+            <div className="lp-fg"><label>Ville</label><input className="lp-in" value={f.ville} onChange={e=>upd('ville',e.target.value)}/></div>
+          </div>
+
+          <div className="lp-form-sec">5 · Besoin</div>
           <div className="lp-form-grid">
             <div className="lp-fg"><label>Objectif principal</label><select className="lp-in" value={f.objectif} onChange={e=>upd('objectif',e.target.value)}><option value="">— Choisir —</option>{OBJ.map(o=><option key={o} value={o}>{o}</option>)}</select></div>
             <div className="lp-fg"><label>Comment nous avez-vous connus ?</label><select className="lp-in" value={f.source} onChange={e=>upd('source',e.target.value)}><option value="">— Choisir —</option>{SRC.map(o=><option key={o} value={o}>{o}</option>)}</select></div>
@@ -7784,10 +7811,16 @@ function Inscription({onBack,onLogin}){
             <div className="lp-fg full"><label>Message (facultatif)</label><textarea className="lp-in" rows={3} value={f.message} onChange={e=>upd('message',e.target.value)} placeholder="Objectifs, difficultés, questions…"/></div>
           </div>
 
-          <div className="lp-form-sec">4 · Pièce justificative (facultatif)</div>
-          <div className="lp-fg full"><label>Justificatif de domicile ou bulletin scolaire (PDF ou image)</label>
-            <input className="lp-in" type="file" accept=".pdf,image/*" onChange={e=>{const x=e.target.files&&e.target.files[0]; if(x&&x.size>8*1024*1024){setErr('Fichier trop volumineux (8 Mo maximum).'); e.target.value=''; setFile(null); return;} setErr(''); setFile(x||null);}}/>
-            {file?<div style={{fontFamily:'var(--ff-mono)',fontSize:11.5,color:'var(--muted)',marginTop:6}}>📎 {file.name}</div>:null}
+          <div className="lp-form-sec">6 · Pièces justificatives (facultatif)</div>
+          <div className="lp-form-grid">
+            <div className="lp-fg full"><label>Justificatif de domicile (PDF ou image)</label>
+              <input className="lp-in" type="file" accept=".pdf,image/*" onChange={e=>{const x=e.target.files&&e.target.files[0]; if(x&&x.size>8*1024*1024){setErr('Fichier trop volumineux (8 Mo maximum).'); e.target.value=''; setFileDom(null); return;} setErr(''); setFileDom(x||null);}}/>
+              {fileDom?<div style={{fontFamily:'var(--ff-mono)',fontSize:11.5,color:'var(--muted)',marginTop:6}}>📎 {fileDom.name}</div>:null}
+            </div>
+            <div className="lp-fg full"><label>Dernier bulletin scolaire (PDF ou image)</label>
+              <input className="lp-in" type="file" accept=".pdf,image/*" onChange={e=>{const x=e.target.files&&e.target.files[0]; if(x&&x.size>8*1024*1024){setErr('Fichier trop volumineux (8 Mo maximum).'); e.target.value=''; setFileBul(null); return;} setErr(''); setFileBul(x||null);}}/>
+              {fileBul?<div style={{fontFamily:'var(--ff-mono)',fontSize:11.5,color:'var(--muted)',marginTop:6}}>📎 {fileBul.name}</div>:null}
+            </div>
           </div>
 
           {/* anti-spam : champ caché */}
@@ -7848,12 +7881,14 @@ function DemandesWeb({demandes=[],setDemandes,cours=[],setInscriptions,goGestion
             </div>
             {d.details&&(d.details.date_naissance||d.details.etablissement||d.details.ville||d.details.objectif||d.details.source||d.details.parent_tel2||d.details.parent_prenom)?<div style={{fontSize:11.5,color:'#666',margin:'4px 0',display:'flex',flexWrap:'wrap',gap:'2px 14px'}}>
               {d.details.parent_prenom?<span>👤 {d.details.parent_prenom}</span>:null}
-              {d.details.parent_tel2?<span>📞 {d.details.parent_tel2}</span>:null}
+              {d.details.tuteur1_lien?<span>👪 T1&nbsp;: {d.details.tuteur1_lien}</span>:null}
+              {d.details.t2_nom?<span>👤 T2&nbsp;: {d.details.t2_prenom} {d.details.t2_nom}{d.details.t2_lien?' ('+d.details.t2_lien+')':''}</span>:null}
+              {d.details.t2_tel?<span>📞 T2&nbsp;{d.details.t2_tel}</span>:null}
               {d.details.date_naissance?<span>🎂 {d.details.date_naissance}</span>:null}
               {d.details.etablissement?<span>🏫 {d.details.etablissement}</span>:null}
-              {(d.details.ville||d.details.code_postal)?<span>📍 {d.details.code_postal} {d.details.ville}</span>:null}
+              {(d.details.adresse||d.details.ville||d.details.code_postal)?<span>📍 {d.details.adresse?d.details.adresse+', ':''}{d.details.code_postal} {d.details.ville}</span>:null}
               {d.details.objectif?<span>🎯 {d.details.objectif}</span>:null}
-              {d.details.source?<span>👋 {d.details.source}</span>:null}{d.details&&d.details.justificatif_path?<button onClick={async()=>{try{const r=await sb.storage.from('justificatifs').createSignedUrl(d.details.justificatif_path,3600);if(r.data&&r.data.signedUrl)window.open(r.data.signedUrl,'_blank');else alert('Document indisponible (vérifiez le bucket Storage justificatifs).');}catch(e){alert('Document indisponible.');}}} style={{background:'none',border:'none',color:'#1a4fc4',cursor:'pointer',fontFamily:'inherit',fontSize:'inherit',padding:0,textDecoration:'underline'}}>📎 {d.details.justificatif_nom||'Justificatif'}</button>:null}
+              {d.details.source?<span>👋 {d.details.source}</span>:null}{d.details&&(d.details.domicile_path||d.details.bulletin_path||d.details.justificatif_path)?<>{d.details.domicile_path?<button onClick={async()=>{try{const r=await sb.storage.from('justificatifs').createSignedUrl(d.details.domicile_path,3600);if(r.data&&r.data.signedUrl)window.open(r.data.signedUrl,'_blank');else alert('Document indisponible (vérifiez le bucket Storage justificatifs).');}catch(e){alert('Document indisponible.');}}} style={{background:'none',border:'none',color:'#1a4fc4',cursor:'pointer',fontFamily:'inherit',fontSize:'inherit',padding:0,textDecoration:'underline',marginRight:10}}>📎 Domicile</button>:null}{d.details.bulletin_path?<button onClick={async()=>{try{const r=await sb.storage.from('justificatifs').createSignedUrl(d.details.bulletin_path,3600);if(r.data&&r.data.signedUrl)window.open(r.data.signedUrl,'_blank');else alert('Document indisponible (vérifiez le bucket Storage justificatifs).');}catch(e){alert('Document indisponible.');}}} style={{background:'none',border:'none',color:'#1a4fc4',cursor:'pointer',fontFamily:'inherit',fontSize:'inherit',padding:0,textDecoration:'underline',marginRight:10}}>📎 Bulletin</button>:null}{d.details.justificatif_path?<button onClick={async()=>{try{const r=await sb.storage.from('justificatifs').createSignedUrl(d.details.justificatif_path,3600);if(r.data&&r.data.signedUrl)window.open(r.data.signedUrl,'_blank');else alert('Document indisponible (vérifiez le bucket Storage justificatifs).');}catch(e){alert('Document indisponible.');}}} style={{background:'none',border:'none',color:'#1a4fc4',cursor:'pointer',fontFamily:'inherit',fontSize:'inherit',padding:0,textDecoration:'underline',marginRight:10}}>📎 {d.details.justificatif_nom||'Justificatif'}</button>:null}</>:null}
             </div>:null}
             {d.creneau_souhaite?<div style={{fontSize:12,color:'#555'}}>🕒 Souhait : {d.creneau_souhaite}</div>:null}
             {d.creneau&&coursById(d.creneau)?<div style={{fontSize:12,color:'#7c3aed',fontWeight:600,marginTop:4}}>📅 Créneau attribué : {coursLabel(coursById(d.creneau))}</div>:null}
@@ -8089,6 +8124,50 @@ function StagesReseau({user,users=[],entreprises=[],setEntreprises,stages=[],set
   </>;
 }
 
+function Communique(){
+  const LBL={display:'block',fontSize:11,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.5,marginBottom:5};
+  const [c,setC]=useState({titre:'',corps:'',cta_label:'',cta_url:'',actif:false});
+  const [loading,setLoading]=useState(true);
+  const [saving,setSaving]=useState(false);
+  const [msg,setMsg]=useState('');
+  useEffect(()=>{(async()=>{try{const r=await sb.from('site_content').select('data').eq('id','communique').maybeSingle();if(r&&r.data&&r.data.data)setC(p=>({...p,...r.data.data}));}catch(_){}setLoading(false);})();},[]);
+  const upd=(k,v)=>setC(p=>({...p,[k]:v}));
+  const save=async()=>{setSaving(true);setMsg('');try{const payload={...c,updated_at:new Date().toISOString()};const r=await sb.from('site_content').upsert({id:'communique',data:payload});if(r.error){setMsg('❌ '+(r.error.message||'Erreur'));}else{setMsg(c.actif?'✅ Enregistré et publié sur le site.':'✅ Enregistré (brouillon, non publié).');}}catch(e){setMsg('❌ '+(e&&e.message||'Erreur'));}setSaving(false);};
+  return <div style={{padding:'24px 28px',maxWidth:900}}>
+    <h1 style={{fontFamily:'var(--ff-serif)',fontSize:24,color:'var(--navy)',margin:'0 0 4px'}}>📢 Communiqué de rentrée</h1>
+    <p style={{color:'var(--muted)',fontSize:13,margin:'0 0 20px'}}>Publiez un message d'actualité directement sur la page d'accueil du site.</p>
+    {loading?<p style={{color:'var(--muted)'}}>Chargement…</p>:<>
+    <div style={{maxWidth:720,background:'#fff',border:'1px solid var(--cream2)',borderRadius:8,padding:'22px 24px'}}>
+      <label style={LBL}>Titre</label>
+      <input className="lp-in" value={c.titre} onChange={e=>upd('titre',e.target.value)} placeholder="Ex : Inscriptions rentrée 2026 ouvertes"/>
+      <label style={{...LBL,marginTop:16}}>Message</label>
+      <textarea className="lp-in" rows={6} value={c.corps} onChange={e=>upd('corps',e.target.value)} placeholder="Votre communiqué… (les retours à la ligne sont conservés)"/>
+      <div style={{display:'flex',gap:14,flexWrap:'wrap',marginTop:16}}>
+        <div style={{flex:'1 1 200px'}}><label style={LBL}>Texte du bouton (facultatif)</label><input className="lp-in" value={c.cta_label} onChange={e=>upd('cta_label',e.target.value)} placeholder="Ex : S'inscrire"/></div>
+        <div style={{flex:'1 1 200px'}}><label style={LBL}>Lien du bouton (facultatif)</label><input className="lp-in" value={c.cta_url} onChange={e=>upd('cta_url',e.target.value)} placeholder="https://…  (vide = ouvre le formulaire)"/></div>
+      </div>
+      <label style={{display:'flex',alignItems:'center',gap:10,marginTop:20,cursor:'pointer',fontSize:14}}>
+        <input type="checkbox" checked={!!c.actif} onChange={e=>upd('actif',e.target.checked)} style={{width:18,height:18}}/>
+        <span><b>Publier sur le site</b> <span style={{color:'var(--muted)',fontSize:12.5}}>(décoché = brouillon, invisible)</span></span>
+      </label>
+      <div style={{display:'flex',alignItems:'center',gap:14,marginTop:20}}>
+        <button className="lp-btn" disabled={saving} onClick={save} style={{opacity:saving?.6:1}}>{saving?'Enregistrement…':'Enregistrer'}</button>
+        {msg?<span style={{fontSize:13}}>{msg}</span>:null}
+      </div>
+    </div>
+    <div style={{maxWidth:720,marginTop:22}}>
+      <div style={{fontSize:11,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:1,marginBottom:8}}>Aperçu</div>
+      <div style={{background:'linear-gradient(180deg,#fff,var(--cream))',borderTop:'3px solid var(--gold)',borderRadius:6,padding:'24px',textAlign:'center'}}>
+        <div style={{display:'inline-block',fontFamily:'var(--ff-mono)',fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:'uppercase',color:'var(--gold)',marginBottom:10}}>📢 Communiqué</div>
+        <div style={{fontFamily:'var(--ff-serif)',fontSize:22,color:'var(--navy)',marginBottom:8}}>{c.titre||'(titre)'}</div>
+        <div style={{fontSize:14,lineHeight:1.6,color:'#333',whiteSpace:'pre-line'}}>{c.corps||'(message)'}</div>
+        {c.cta_label?<div style={{marginTop:14}}><span className="lp-btn">{c.cta_label}</span></div>:null}
+      </div>
+    </div>
+    </>}
+  </div>;
+}
+
 function App(){
   const [cu,setCu]=useState(null);
   const [page,setPage]=useState('dashboard');
@@ -8258,6 +8337,7 @@ function App(){
     case'inscriptions':return<Inscriptions {...props} setFactures={props.setFactures} demandesWeb={demandesWeb} setDemandesWeb={setDemandesWeb}/>;
     case'suivi':return<SuiviCompetences {...props} customComps={props.customComps} setCustomComps={props.setCustomComps} awardedTrophies={props.awardedTrophies} setAwardedTrophies={props.setAwardedTrophies}/>;
     case'coursparticuliers':return<CoursParticuliers {...props}/>;
+    case'communique':return<Communique/>;
     case'admin':return<Admin {...props} factures={props.factures} setFactures={props.setFactures} customTrophies={props.customTrophies} setCustomTrophies={props.setCustomTrophies} awardedTrophies={props.awardedTrophies} setAwardedTrophies={props.setAwardedTrophies} inscriptions={props.inscriptions} setInscriptions={props.setInscriptions}/>;
     case'sorties':return<Sorties sorties={props.sorties} setSorties={props.setSorties} users={props.users} cours={props.cours}/>;
     case'stages':return<StagesReseau user={cu} users={props.users} entreprises={entreprises} setEntreprises={setEntreprises} stages={stages} setStages={setStages}/>;
