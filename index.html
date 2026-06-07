@@ -7618,6 +7618,10 @@ const SITE={
     ],
   };
 
+function encodePage(o){try{return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}catch(e){return '';}}
+function decodePage(s){s=String(s).replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return JSON.parse(decodeURIComponent(escape(atob(s))));}
+function pageLink(o){let base='';try{base=window.location.origin+window.location.pathname;}catch(_){}return base+'#v/'+encodePage(o);}
+
 function Landing({onLogin,onInscription,onPaiement}){
   const [faq,setFaq]=useState(null);
   const [annonces,setAnnonces]=useState([]);
@@ -7626,7 +7630,7 @@ function Landing({onLogin,onInscription,onPaiement}){
   const [paiement,setPaiement]=useState(null);
   useEffect(()=>{(async()=>{try{const r=await sb.from('site_content').select('data').eq('id','paiement').maybeSingle();if(r&&r.data&&r.data.data)setPaiement(r.data.data);}catch(_){}})();},[]);
   useEffect(()=>{(async()=>{try{const r=await sb.from('site_content').select('data').eq('id','pages').maybeSingle();const items=(r&&r.data&&r.data.data&&r.data.data.items)||[];setPages(items.filter(p=>p&&p.actif));}catch(_){}})();},[]);
-  useEffect(()=>{const apply=()=>{const h=window.location.hash||'';const m=h.match(/^#page\/(.+)$/);if(m){const slug=decodeURIComponent(m[1]);const p=pages.find(x=>(x.slug||x.id)===slug);if(p){setOpenPage(p);try{window.scrollTo(0,0);}catch(_){}return;}}setOpenPage(null);};apply();window.addEventListener('hashchange',apply);return ()=>window.removeEventListener('hashchange',apply);},[pages]);
+  useEffect(()=>{const apply=()=>{const h=window.location.hash||'';const mv=h.match(/^#v\/(.+)$/);if(mv){try{const o=decodePage(mv[1]);setOpenPage({titre:o.titre||'',html:o.html||''});try{window.scrollTo(0,0);}catch(_){}}catch(_){setOpenPage(null);}return;}const m=h.match(/^#page\/(.+)$/);if(m){const slug=decodeURIComponent(m[1]);const p=pages.find(x=>(x.slug||x.id)===slug);if(p){setOpenPage(p);try{window.scrollTo(0,0);}catch(_){}return;}}setOpenPage(null);};apply();window.addEventListener('hashchange',apply);return ()=>window.removeEventListener('hashchange',apply);},[pages]);
   useEffect(()=>{(async()=>{try{const r=await sb.from('site_content').select('data').eq('id','annonces').maybeSingle();let items=(r&&r.data&&r.data.data&&r.data.data.items)||[];if(!items.length){const c=await sb.from('site_content').select('data').eq('id','communique').maybeSingle();if(c&&c.data&&c.data.data&&(c.data.data.titre||c.data.data.corps))items=[{...c.data.data,id:'legacy',tag:'Communiqué'}];}setAnnonces(items.filter(a=>a&&a.actif));}catch(_){}})();},[]);
   const [waOpen,setWaOpen]=useState(false);
   
@@ -7652,7 +7656,7 @@ function Landing({onLogin,onInscription,onPaiement}){
         <a onClick={onPaiement}>Tarifs</a>
         <a onClick={()=>go('acces')}>Accès</a>
         <a onClick={()=>go('faq')}>FAQ</a>
-        {pages.map(p=><a key={p.id} onClick={()=>{window.location.hash='page/'+(p.slug||p.id);}}>{p.titre}</a>)}
+        
         <a onClick={onInscription}>Inscription</a>
       </div>
       <div style={{display:'flex',gap:8,alignItems:'center'}}>
@@ -8236,6 +8240,9 @@ function Pages(){
   const regenSlug=()=>setPages(p=>p.map(x=>x.id===sel?{...x,slug:slugify(x.titre||'')}:x));
   const fullLink=(slug)=>{try{return window.location.origin+window.location.pathname+'#page/'+slug;}catch(_){return '#page/'+slug;}};
   const copyLink=(slug)=>{try{navigator.clipboard.writeText(fullLink(slug));setMsg('✅ Lien copié dans le presse-papier');setTimeout(()=>setMsg(''),1800);}catch(_){}};
+  const buildPriv=()=>{const html=(edRef.current&&edRef.current.innerHTML)||(current&&current.html)||'';return pageLink({titre:(current&&current.titre)||'Page',html});};
+  const copyPrivate=()=>{const l=buildPriv();try{navigator.clipboard.writeText(l);setMsg('✅ Lien privé copié ('+l.length+' caractères)');setTimeout(()=>setMsg(''),2600);}catch(_){}};
+  const previewPrivate=()=>{const l=buildPriv();try{window.open(l,'_blank');}catch(_){}};
   const exec=(cmd,val)=>{ document.execCommand(cmd,false,(val===undefined?null:val)); edRef.current&&edRef.current.focus(); };
   const insertTable=()=>{ const r=parseInt(prompt('Nombre de lignes ?','3'),10); const c=parseInt(prompt('Nombre de colonnes ?','3'),10); if(!r||!c)return; let h='<table class="pg-tbl"><tbody>'; for(let i=0;i<r;i++){ h+='<tr>'; for(let j=0;j<c;j++){ h+=(i===0?'<th>Titre</th>':'<td>—</td>'); } h+='</tr>'; } h+='</tbody></table><p></p>'; exec('insertHTML',h); };
   const insertLink=()=>{ const u=prompt('Adresse du lien (https://…)'); if(u)exec('createLink',u); };
@@ -8261,7 +8268,7 @@ function Pages(){
           <label style={{display:'flex',alignItems:'center',gap:8,fontSize:13,fontWeight:700,cursor:'pointer',paddingBottom:8}}><input type="checkbox" checked={!!current.actif} onChange={e=>updMeta('actif',e.target.checked)} style={{width:17,height:17}}/>{current.actif?'Visible':'Masquée'}</label>
           <button onClick={()=>delPage(current.id)} className="lp-btn lp-btn-o" style={{color:'#b3243b',borderColor:'#b3243b',paddingBottom:8}}>🗑 Supprimer</button>
         </div>
-        <div style={{display:'flex',gap:10,alignItems:'center',flexWrap:'wrap',marginBottom:14,fontSize:12.5,color:'var(--muted)'}}><span>Lien de la page :</span><code style={{background:'#fff',border:'1px solid var(--cream2)',borderRadius:4,padding:'4px 8px',fontSize:12,color:'var(--navy)'}}>#page/{current.slug||slugify(current.titre||'')}</code><button className="lp-btn lp-btn-o" style={{padding:'4px 10px',fontSize:12}} onClick={()=>copyLink(current.slug||slugify(current.titre||''))}>Copier le lien</button><button className="lp-btn lp-btn-o" style={{padding:'4px 10px',fontSize:12}} onClick={regenSlug}>Régénérer</button></div>
+        <div style={{display:'flex',gap:10,alignItems:'center',flexWrap:'wrap',marginBottom:6,fontSize:12.5,color:'var(--muted)'}}><span>Lien privé (autonome) :</span><button className="lp-btn" style={{padding:'5px 12px',fontSize:12.5}} onClick={copyPrivate}>🔗 Copier le lien privé</button><button className="lp-btn lp-btn-o" style={{padding:'5px 12px',fontSize:12}} onClick={previewPrivate}>👁 Prévisualiser</button></div><div style={{marginBottom:14,fontSize:11.5,color:'var(--muted)',lineHeight:1.5}}>Le lien contient toute la page (titre + mise en forme) — rien n'est publié dans le menu. Colle-le dans une annonce ou envoie-le à qui tu veux ; la page s'ouvre au style du site. Le contenu voyage dans le lien (non listé), pas besoin de publier.</div>
         <div className="pg-tools">
           {T('formatBlock','H2','<h2>')}{T('formatBlock','H3','<h3>')}{T('formatBlock','¶','<p>')}
           <span className="sep"/>
