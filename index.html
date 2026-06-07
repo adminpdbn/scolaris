@@ -7523,6 +7523,7 @@ function Landing({onLogin,onInscription}){
   const [pages,setPages]=useState([]);
   const [openPage,setOpenPage]=useState(null);
   useEffect(()=>{(async()=>{try{const r=await sb.from('site_content').select('data').eq('id','pages').maybeSingle();const items=(r&&r.data&&r.data.data&&r.data.data.items)||[];setPages(items.filter(p=>p&&p.actif));}catch(_){}})();},[]);
+  useEffect(()=>{const apply=()=>{const h=window.location.hash||'';const m=h.match(/^#page\/(.+)$/);if(m){const slug=decodeURIComponent(m[1]);const p=pages.find(x=>(x.slug||x.id)===slug);if(p){setOpenPage(p);try{window.scrollTo(0,0);}catch(_){}return;}}setOpenPage(null);};apply();window.addEventListener('hashchange',apply);return ()=>window.removeEventListener('hashchange',apply);},[pages]);
   useEffect(()=>{(async()=>{try{const r=await sb.from('site_content').select('data').eq('id','annonces').maybeSingle();let items=(r&&r.data&&r.data.data&&r.data.data.items)||[];if(!items.length){const c=await sb.from('site_content').select('data').eq('id','communique').maybeSingle();if(c&&c.data&&c.data.data&&(c.data.data.titre||c.data.data.corps))items=[{...c.data.data,id:'legacy',tag:'Communiqué'}];}setAnnonces(items.filter(a=>a&&a.actif));}catch(_){}})();},[]);
   const [waOpen,setWaOpen]=useState(false);
   const SITE={
@@ -7620,7 +7621,7 @@ function Landing({onLogin,onInscription}){
     {openPage?<div className="lp-page-overlay">
       <nav className="lp-nav" style={{position:'sticky',top:0,zIndex:5,background:'var(--cream)'}}>
         <div className="lp-nav-brand"><svg width="22" height="22" viewBox="0 0 52 52" fill="none"><circle cx="26" cy="26" r="24" fill="var(--gold2)" opacity="0.2"/><path d="M26 8 L38 18 L38 34 L26 42 L14 34 L14 18 Z" fill="var(--gold)" opacity="0.9"/></svg> {SITE.nom}</div>
-        <div style={{display:'flex',gap:8,alignItems:'center'}}><button className="lp-btn lp-btn-o" onClick={()=>setOpenPage(null)}>← Accueil</button><button className="lp-btn" onClick={onInscription}>S'inscrire</button></div>
+        <div style={{display:'flex',gap:8,alignItems:'center'}}><button className="lp-btn lp-btn-o" onClick={()=>{try{history.replaceState(null,'',window.location.pathname+window.location.search);}catch(_){} setOpenPage(null);}}>← Accueil</button><button className="lp-btn" onClick={onInscription}>S'inscrire</button></div>
       </nav>
       <article className="lp-page"><h1 className="lp-page-title">{openPage.titre}</h1><div className="lp-page-body" dangerouslySetInnerHTML={{__html:openPage.html||''}}/></article>
       <div className="lp-foot-mini">{SITE.nom} — Soutien scolaire à La Courneuve</div>
@@ -7637,7 +7638,7 @@ function Landing({onLogin,onInscription}){
         <a onClick={()=>go('tarifs')}>Tarifs</a>
         <a onClick={()=>go('acces')}>Accès</a>
         <a onClick={()=>go('faq')}>FAQ</a>
-        {pages.map(p=><a key={p.id} onClick={()=>{setOpenPage(p);try{window.scrollTo(0,0);}catch(_){}}}>{p.titre}</a>)}
+        {pages.map(p=><a key={p.id} onClick={()=>{window.location.hash='page/'+(p.slug||p.id);}}>{p.titre}</a>)}
         <a onClick={onInscription}>Inscription</a>
       </div>
       <div style={{display:'flex',gap:8,alignItems:'center'}}>
@@ -7667,7 +7668,7 @@ function Landing({onLogin,onInscription}){
         </div>
         <div className="lp-stats">{SITE.stats.map((s,i)=><div key={i}><div className="lp-stat-n">{s.n}</div><div className="lp-stat-l">{s.l}</div></div>)}</div>
         </div>
-        {annonces.length?<aside className="lp-hero-news"><div className="lp-news-h">📢 Annonces</div>{annonces.map((a,i)=><div key={a.id||i} className="lp-news-card">{a.tag?<div className="lp-news-tag">{a.tag}</div>:null}{a.titre?<div className="lp-news-ttl">{a.titre}</div>:null}{a.corps?<div className="lp-news-txt">{a.corps}</div>:null}{a.cta_label?(a.cta_url?<a className="lp-news-link" href={a.cta_url} target="_blank" rel="noreferrer">{a.cta_label} →</a>:<button className="lp-news-link" onClick={onInscription}>{a.cta_label} →</button>):null}</div>)}</aside>:null}
+        {annonces.length?<aside className="lp-hero-news"><div className="lp-news-h">📢 Annonces</div>{annonces.map((a,i)=><div key={a.id||i} className="lp-news-card">{a.tag?<div className="lp-news-tag">{a.tag}</div>:null}{a.titre?<div className="lp-news-ttl">{a.titre}</div>:null}{a.corps?<div className="lp-news-txt">{a.corps}</div>:null}{a.cta_label?(a.cta_url?<a className="lp-news-link" href={a.cta_url} {...(String(a.cta_url).charAt(0)==='#'?{}:{target:'_blank',rel:'noreferrer'})}>{a.cta_label} →</a>:<button className="lp-news-link" onClick={onInscription}>{a.cta_label} →</button>):null}</div>)}</aside>:null}
       </div>
     </header>
 
@@ -8195,12 +8196,17 @@ function Pages(){
   const addPage=()=>{ const np=capture(); const id='p'+Date.now(); setPages([...np,{id,titre:'Nouvelle page',html:'<p>Votre contenu…</p>',actif:true}]); setSel(id); };
   const delPage=(id)=>{ if(window.confirm('Supprimer cette page ?')){ const np=pages.filter(x=>x.id!==id); setPages(np); setSel(np.length?np[0].id:null); } };
   const updMeta=(k,v)=>setPages(p=>p.map(x=>x.id===sel?{...x,[k]:v}:x));
+  const slugify=(s)=>(((s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')).slice(0,60))||('page'+Date.now());
+  const setTitre=(v)=>setPages(p=>p.map(x=>x.id===sel?{...x,titre:v,slug:(x.slug?x.slug:slugify(v))}:x));
+  const regenSlug=()=>setPages(p=>p.map(x=>x.id===sel?{...x,slug:slugify(x.titre||'')}:x));
+  const fullLink=(slug)=>{try{return window.location.origin+window.location.pathname+'#page/'+slug;}catch(_){return '#page/'+slug;}};
+  const copyLink=(slug)=>{try{navigator.clipboard.writeText(fullLink(slug));setMsg('✅ Lien copié dans le presse-papier');setTimeout(()=>setMsg(''),1800);}catch(_){}};
   const exec=(cmd,val)=>{ document.execCommand(cmd,false,(val===undefined?null:val)); edRef.current&&edRef.current.focus(); };
   const insertTable=()=>{ const r=parseInt(prompt('Nombre de lignes ?','3'),10); const c=parseInt(prompt('Nombre de colonnes ?','3'),10); if(!r||!c)return; let h='<table class="pg-tbl"><tbody>'; for(let i=0;i<r;i++){ h+='<tr>'; for(let j=0;j<c;j++){ h+=(i===0?'<th>Titre</th>':'<td>—</td>'); } h+='</tr>'; } h+='</tbody></table><p></p>'; exec('insertHTML',h); };
   const insertLink=()=>{ const u=prompt('Adresse du lien (https://…)'); if(u)exec('createLink',u); };
   const insertImgUrl=()=>{ const u=prompt('URL de l\'image (https://…)'); if(u)exec('insertImage',u); };
   const onPickImg=async(e)=>{ const f=e.target.files&&e.target.files[0]; e.target.value=''; if(!f)return; try{ const safe=f.name.replace(/[^a-zA-Z0-9._-]/g,'_'); const path='img_'+Date.now()+'_'+safe; const up=await sb.storage.from('pages-media').upload(path,f,{upsert:true}); if(up.error){ alert('Upload impossible ('+(up.error.message||'')+'). Astuce : créez un bucket public « pages-media », ou utilisez « Image (lien) ».'); return; } const pub=sb.storage.from('pages-media').getPublicUrl(path); const url=pub&&pub.data&&pub.data.publicUrl; if(url)exec('insertImage',url); }catch(err){ alert('Erreur upload image.'); } };
-  const save=async()=>{ setSaving(true); setMsg(''); try{ const items=capture(); setPages(items); const r=await sb.from('site_content').upsert({id:'pages',data:{items}}); if(r.error)setMsg('❌ '+(r.error.message||'Erreur')); else setMsg('✅ Enregistré — '+items.filter(p=>p.actif).length+' page(s) visible(s) dans le menu.'); }catch(e){ setMsg('❌ '+(e&&e.message||'Erreur')); } setSaving(false); };
+  const save=async()=>{ setSaving(true); setMsg(''); try{ let items=capture(); items=items.map(x=>({...x,slug:(x.slug||slugify(x.titre||x.id))})); setPages(items); const r=await sb.from('site_content').upsert({id:'pages',data:{items}}); if(r.error)setMsg('❌ '+(r.error.message||'Erreur')); else setMsg('✅ Enregistré — '+items.filter(p=>p.actif).length+' page(s) visible(s) dans le menu.'); }catch(e){ setMsg('❌ '+(e&&e.message||'Erreur')); } setSaving(false); };
   const T=(cmd,label,val)=><button onMouseDown={e=>{e.preventDefault();exec(cmd,val);}} title={label}>{label}</button>;
   return <div style={{padding:'24px 28px',maxWidth:1100}}>
     <h1 style={{fontFamily:'var(--ff-serif)',fontSize:24,color:'var(--navy)',margin:'0 0 4px'}}>📄 Pages du site</h1>
@@ -8216,10 +8222,11 @@ function Pages(){
       </div>
       {current?<div>
         <div style={{display:'flex',gap:14,flexWrap:'wrap',alignItems:'flex-end',marginBottom:12}}>
-          <div style={{flex:'1 1 280px'}}><label style={LBL}>Titre / libellé dans le menu</label><input className="lp-in" value={current.titre||''} onChange={e=>updMeta('titre',e.target.value)}/></div>
+          <div style={{flex:'1 1 280px'}}><label style={LBL}>Titre / libellé dans le menu</label><input className="lp-in" value={current.titre||''} onChange={e=>setTitre(e.target.value)}/></div>
           <label style={{display:'flex',alignItems:'center',gap:8,fontSize:13,fontWeight:700,cursor:'pointer',paddingBottom:8}}><input type="checkbox" checked={!!current.actif} onChange={e=>updMeta('actif',e.target.checked)} style={{width:17,height:17}}/>{current.actif?'Visible':'Masquée'}</label>
           <button onClick={()=>delPage(current.id)} className="lp-btn lp-btn-o" style={{color:'#b3243b',borderColor:'#b3243b',paddingBottom:8}}>🗑 Supprimer</button>
         </div>
+        <div style={{display:'flex',gap:10,alignItems:'center',flexWrap:'wrap',marginBottom:14,fontSize:12.5,color:'var(--muted)'}}><span>Lien de la page :</span><code style={{background:'#fff',border:'1px solid var(--cream2)',borderRadius:4,padding:'4px 8px',fontSize:12,color:'var(--navy)'}}>#page/{current.slug||slugify(current.titre||'')}</code><button className="lp-btn lp-btn-o" style={{padding:'4px 10px',fontSize:12}} onClick={()=>copyLink(current.slug||slugify(current.titre||''))}>Copier le lien</button><button className="lp-btn lp-btn-o" style={{padding:'4px 10px',fontSize:12}} onClick={regenSlug}>Régénérer</button></div>
         <div className="pg-tools">
           {T('formatBlock','H2','<h2>')}{T('formatBlock','H3','<h3>')}{T('formatBlock','¶','<p>')}
           <span className="sep"/>
