@@ -7787,7 +7787,7 @@ function Inscription({onBack,onLogin}){
       details:{date_naissance:f.date_naissance,etablissement:f.etablissement.trim(),parent_prenom:f.parent_prenom.trim(),tuteur1_lien:f.tuteur1_lien,t2_nom:f.t2_nom.trim(),t2_prenom:f.t2_prenom.trim(),t2_lien:f.t2_lien,t2_tel:f.t2_tel.trim(),t2_email:f.t2_email.trim(),adresse:f.adresse.trim(),ville:f.ville.trim(),code_postal:f.code_postal.trim(),objectif:f.objectif,source:f.source},
     };
     try{
-      const upOne=async(fl,key)=>{ if(!fl) return; try{ const safe=fl.name.replace(/[^a-zA-Z0-9._-]/g,'_'); const path=rec.id+'_'+key+'_'+safe; const up=await sb.storage.from('justificatifs').upload(path,fl,{upsert:true}); console.log('[upload '+key+']',up); if(up&&up.error){ alert('Upload '+key+' ÉCHEC : '+(up.error.message||JSON.stringify(up.error))); } else { rec.details[key+'_path']=path; rec.details[key+'_nom']=fl.name; } }catch(e){ console.error('[upload '+key+'] exception',e); alert('Upload '+key+' EXCEPTION : '+(e&&e.message||e)); } }; await upOne(fileDom,'domicile'); await upOne(fileBul,'bulletin');
+      const upOne=async(fl,key)=>{ if(!fl) return; try{ const safe=fl.name.replace(/[^a-zA-Z0-9._-]/g,'_'); const path=rec.id+'_'+key+'_'+safe; const up=await sb.storage.from('justificatifs').upload(path,fl,{upsert:true}); if(!(up&&up.error)){ rec.details[key+'_path']=path; rec.details[key+'_nom']=fl.name; } }catch(_){ } }; await upOne(fileDom,'domicile'); await upOne(fileBul,'bulletin');
       const {error}=await sb.from('inscriptions_web').insert([rec]);
       if(error){console.error("[inscription] Supabase:",error);setErr("L'envoi a échoué : "+(error.message||"erreur inconnue")+". Réessayez ou contactez-nous par téléphone.");setBusy(false);return;}
       setSent(true);
