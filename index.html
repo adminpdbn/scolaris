@@ -599,6 +599,11 @@ html{-webkit-text-size-adjust:100%;}
 .pg-editor img{max-width:100%;height:auto;}
 .pg-editor table{border-collapse:collapse;margin:12px 0;width:100%;}
 .pg-editor td,.pg-editor th{border:1px solid var(--cream2);padding:6px 10px;}
+
+.lp-pay-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;max-width:760px;margin:0 auto;}
+.lp-pay-card{background:var(--white);border:2px solid var(--cream2);border-radius:8px;padding:22px 18px;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center;}
+.lp-pay-label{font-family:var(--ff-serif);font-size:17px;color:var(--navy);}
+.lp-pay-prix{font-family:var(--ff-mono);font-size:22px;font-weight:700;color:var(--gold);}
 </style>
 </head>
 <body>
@@ -1164,6 +1169,7 @@ function Sidebar({user,page,setPage,onLogout,pinned,setPinned}){
     {id:'coursparticuliers',icon:'🎯',label:'Cours particuliers',roles:['admin','prof','eleve']},
     {id:'sorties',icon:'🚌',label:'Sorties scolaires',roles:['admin']},
     {id:'stages',icon:'🤝',label:'Stages & Réseau',roles:['admin']},
+    {id:'paiement',icon:'💳',label:'Paiement',roles:['admin']},
     {id:'pages',icon:'📄',label:'Pages',roles:['admin']},
     {id:'annonces',icon:'📢',label:'Annonces',roles:['admin']},
     {id:'admin',icon:'⚙️',label:'Administration',roles:['admin']},
@@ -7522,6 +7528,8 @@ function Landing({onLogin,onInscription}){
   const [annonces,setAnnonces]=useState([]);
   const [pages,setPages]=useState([]);
   const [openPage,setOpenPage]=useState(null);
+  const [paiement,setPaiement]=useState(null);
+  useEffect(()=>{(async()=>{try{const r=await sb.from('site_content').select('data').eq('id','paiement').maybeSingle();if(r&&r.data&&r.data.data)setPaiement(r.data.data);}catch(_){}})();},[]);
   useEffect(()=>{(async()=>{try{const r=await sb.from('site_content').select('data').eq('id','pages').maybeSingle();const items=(r&&r.data&&r.data.data&&r.data.data.items)||[];setPages(items.filter(p=>p&&p.actif));}catch(_){}})();},[]);
   useEffect(()=>{const apply=()=>{const h=window.location.hash||'';const m=h.match(/^#page\/(.+)$/);if(m){const slug=decodeURIComponent(m[1]);const p=pages.find(x=>(x.slug||x.id)===slug);if(p){setOpenPage(p);try{window.scrollTo(0,0);}catch(_){}return;}}setOpenPage(null);};apply();window.addEventListener('hashchange',apply);return ()=>window.removeEventListener('hashchange',apply);},[pages]);
   useEffect(()=>{(async()=>{try{const r=await sb.from('site_content').select('data').eq('id','annonces').maybeSingle();let items=(r&&r.data&&r.data.data&&r.data.data.items)||[];if(!items.length){const c=await sb.from('site_content').select('data').eq('id','communique').maybeSingle();if(c&&c.data&&c.data.data&&(c.data.data.titre||c.data.data.corps))items=[{...c.data.data,id:'legacy',tag:'Communiqué'}];}setAnnonces(items.filter(a=>a&&a.actif));}catch(_){}})();},[]);
@@ -7712,6 +7720,13 @@ function Landing({onLogin,onInscription}){
       <div className="lp-tnote">{SITE.tarifNote}</div>
     </section>
 
+    {paiement&&paiement.actif&&(paiement.offres||[]).filter(o=>o&&o.lien).length?<section className="lp-sec" id="abonnement">
+      <div className="lp-kicker">Paiement</div>
+      <h2 className="lp-h2">S'abonner en ligne</h2>
+      {paiement.intro?<p style={{maxWidth:680,margin:'0 auto 22px',textAlign:'center',color:'var(--muted)',fontSize:14,lineHeight:1.6}}>{paiement.intro}</p>:null}
+      <div className="lp-pay-grid">{paiement.offres.filter(o=>o&&o.lien).map((o,i)=><div key={o.id||i} className="lp-pay-card"><div className="lp-pay-label">{o.label}</div>{o.prix?<div className="lp-pay-prix">{o.prix}</div>:null}<a className="lp-btn" href={o.lien} target="_blank" rel="noreferrer">S'abonner →</a></div>)}</div>
+      <p style={{textAlign:'center',color:'var(--muted)',fontSize:11.5,marginTop:16}}>🔒 Paiement sécurisé par Stripe — résiliable à tout moment.</p>
+    </section>:null}
     <section className="lp-sec" id="acces">
       <div className="lp-kicker">Localisation</div>
       <h2 className="lp-h2">Nous trouver</h2>
@@ -8179,6 +8194,49 @@ function StagesReseau({user,users=[],entreprises=[],setEntreprises,stages=[],set
   </>;
 }
 
+function Paiement(){
+  const LBL={display:'block',fontSize:11,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.5,marginBottom:5};
+  const BTN={background:'#fff',border:'1px solid var(--cream2)',borderRadius:5,width:30,height:30,cursor:'pointer',fontSize:14};
+  const [cfg,setCfg]=useState({actif:false,intro:'',offres:[]});
+  const [loading,setLoading]=useState(true);
+  const [saving,setSaving]=useState(false);
+  const [msg,setMsg]=useState('');
+  useEffect(()=>{(async()=>{try{const r=await sb.from('site_content').select('data').eq('id','paiement').maybeSingle();if(r&&r.data&&r.data.data)setCfg(p=>({...p,...r.data.data,offres:(r.data.data.offres||[])}));}catch(_){}setLoading(false);})();},[]);
+  const upd=(k,v)=>setCfg(p=>({...p,[k]:v}));
+  const updO=(id,k,v)=>setCfg(p=>({...p,offres:p.offres.map(o=>o.id===id?{...o,[k]:v}:o)}));
+  const addO=()=>setCfg(p=>({...p,offres:[...p.offres,{id:'o'+Date.now()+Math.floor(Math.random()*999),label:'',prix:'',lien:''}]}));
+  const delO=(id)=>{if(window.confirm('Supprimer cette offre ?'))setCfg(p=>({...p,offres:p.offres.filter(o=>o.id!==id)}));};
+  const move=(i,dir)=>setCfg(p=>{const n=[...p.offres];const k=i+dir;if(k<0||k>=n.length)return p;const tmp=n[i];n[i]=n[k];n[k]=tmp;return {...p,offres:n};});
+  const save=async()=>{setSaving(true);setMsg('');try{const r=await sb.from('site_content').upsert({id:'paiement',data:cfg});if(r.error)setMsg('❌ '+(r.error.message||'Erreur'));else setMsg(cfg.actif?'✅ Enregistré et activé sur le site.':'✅ Enregistré (paiement masqué).');}catch(e){setMsg('❌ '+(e&&e.message||'Erreur'));}setSaving(false);};
+  return <div style={{padding:'24px 28px',maxWidth:980}}>
+    <h1 style={{fontFamily:'var(--ff-serif)',fontSize:24,color:'var(--navy)',margin:'0 0 4px'}}>💳 Paiement en ligne</h1>
+    <p style={{color:'var(--muted)',fontSize:13,margin:'0 0 14px',maxWidth:720}}>Affichez une section « S'abonner en ligne » sur l'accueil. Collez ici les liens de paiement Stripe (un par formule). Le paiement est géré entièrement par Stripe (carte, prélèvement mensuel, résiliation).</p>
+    <div style={{background:'#fff',border:'1px solid var(--cream2)',borderRadius:8,padding:'14px 16px',marginBottom:16,fontSize:12.5,color:'var(--muted)',maxWidth:720}}>
+      <b style={{color:'var(--navy)'}}>Comment obtenir un lien Stripe :</b> dans Stripe → <b>Produits</b> → ajoutez un produit (ex. « Abonnement 1 créneau », prix 65 €, <b>récurrent · mensuel</b>) → bouton <b>… → Créer un lien de paiement</b> → copiez l'URL (https://buy.stripe.com/…). Répétez pour chaque formule.
+    </div>
+    <label style={{display:'flex',alignItems:'center',gap:10,marginBottom:16,cursor:'pointer',fontSize:14}}>
+      <input type="checkbox" checked={!!cfg.actif} onChange={e=>upd('actif',e.target.checked)} style={{width:18,height:18}}/>
+      <span><b>Afficher le paiement sur le site</b> <span style={{color:'var(--muted)',fontSize:12.5}}>(décoché = masqué)</span></span>
+    </label>
+    <div style={{maxWidth:720,marginBottom:16}}><label style={LBL}>Texte d'introduction (facultatif)</label><textarea className="lp-in" rows={2} value={cfg.intro||''} onChange={e=>upd('intro',e.target.value)} placeholder="Réglez votre abonnement mensuel en ligne, en toute sécurité."/></div>
+    <div style={{display:'flex',gap:12,marginBottom:16,flexWrap:'wrap'}}>
+      <button className="lp-btn lp-btn-o" onClick={addO}>+ Ajouter une formule</button>
+      <button className="lp-btn" onClick={save} disabled={saving} style={{opacity:saving?.6:1}}>{saving?'Enregistrement…':'Enregistrer'}</button>
+      {msg?<span style={{fontSize:13,alignSelf:'center'}}>{msg}</span>:null}
+    </div>
+    {loading?<p style={{color:'var(--muted)'}}>Chargement…</p>:(cfg.offres||[]).length===0?<p style={{color:'var(--muted)'}}>Aucune formule. Cliquez « + Ajouter une formule ».</p>:(cfg.offres||[]).map((o,i)=><div key={o.id} style={{background:'#fff',border:'1px solid var(--cream2)',borderRadius:8,padding:'14px 16px',marginBottom:12,display:'flex',gap:12,flexWrap:'wrap',alignItems:'flex-end'}}>
+      <div style={{flex:'1 1 200px'}}><label style={LBL}>Libellé</label><input className="lp-in" value={o.label||''} onChange={e=>updO(o.id,'label',e.target.value)} placeholder="1 créneau / mois"/></div>
+      <div style={{flex:'0 0 130px'}}><label style={LBL}>Prix affiché</label><input className="lp-in" value={o.prix||''} onChange={e=>updO(o.id,'prix',e.target.value)} placeholder="65 €/mois"/></div>
+      <div style={{flex:'2 1 280px'}}><label style={LBL}>Lien Stripe</label><input className="lp-in" value={o.lien||''} onChange={e=>updO(o.id,'lien',e.target.value)} placeholder="https://buy.stripe.com/…"/></div>
+      <div style={{display:'flex',gap:6,paddingBottom:2}}>
+        <button onClick={()=>move(i,-1)} title="Monter" style={BTN}>↑</button>
+        <button onClick={()=>move(i,1)} title="Descendre" style={BTN}>↓</button>
+        <button onClick={()=>delO(o.id)} title="Supprimer" style={{...BTN,color:'#b3243b'}}>🗑</button>
+      </div>
+    </div>)}
+  </div>;
+}
+
 function Pages(){
   const LBL={display:'block',fontSize:11,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.5,marginBottom:5};
   const edRef=React.useRef(null);
@@ -8463,6 +8521,7 @@ function App(){
     case'inscriptions':return<Inscriptions {...props} setFactures={props.setFactures} demandesWeb={demandesWeb} setDemandesWeb={setDemandesWeb}/>;
     case'suivi':return<SuiviCompetences {...props} customComps={props.customComps} setCustomComps={props.setCustomComps} awardedTrophies={props.awardedTrophies} setAwardedTrophies={props.setAwardedTrophies}/>;
     case'coursparticuliers':return<CoursParticuliers {...props}/>;
+    case'paiement':return<Paiement/>;
     case'pages':return<Pages/>;
     case'annonces':return<Annonces/>;
     case'admin':return<Admin {...props} factures={props.factures} setFactures={props.setFactures} customTrophies={props.customTrophies} setCustomTrophies={props.setCustomTrophies} awardedTrophies={props.awardedTrophies} setAwardedTrophies={props.setAwardedTrophies} inscriptions={props.inscriptions} setInscriptions={props.setInscriptions}/>;
