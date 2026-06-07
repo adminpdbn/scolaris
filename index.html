@@ -8358,7 +8358,7 @@ function Abonnement({onBack}){
   const offres=((cfg&&cfg.offres)||[]).filter(o=>o&&o.lien);
   return <div className="lp">
     <nav className="lp-nav">
-      <div className="lp-nav-brand"><svg width="22" height="22" viewBox="0 0 52 52" fill="none"><circle cx="26" cy="26" r="24" fill="var(--gold2)" opacity="0.2"/><path d="M26 8 L38 18 L38 34 L26 42 L14 34 L14 18 Z" fill="var(--gold)" opacity="0.9"/></svg> {SITE.nom}</div>
+      <div className="lp-nav-brand"><svg width="22" height="22" viewBox="0 0 52 52" fill="none"><circle cx="26" cy="26" r="24" fill="var(--gold2)" opacity="0.2"/><path d="M26 8 L38 18 L38 34 L26 42 L14 34 L14 18 Z" fill="var(--gold)" opacity="0.9"/></svg> PlusdeBonnesNotes</div>
       <button className="lp-btn lp-btn-o" onClick={onBack}>← Accueil</button>
     </nav>
     <div className="lp-pay-page">
@@ -8368,7 +8368,7 @@ function Abonnement({onBack}){
       {loading?<p style={{textAlign:'center',color:'var(--muted)'}}>Chargement…</p>:offres.length?<div className="lp-pay-grid">{offres.map((o,i)=><div key={o.id||i} className="lp-pay-card"><div className="lp-pay-label">{o.label}</div>{o.prix?<div className="lp-pay-prix">{o.prix}</div>:null}<a className="lp-btn" href={safeLink(o.lien)} target="_blank" rel="noreferrer">S'abonner →</a></div>)}</div>:<p style={{textAlign:'center',color:'var(--muted)'}}>Le paiement en ligne sera disponible très bientôt.</p>}
       <p style={{textAlign:'center',color:'var(--muted)',fontSize:12,marginTop:24}}>🔒 Paiement sécurisé par Stripe — vous serez redirigé vers une page de paiement protégée. Résiliable à tout moment.</p>
     </div>
-    <div className="lp-foot-mini">{SITE.nom} — Soutien scolaire à La Courneuve</div>
+    <div className="lp-foot-mini">PlusdeBonnesNotes — Soutien scolaire à La Courneuve</div>
   </div>;
 }
 
