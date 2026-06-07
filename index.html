@@ -572,6 +572,33 @@ html{-webkit-text-size-adjust:100%;}
 .lp-news-link{display:inline-block;margin-top:10px;background:none;border:none;padding:0;cursor:pointer;font-family:var(--ff-mono);font-size:12.5px;font-weight:700;color:var(--gold2);text-decoration:none;}
 .lp-news-link:hover{text-decoration:underline;}
 @media(max-width:900px){.lp-hero-in.has-aside{display:block;max-width:880px;}.lp-hero-news{margin-top:34px;}}
+
+.lp-page-overlay{position:fixed;inset:0;z-index:1000;overflow-y:auto;background:var(--cream);}
+.lp-page{max-width:820px;margin:0 auto;padding:40px 28px 60px;}
+.lp-page-title{font-family:var(--ff-serif);font-size:clamp(28px,5vw,44px);color:var(--navy);margin:0 0 24px;line-height:1.1;}
+.lp-page-body{font-size:16px;line-height:1.75;color:#2a2a2a;}
+.lp-page-body h2{font-family:var(--ff-serif);font-size:26px;color:var(--navy);margin:32px 0 12px;}
+.lp-page-body h3{font-family:var(--ff-serif);font-size:20px;color:var(--navy);margin:24px 0 10px;}
+.lp-page-body p{margin:0 0 16px;}
+.lp-page-body ul,.lp-page-body ol{margin:0 0 16px 22px;}
+.lp-page-body li{margin:4px 0;}
+.lp-page-body a{color:var(--gold);text-decoration:underline;}
+.lp-page-body img{max-width:100%;height:auto;border-radius:6px;margin:14px 0;}
+.lp-page-body table,.pg-tbl{border-collapse:collapse;width:100%;margin:18px 0;font-size:14px;}
+.lp-page-body td,.lp-page-body th,.pg-tbl td,.pg-tbl th{border:1px solid var(--cream2);padding:8px 12px;text-align:left;}
+.lp-page-body th,.pg-tbl th{background:#fff;font-weight:bold;}
+.lp-foot-mini{text-align:center;padding:26px;font-family:var(--ff-mono);font-size:12px;color:var(--muted);border-top:1px solid var(--cream2);}
+.pg-tools{display:flex;flex-wrap:wrap;gap:4px;background:#fff;border:1px solid var(--cream2);border-bottom:none;border-radius:8px 8px 0 0;padding:8px;}
+.pg-tools button{background:#f5f0e8;border:1px solid var(--cream2);border-radius:4px;min-width:32px;height:30px;padding:0 8px;cursor:pointer;font-size:13px;font-family:var(--ff-mono);color:var(--navy);}
+.pg-tools button:hover{background:var(--cream2);}
+.pg-tools .sep{width:1px;background:var(--cream2);margin:0 4px;align-self:stretch;}
+.pg-editor{min-height:340px;background:#fff;border:1px solid var(--cream2);border-radius:0 0 8px 8px;padding:18px 20px;font-size:15px;line-height:1.7;color:#2a2a2a;outline:none;}
+.pg-editor:focus{border-color:var(--gold2);}
+.pg-editor h2{font-family:var(--ff-serif);font-size:24px;color:var(--navy);margin:18px 0 8px;}
+.pg-editor h3{font-family:var(--ff-serif);font-size:19px;color:var(--navy);margin:14px 0 6px;}
+.pg-editor img{max-width:100%;height:auto;}
+.pg-editor table{border-collapse:collapse;margin:12px 0;width:100%;}
+.pg-editor td,.pg-editor th{border:1px solid var(--cream2);padding:6px 10px;}
 </style>
 </head>
 <body>
@@ -1137,6 +1164,7 @@ function Sidebar({user,page,setPage,onLogout,pinned,setPinned}){
     {id:'coursparticuliers',icon:'🎯',label:'Cours particuliers',roles:['admin','prof','eleve']},
     {id:'sorties',icon:'🚌',label:'Sorties scolaires',roles:['admin']},
     {id:'stages',icon:'🤝',label:'Stages & Réseau',roles:['admin']},
+    {id:'pages',icon:'📄',label:'Pages',roles:['admin']},
     {id:'annonces',icon:'📢',label:'Annonces',roles:['admin']},
     {id:'admin',icon:'⚙️',label:'Administration',roles:['admin']},
   ].filter(i=>i.roles.includes(user.role));
@@ -7492,6 +7520,9 @@ function Sorties({sorties,setSorties,users,cours}){
 function Landing({onLogin,onInscription}){
   const [faq,setFaq]=useState(null);
   const [annonces,setAnnonces]=useState([]);
+  const [pages,setPages]=useState([]);
+  const [openPage,setOpenPage]=useState(null);
+  useEffect(()=>{(async()=>{try{const r=await sb.from('site_content').select('data').eq('id','pages').maybeSingle();const items=(r&&r.data&&r.data.data&&r.data.data.items)||[];setPages(items.filter(p=>p&&p.actif));}catch(_){}})();},[]);
   useEffect(()=>{(async()=>{try{const r=await sb.from('site_content').select('data').eq('id','annonces').maybeSingle();let items=(r&&r.data&&r.data.data&&r.data.data.items)||[];if(!items.length){const c=await sb.from('site_content').select('data').eq('id','communique').maybeSingle();if(c&&c.data&&c.data.data&&(c.data.data.titre||c.data.data.corps))items=[{...c.data.data,id:'legacy',tag:'Communiqué'}];}setAnnonces(items.filter(a=>a&&a.actif));}catch(_){}})();},[]);
   const [waOpen,setWaOpen]=useState(false);
   const SITE={
@@ -7586,6 +7617,14 @@ function Landing({onLogin,onInscription}){
   };
   const go=id=>{const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth'});};
   return <div className="lp">
+    {openPage?<div className="lp-page-overlay">
+      <nav className="lp-nav" style={{position:'sticky',top:0,zIndex:5,background:'var(--cream)'}}>
+        <div className="lp-nav-brand"><svg width="22" height="22" viewBox="0 0 52 52" fill="none"><circle cx="26" cy="26" r="24" fill="var(--gold2)" opacity="0.2"/><path d="M26 8 L38 18 L38 34 L26 42 L14 34 L14 18 Z" fill="var(--gold)" opacity="0.9"/></svg> {SITE.nom}</div>
+        <div style={{display:'flex',gap:8,alignItems:'center'}}><button className="lp-btn lp-btn-o" onClick={()=>setOpenPage(null)}>← Accueil</button><button className="lp-btn" onClick={onInscription}>S'inscrire</button></div>
+      </nav>
+      <article className="lp-page"><h1 className="lp-page-title">{openPage.titre}</h1><div className="lp-page-body" dangerouslySetInnerHTML={{__html:openPage.html||''}}/></article>
+      <div className="lp-foot-mini">{SITE.nom} — Soutien scolaire à La Courneuve</div>
+    </div>:null}
     {SITE.banner?<div className="lp-banner" onClick={onInscription}>{SITE.banner} <u>S'inscrire →</u></div>:null}
     <nav className="lp-nav">
       <div className="lp-nav-brand">
@@ -7598,6 +7637,7 @@ function Landing({onLogin,onInscription}){
         <a onClick={()=>go('tarifs')}>Tarifs</a>
         <a onClick={()=>go('acces')}>Accès</a>
         <a onClick={()=>go('faq')}>FAQ</a>
+        {pages.map(p=><a key={p.id} onClick={()=>{setOpenPage(p);try{window.scrollTo(0,0);}catch(_){}}}>{p.titre}</a>)}
         <a onClick={onInscription}>Inscription</a>
       </div>
       <div style={{display:'flex',gap:8,alignItems:'center'}}>
@@ -8138,6 +8178,70 @@ function StagesReseau({user,users=[],entreprises=[],setEntreprises,stages=[],set
   </>;
 }
 
+function Pages(){
+  const LBL={display:'block',fontSize:11,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.5,marginBottom:5};
+  const edRef=React.useRef(null);
+  const fileRef=React.useRef(null);
+  const [pages,setPages]=useState([]);
+  const [sel,setSel]=useState(null);
+  const [loading,setLoading]=useState(true);
+  const [saving,setSaving]=useState(false);
+  const [msg,setMsg]=useState('');
+  useEffect(()=>{(async()=>{try{const r=await sb.from('site_content').select('data').eq('id','pages').maybeSingle();const it=(r&&r.data&&r.data.data&&r.data.data.items)||[];setPages(it);if(it.length)setSel(it[0].id);}catch(_){}setLoading(false);})();},[]);
+  const current=pages.find(p=>p.id===sel)||null;
+  const initial=React.useMemo(()=>current?(current.html||''):'',[sel]);
+  const capture=(list)=>{ const L=list||pages; if(sel&&edRef.current){ return L.map(x=>x.id===sel?{...x,html:edRef.current.innerHTML}:x); } return L; };
+  const selectPage=(id)=>{ setPages(capture()); setSel(id); };
+  const addPage=()=>{ const np=capture(); const id='p'+Date.now(); setPages([...np,{id,titre:'Nouvelle page',html:'<p>Votre contenu…</p>',actif:true}]); setSel(id); };
+  const delPage=(id)=>{ if(window.confirm('Supprimer cette page ?')){ const np=pages.filter(x=>x.id!==id); setPages(np); setSel(np.length?np[0].id:null); } };
+  const updMeta=(k,v)=>setPages(p=>p.map(x=>x.id===sel?{...x,[k]:v}:x));
+  const exec=(cmd,val)=>{ document.execCommand(cmd,false,(val===undefined?null:val)); edRef.current&&edRef.current.focus(); };
+  const insertTable=()=>{ const r=parseInt(prompt('Nombre de lignes ?','3'),10); const c=parseInt(prompt('Nombre de colonnes ?','3'),10); if(!r||!c)return; let h='<table class="pg-tbl"><tbody>'; for(let i=0;i<r;i++){ h+='<tr>'; for(let j=0;j<c;j++){ h+=(i===0?'<th>Titre</th>':'<td>—</td>'); } h+='</tr>'; } h+='</tbody></table><p></p>'; exec('insertHTML',h); };
+  const insertLink=()=>{ const u=prompt('Adresse du lien (https://…)'); if(u)exec('createLink',u); };
+  const insertImgUrl=()=>{ const u=prompt('URL de l\'image (https://…)'); if(u)exec('insertImage',u); };
+  const onPickImg=async(e)=>{ const f=e.target.files&&e.target.files[0]; e.target.value=''; if(!f)return; try{ const safe=f.name.replace(/[^a-zA-Z0-9._-]/g,'_'); const path='img_'+Date.now()+'_'+safe; const up=await sb.storage.from('pages-media').upload(path,f,{upsert:true}); if(up.error){ alert('Upload impossible ('+(up.error.message||'')+'). Astuce : créez un bucket public « pages-media », ou utilisez « Image (lien) ».'); return; } const pub=sb.storage.from('pages-media').getPublicUrl(path); const url=pub&&pub.data&&pub.data.publicUrl; if(url)exec('insertImage',url); }catch(err){ alert('Erreur upload image.'); } };
+  const save=async()=>{ setSaving(true); setMsg(''); try{ const items=capture(); setPages(items); const r=await sb.from('site_content').upsert({id:'pages',data:{items}}); if(r.error)setMsg('❌ '+(r.error.message||'Erreur')); else setMsg('✅ Enregistré — '+items.filter(p=>p.actif).length+' page(s) visible(s) dans le menu.'); }catch(e){ setMsg('❌ '+(e&&e.message||'Erreur')); } setSaving(false); };
+  const T=(cmd,label,val)=><button onMouseDown={e=>{e.preventDefault();exec(cmd,val);}} title={label}>{label}</button>;
+  return <div style={{padding:'24px 28px',maxWidth:1100}}>
+    <h1 style={{fontFamily:'var(--ff-serif)',fontSize:24,color:'var(--navy)',margin:'0 0 4px'}}>📄 Pages du site</h1>
+    <p style={{color:'var(--muted)',fontSize:13,margin:'0 0 16px',maxWidth:720}}>Créez des pages d'information (communiqué, infos rentrée…) avec titres, images et tableaux, dans le style du site. Elles apparaissent dans le menu du haut. Cochez « Visible » pour publier.</p>
+    <div style={{display:'flex',gap:12,marginBottom:16,flexWrap:'wrap'}}>
+      <button className="lp-btn lp-btn-o" onClick={addPage}>+ Nouvelle page</button>
+      <button className="lp-btn" onClick={save} disabled={saving} style={{opacity:saving?.6:1}}>{saving?'Enregistrement…':'Enregistrer'}</button>
+      {msg?<span style={{fontSize:13,alignSelf:'center'}}>{msg}</span>:null}
+    </div>
+    {loading?<p style={{color:'var(--muted)'}}>Chargement…</p>:pages.length===0?<p style={{color:'var(--muted)'}}>Aucune page pour le moment. Cliquez « + Nouvelle page ».</p>:<div style={{display:'grid',gridTemplateColumns:'220px 1fr',gap:20,alignItems:'start'}}>
+      <div style={{display:'flex',flexDirection:'column',gap:6}}>
+        {pages.map(p=><button key={p.id} onClick={()=>selectPage(p.id)} style={{textAlign:'left',background:p.id===sel?'var(--navy)':'#fff',color:p.id===sel?'#fff':'var(--navy)',border:'1px solid var(--cream2)',borderRadius:6,padding:'10px 12px',cursor:'pointer',fontSize:13}}>{p.actif?'':'🚫 '}{p.titre||'(sans titre)'}</button>)}
+      </div>
+      {current?<div>
+        <div style={{display:'flex',gap:14,flexWrap:'wrap',alignItems:'flex-end',marginBottom:12}}>
+          <div style={{flex:'1 1 280px'}}><label style={LBL}>Titre / libellé dans le menu</label><input className="lp-in" value={current.titre||''} onChange={e=>updMeta('titre',e.target.value)}/></div>
+          <label style={{display:'flex',alignItems:'center',gap:8,fontSize:13,fontWeight:700,cursor:'pointer',paddingBottom:8}}><input type="checkbox" checked={!!current.actif} onChange={e=>updMeta('actif',e.target.checked)} style={{width:17,height:17}}/>{current.actif?'Visible':'Masquée'}</label>
+          <button onClick={()=>delPage(current.id)} className="lp-btn lp-btn-o" style={{color:'#b3243b',borderColor:'#b3243b',paddingBottom:8}}>🗑 Supprimer</button>
+        </div>
+        <div className="pg-tools">
+          {T('formatBlock','H2','<h2>')}{T('formatBlock','H3','<h3>')}{T('formatBlock','¶','<p>')}
+          <span className="sep"/>
+          {T('bold','G')}{T('italic','I')}{T('underline','S')}
+          <span className="sep"/>
+          {T('insertUnorderedList','• Liste')}{T('insertOrderedList','1. Liste')}
+          <span className="sep"/>
+          <button onMouseDown={e=>{e.preventDefault();insertLink();}} title="Lien">🔗 Lien</button>
+          <button onMouseDown={e=>{e.preventDefault();insertImgUrl();}} title="Image par URL">🖼 Image (lien)</button>
+          <button onMouseDown={e=>{e.preventDefault();fileRef.current&&fileRef.current.click();}} title="Téléverser une image">⬆ Image</button>
+          <button onMouseDown={e=>{e.preventDefault();insertTable();}} title="Tableau">▦ Tableau</button>
+          <span className="sep"/>
+          {T('removeFormat','Tx')}
+        </div>
+        <div className="pg-editor" contentEditable suppressContentEditableWarning ref={edRef} key={sel} dangerouslySetInnerHTML={{__html:initial}}/>
+        <input ref={fileRef} type="file" accept="image/*" style={{display:'none'}} onChange={onPickImg}/>
+        <p style={{fontSize:11.5,color:'var(--muted)',marginTop:8}}>Astuce : sélectionnez du texte puis cliquez sur un bouton (G = gras, I = italique, S = souligné, Tx = effacer le style). Pensez à Enregistrer.</p>
+      </div>:<p style={{color:'var(--muted)'}}>Sélectionnez une page à gauche.</p>}
+    </div>}
+  </div>;
+}
+
 function Annonces(){
   const LBL={display:'block',fontSize:11,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.5,marginBottom:5};
   const BTN={background:'#fff',border:'1px solid var(--cream2)',borderRadius:5,width:30,height:30,cursor:'pointer',fontSize:14};
@@ -8352,6 +8456,7 @@ function App(){
     case'inscriptions':return<Inscriptions {...props} setFactures={props.setFactures} demandesWeb={demandesWeb} setDemandesWeb={setDemandesWeb}/>;
     case'suivi':return<SuiviCompetences {...props} customComps={props.customComps} setCustomComps={props.setCustomComps} awardedTrophies={props.awardedTrophies} setAwardedTrophies={props.setAwardedTrophies}/>;
     case'coursparticuliers':return<CoursParticuliers {...props}/>;
+    case'pages':return<Pages/>;
     case'annonces':return<Annonces/>;
     case'admin':return<Admin {...props} factures={props.factures} setFactures={props.setFactures} customTrophies={props.customTrophies} setCustomTrophies={props.setCustomTrophies} awardedTrophies={props.awardedTrophies} setAwardedTrophies={props.setAwardedTrophies} inscriptions={props.inscriptions} setInscriptions={props.setInscriptions}/>;
     case'sorties':return<Sorties sorties={props.sorties} setSorties={props.setSorties} users={props.users} cours={props.cours}/>;
