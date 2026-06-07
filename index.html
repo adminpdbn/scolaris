@@ -7527,18 +7527,7 @@ function Sorties({sorties,setSorties,users,cours}){
 
 // ═══════════════════ PAGE D'ACCUEIL PUBLIQUE ═══════════════════
 // ▼▼ Tout le contenu éditable est ici : modifie librement ▼▼
-function Landing({onLogin,onInscription,onPaiement}){
-  const [faq,setFaq]=useState(null);
-  const [annonces,setAnnonces]=useState([]);
-  const [pages,setPages]=useState([]);
-  const [openPage,setOpenPage]=useState(null);
-  const [paiement,setPaiement]=useState(null);
-  useEffect(()=>{(async()=>{try{const r=await sb.from('site_content').select('data').eq('id','paiement').maybeSingle();if(r&&r.data&&r.data.data)setPaiement(r.data.data);}catch(_){}})();},[]);
-  useEffect(()=>{(async()=>{try{const r=await sb.from('site_content').select('data').eq('id','pages').maybeSingle();const items=(r&&r.data&&r.data.data&&r.data.data.items)||[];setPages(items.filter(p=>p&&p.actif));}catch(_){}})();},[]);
-  useEffect(()=>{const apply=()=>{const h=window.location.hash||'';const m=h.match(/^#page\/(.+)$/);if(m){const slug=decodeURIComponent(m[1]);const p=pages.find(x=>(x.slug||x.id)===slug);if(p){setOpenPage(p);try{window.scrollTo(0,0);}catch(_){}return;}}setOpenPage(null);};apply();window.addEventListener('hashchange',apply);return ()=>window.removeEventListener('hashchange',apply);},[pages]);
-  useEffect(()=>{(async()=>{try{const r=await sb.from('site_content').select('data').eq('id','annonces').maybeSingle();let items=(r&&r.data&&r.data.data&&r.data.data.items)||[];if(!items.length){const c=await sb.from('site_content').select('data').eq('id','communique').maybeSingle();if(c&&c.data&&c.data.data&&(c.data.data.titre||c.data.data.corps))items=[{...c.data.data,id:'legacy',tag:'Communiqué'}];}setAnnonces(items.filter(a=>a&&a.actif));}catch(_){}})();},[]);
-  const [waOpen,setWaOpen]=useState(false);
-  const SITE={
+const SITE={
     nom:'PlusdeBonnesNotes',
     baseline:'Le soutien scolaire connecté — La Courneuve (93)',
     promesse:'Remonter la moyenne, reprendre confiance, viser la mention.',
@@ -7628,6 +7617,19 @@ function Landing({onLogin,onInscription,onPaiement}){
       {q:'Comment inscrire mon enfant ?',r:"Remplissez le formulaire d'inscription en ligne (un par enfant, même pour un élève déjà inscrit). Nous vous recontactons rapidement pour confirmer le créneau et la formule adaptée. Vous pouvez aussi nous joindre par téléphone — privilégiez le SMS pour un retour rapide."},
     ],
   };
+
+function Landing({onLogin,onInscription,onPaiement}){
+  const [faq,setFaq]=useState(null);
+  const [annonces,setAnnonces]=useState([]);
+  const [pages,setPages]=useState([]);
+  const [openPage,setOpenPage]=useState(null);
+  const [paiement,setPaiement]=useState(null);
+  useEffect(()=>{(async()=>{try{const r=await sb.from('site_content').select('data').eq('id','paiement').maybeSingle();if(r&&r.data&&r.data.data)setPaiement(r.data.data);}catch(_){}})();},[]);
+  useEffect(()=>{(async()=>{try{const r=await sb.from('site_content').select('data').eq('id','pages').maybeSingle();const items=(r&&r.data&&r.data.data&&r.data.data.items)||[];setPages(items.filter(p=>p&&p.actif));}catch(_){}})();},[]);
+  useEffect(()=>{const apply=()=>{const h=window.location.hash||'';const m=h.match(/^#page\/(.+)$/);if(m){const slug=decodeURIComponent(m[1]);const p=pages.find(x=>(x.slug||x.id)===slug);if(p){setOpenPage(p);try{window.scrollTo(0,0);}catch(_){}return;}}setOpenPage(null);};apply();window.addEventListener('hashchange',apply);return ()=>window.removeEventListener('hashchange',apply);},[pages]);
+  useEffect(()=>{(async()=>{try{const r=await sb.from('site_content').select('data').eq('id','annonces').maybeSingle();let items=(r&&r.data&&r.data.data&&r.data.data.items)||[];if(!items.length){const c=await sb.from('site_content').select('data').eq('id','communique').maybeSingle();if(c&&c.data&&c.data.data&&(c.data.data.titre||c.data.data.corps))items=[{...c.data.data,id:'legacy',tag:'Communiqué'}];}setAnnonces(items.filter(a=>a&&a.actif));}catch(_){}})();},[]);
+  const [waOpen,setWaOpen]=useState(false);
+  
   const go=id=>{const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth'});};
   return <div className="lp">
     {openPage?<div className="lp-page-overlay">
@@ -7647,11 +7649,10 @@ function Landing({onLogin,onInscription,onPaiement}){
       <div className="lp-nav-links">
         <a onClick={()=>go('activite')}>Activité</a>
         <a onClick={()=>go('engagement')}>Engagement</a>
-        <a onClick={()=>go('tarifs')}>Tarifs</a>
+        <a onClick={onPaiement}>Tarifs</a>
         <a onClick={()=>go('acces')}>Accès</a>
         <a onClick={()=>go('faq')}>FAQ</a>
         {pages.map(p=><a key={p.id} onClick={()=>{window.location.hash='page/'+(p.slug||p.id);}}>{p.titre}</a>)}
-        {paiement&&paiement.actif&&(paiement.offres||[]).filter(o=>o&&o.lien).length?<a onClick={onPaiement}>Paiements</a>:null}
         <a onClick={onInscription}>Inscription</a>
       </div>
       <div style={{display:'flex',gap:8,alignItems:'center'}}>
@@ -7669,7 +7670,7 @@ function Landing({onLogin,onInscription,onPaiement}){
         {SITE.promesse?<p className="lp-promesse">{SITE.promesse}</p>:null}
         <div className="lp-hero-cta">
           <button className="lp-btn" onClick={onInscription}>Inscrire mon enfant →</button>
-          <button className="lp-btn lp-btn-o" style={{color:'var(--cream)',borderColor:'var(--cream)'}} onClick={()=>go('tarifs')}>Voir les tarifs</button>
+          <button className="lp-btn lp-btn-o" style={{color:'var(--cream)',borderColor:'var(--cream)'}} onClick={onPaiement}>Voir les tarifs</button>
         </div>
         <div className="lp-trust">
           {SITE.googleUrl?<a className="lp-google" href={SITE.googleUrl} target="_blank" rel="noreferrer">⭐ {SITE.googleNote?SITE.googleNote+' · ':''}Avis Google</a>:null}
@@ -7701,28 +7702,6 @@ function Landing({onLogin,onInscription,onPaiement}){
         <p>{SITE.mission.texte}</p>
         <div className="lp-mission-pts">{SITE.mission.points.map((p,i)=><div key={i} className="lp-mission-pt"><div className="ic">{p.ic}</div><h4>{p.t}</h4><p>{p.d}</p></div>)}</div>
       </div>
-    </section>
-
-    <section className="lp-sec" id="profils">
-      <div className="lp-kicker">Trouver le bon rythme</div>
-      <h2 className="lp-h2">Quelle formule selon le profil ?</h2>
-      <p style={{maxWidth:680,margin:'0 auto 22px',textAlign:'center',color:'var(--muted)',fontSize:14,lineHeight:1.6}}>Le bon nombre de créneaux dépend du niveau et de l'objectif de l'élève. Voici nos repères, en toute transparence.</p>
-      <div className="lp-profils">{SITE.profils.map((p,i)=><div key={i} className={"lp-profil"+(p.reco?" reco":"")}>{p.reco?<span className="lp-profil-reco">Recommandé</span>:null}<h3>{p.t}</h3><div className="lp-profil-f">{p.f}</div><p>{p.d}</p></div>)}</div>
-    </section>
-    <section className="lp-sec" id="tarifs">
-      <div className="lp-kicker">Tarifs</div>
-      <h2 className="lp-h2">Des formules claires et accessibles</h2>
-      <div className="lp-tarifs">{SITE.tarifs.map((tf,i)=><div key={i} className={"lp-tcard"+(tf.feat?" feat":"")}>{tf.tag?<span className="lp-tcard-tag">{tf.tag}</span>:null}<h3>{tf.titre}</h3><div className="lp-price"><b>{tf.prix}</b><span>{tf.unite}</span></div>{tf.eco?<div className="lp-tcard-eco">💸 {tf.eco}</div>:null}<div className="lp-tcard-desc">{tf.desc}</div><ul>{tf.items.map((it,j)=><li key={j}>{it}</li>)}</ul><button className="lp-btn" style={{marginTop:'auto'}} onClick={()=>onInscription()}>S'inscrire</button></div>)}</div>
-      <div className="lp-deg">
-        <div className="lp-deg-h">Tarif dégressif (nombre de créneaux / semaine)</div>
-        {SITE.degressif.map((d,i)=><div key={i} className="lp-deg-row"><span>{d.nb}</span><b>{d.total}</b></div>)}
-      </div>
-      <p className="lp-deg-note">Plus vous cumulez de créneaux (matières ou enfants), plus le tarif baisse. Parrainage cumulable en plus.</p>
-      <div className="lp-deg" style={{marginTop:18}}>
-        <div className="lp-deg-h">Tarifs par discipline</div>
-        {SITE.tarifsSpec.map((s,i)=><div key={i} className="lp-deg-row"><span>{s.l}</span><b style={{fontSize:14}}>{s.v}</b></div>)}
-      </div>
-      <div className="lp-tnote">{SITE.tarifNote}</div>
     </section>
 
     <section className="lp-sec" id="acces">
@@ -8350,7 +8329,7 @@ function Annonces(){
   </div>;
 }
 
-function Abonnement({onBack}){
+function Abonnement({onBack,onInscription}){
   const [cfg,setCfg]=useState(null);
   const [loading,setLoading]=useState(true);
   useEffect(()=>{(async()=>{try{const r=await sb.from('site_content').select('data').eq('id','paiement').maybeSingle();if(r&&r.data&&r.data.data)setCfg(r.data.data);}catch(_){}setLoading(false);})();},[]);
@@ -8361,14 +8340,40 @@ function Abonnement({onBack}){
       <div className="lp-nav-brand"><svg width="22" height="22" viewBox="0 0 52 52" fill="none"><circle cx="26" cy="26" r="24" fill="var(--gold2)" opacity="0.2"/><path d="M26 8 L38 18 L38 34 L26 42 L14 34 L14 18 Z" fill="var(--gold)" opacity="0.9"/></svg> PlusdeBonnesNotes</div>
       <button className="lp-btn lp-btn-o" onClick={onBack}>← Accueil</button>
     </nav>
-    <div className="lp-pay-page">
-      <div className="lp-kicker" style={{display:'block',textAlign:'center',marginBottom:8}}>Paiement</div>
-      <h1 className="lp-pay-h1">Paiements</h1>
-      <p className="lp-pay-intro">{cfg&&cfg.intro?cfg.intro:'Choisissez votre formule et réglez votre abonnement mensuel en toute sécurité. Le prélèvement est automatique chaque mois, résiliable à tout moment.'}</p>
-      {loading?<p style={{textAlign:'center',color:'var(--muted)'}}>Chargement…</p>:offres.length?<div className="lp-pay-grid">{offres.map((o,i)=><div key={o.id||i} className="lp-pay-card"><div className="lp-pay-label">{o.label}</div>{o.prix?<div className="lp-pay-prix">{o.prix}</div>:null}<a className="lp-btn" href={safeLink(o.lien)} target="_blank" rel="noreferrer">S'abonner →</a></div>)}</div>:<p style={{textAlign:'center',color:'var(--muted)'}}>Le paiement en ligne sera disponible très bientôt.</p>}
-      <p style={{textAlign:'center',color:'var(--muted)',fontSize:12,marginTop:24}}>🔒 Paiement sécurisé par Stripe — vous serez redirigé vers une page de paiement protégée. Résiliable à tout moment.</p>
-    </div>
-    <div className="lp-foot-mini">PlusdeBonnesNotes — Soutien scolaire à La Courneuve</div>
+    <div style={{textAlign:'center',padding:'42px 28px 8px',maxWidth:760,margin:'0 auto'}}>
+        <div className="lp-kicker" style={{display:'inline-block'}}>Tarifs & paiement</div>
+        <h1 className="lp-pay-h1">Tarifs &amp; paiement</h1>
+        <p className="lp-pay-intro">{cfg&&cfg.intro?cfg.intro:'Découvrez nos formules, puis réglez votre abonnement en ligne si vous le souhaitez.'}</p>
+      </div>
+      <section className="lp-sec" id="profils">
+      <div className="lp-kicker">Trouver le bon rythme</div>
+      <h2 className="lp-h2">Quelle formule selon le profil ?</h2>
+      <p style={{maxWidth:680,margin:'0 auto 22px',textAlign:'center',color:'var(--muted)',fontSize:14,lineHeight:1.6}}>Le bon nombre de créneaux dépend du niveau et de l'objectif de l'élève. Voici nos repères, en toute transparence.</p>
+      <div className="lp-profils">{SITE.profils.map((p,i)=><div key={i} className={"lp-profil"+(p.reco?" reco":"")}>{p.reco?<span className="lp-profil-reco">Recommandé</span>:null}<h3>{p.t}</h3><div className="lp-profil-f">{p.f}</div><p>{p.d}</p></div>)}</div>
+    </section>
+    <section className="lp-sec" id="tarifs">
+      <div className="lp-kicker">Tarifs</div>
+      <h2 className="lp-h2">Des formules claires et accessibles</h2>
+      <div className="lp-tarifs">{SITE.tarifs.map((tf,i)=><div key={i} className={"lp-tcard"+(tf.feat?" feat":"")}>{tf.tag?<span className="lp-tcard-tag">{tf.tag}</span>:null}<h3>{tf.titre}</h3><div className="lp-price"><b>{tf.prix}</b><span>{tf.unite}</span></div>{tf.eco?<div className="lp-tcard-eco">💸 {tf.eco}</div>:null}<div className="lp-tcard-desc">{tf.desc}</div><ul>{tf.items.map((it,j)=><li key={j}>{it}</li>)}</ul><button className="lp-btn" style={{marginTop:'auto'}} onClick={()=>onInscription()}>S'inscrire</button></div>)}</div>
+      <div className="lp-deg">
+        <div className="lp-deg-h">Tarif dégressif (nombre de créneaux / semaine)</div>
+        {SITE.degressif.map((d,i)=><div key={i} className="lp-deg-row"><span>{d.nb}</span><b>{d.total}</b></div>)}
+      </div>
+      <p className="lp-deg-note">Plus vous cumulez de créneaux (matières ou enfants), plus le tarif baisse. Parrainage cumulable en plus.</p>
+      <div className="lp-deg" style={{marginTop:18}}>
+        <div className="lp-deg-h">Tarifs par discipline</div>
+        {SITE.tarifsSpec.map((s,i)=><div key={i} className="lp-deg-row"><span>{s.l}</span><b style={{fontSize:14}}>{s.v}</b></div>)}
+      </div>
+      <div className="lp-tnote">{SITE.tarifNote}</div>
+    </section>
+
+    {loading?null:offres.length?<section className="lp-sec" id="reglement">
+        <div className="lp-kicker">Paiement</div>
+        <h2 className="lp-h2">Régler en ligne</h2>
+        <div className="lp-pay-grid">{offres.map((o,i)=><div key={o.id||i} className="lp-pay-card"><div className="lp-pay-label">{o.label}</div>{o.prix?<div className="lp-pay-prix">{o.prix}</div>:null}<a className="lp-btn" href={safeLink(o.lien)} target="_blank" rel="noreferrer">S'abonner →</a></div>)}</div>
+        <p style={{textAlign:'center',color:'var(--muted)',fontSize:11.5,marginTop:16}}>🔒 Paiement sécurisé par Stripe — vous serez redirigé vers une page protégée.</p>
+      </section>:null}
+      <div className="lp-foot-mini">PlusdeBonnesNotes — Soutien scolaire à La Courneuve</div>
   </div>;
 }
 
@@ -8517,7 +8522,7 @@ function App(){
 
   if(!appReady) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',background:'#111',color:'var(--gold)',fontFamily:'var(--ff-mono)',fontSize:14,letterSpacing:1}}>⟳ Chargement…</div>;
 
-  if(!cu){ if(pub==='login') return <Login onLogin={login} onBack={backPub}/>; if(pub==='inscription') return <Inscription onBack={backPub} onLogin={()=>openPub('login')}/>; if(pub==='paiement') return <Abonnement onBack={backPub}/>; return <Landing onLogin={()=>openPub('login')} onInscription={()=>openPub('inscription')} onPaiement={()=>openPub('paiement')}/>; }
+  if(!cu){ if(pub==='login') return <Login onLogin={login} onBack={backPub}/>; if(pub==='inscription') return <Inscription onBack={backPub} onLogin={()=>openPub('login')}/>; if(pub==='paiement') return <Abonnement onBack={backPub} onInscription={()=>openPub('inscription')}/>; return <Landing onLogin={()=>openPub('login')} onInscription={()=>openPub('inscription')} onPaiement={()=>openPub('paiement')}/>; }
 
   if(!dataReady) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',background:'var(--cream2)',color:'var(--navy)',fontFamily:'var(--ff-mono)',fontSize:13,letterSpacing:.5}}>
     <div style={{textAlign:'center'}}>
