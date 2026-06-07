@@ -7653,10 +7653,10 @@ function Landing({onLogin,onInscription,onPaiement}){
       <div className="lp-nav-links">
         <a onClick={()=>go('activite')}>Activité</a>
         <a onClick={()=>go('engagement')}>Engagement</a>
-        <a onClick={onPaiement}>Tarifs</a>
+        <a onClick={()=>go('tarifs')}>Tarifs</a>
         <a onClick={()=>go('acces')}>Accès</a>
         <a onClick={()=>go('faq')}>FAQ</a>
-        
+        {paiement&&paiement.actif&&(paiement.offres||[]).filter(o=>o&&o.lien).length?<a onClick={onPaiement}>Paiement</a>:null}
         <a onClick={onInscription}>Inscription</a>
       </div>
       <div style={{display:'flex',gap:8,alignItems:'center'}}>
@@ -7674,7 +7674,7 @@ function Landing({onLogin,onInscription,onPaiement}){
         {SITE.promesse?<p className="lp-promesse">{SITE.promesse}</p>:null}
         <div className="lp-hero-cta">
           <button className="lp-btn" onClick={onInscription}>Inscrire mon enfant →</button>
-          <button className="lp-btn lp-btn-o" style={{color:'var(--cream)',borderColor:'var(--cream)'}} onClick={onPaiement}>Voir les tarifs</button>
+          <button className="lp-btn lp-btn-o" style={{color:'var(--cream)',borderColor:'var(--cream)'}} onClick={()=>go('tarifs')}>Voir les tarifs</button>
         </div>
         <div className="lp-trust">
           {SITE.googleUrl?<a className="lp-google" href={SITE.googleUrl} target="_blank" rel="noreferrer">⭐ {SITE.googleNote?SITE.googleNote+' · ':''}Avis Google</a>:null}
@@ -7706,6 +7706,28 @@ function Landing({onLogin,onInscription,onPaiement}){
         <p>{SITE.mission.texte}</p>
         <div className="lp-mission-pts">{SITE.mission.points.map((p,i)=><div key={i} className="lp-mission-pt"><div className="ic">{p.ic}</div><h4>{p.t}</h4><p>{p.d}</p></div>)}</div>
       </div>
+    </section>
+
+    <section className="lp-sec" id="profils">
+      <div className="lp-kicker">Trouver le bon rythme</div>
+      <h2 className="lp-h2">Quelle formule selon le profil ?</h2>
+      <p style={{maxWidth:680,margin:'0 auto 22px',textAlign:'center',color:'var(--muted)',fontSize:14,lineHeight:1.6}}>Le bon nombre de créneaux dépend du niveau et de l'objectif de l'élève. Voici nos repères, en toute transparence.</p>
+      <div className="lp-profils">{SITE.profils.map((p,i)=><div key={i} className={"lp-profil"+(p.reco?" reco":"")}>{p.reco?<span className="lp-profil-reco">Recommandé</span>:null}<h3>{p.t}</h3><div className="lp-profil-f">{p.f}</div><p>{p.d}</p></div>)}</div>
+    </section>
+    <section className="lp-sec" id="tarifs">
+      <div className="lp-kicker">Tarifs</div>
+      <h2 className="lp-h2">Des formules claires et accessibles</h2>
+      <div className="lp-tarifs">{SITE.tarifs.map((tf,i)=><div key={i} className={"lp-tcard"+(tf.feat?" feat":"")}>{tf.tag?<span className="lp-tcard-tag">{tf.tag}</span>:null}<h3>{tf.titre}</h3><div className="lp-price"><b>{tf.prix}</b><span>{tf.unite}</span></div>{tf.eco?<div className="lp-tcard-eco">💸 {tf.eco}</div>:null}<div className="lp-tcard-desc">{tf.desc}</div><ul>{tf.items.map((it,j)=><li key={j}>{it}</li>)}</ul><button className="lp-btn" style={{marginTop:'auto'}} onClick={()=>onInscription()}>S'inscrire</button></div>)}</div>
+      <div className="lp-deg">
+        <div className="lp-deg-h">Tarif dégressif (nombre de créneaux / semaine)</div>
+        {SITE.degressif.map((d,i)=><div key={i} className="lp-deg-row"><span>{d.nb}</span><b>{d.total}</b></div>)}
+      </div>
+      <p className="lp-deg-note">Plus vous cumulez de créneaux (matières ou enfants), plus le tarif baisse. Parrainage cumulable en plus.</p>
+      <div className="lp-deg" style={{marginTop:18}}>
+        <div className="lp-deg-h">Tarifs par discipline</div>
+        {SITE.tarifsSpec.map((s,i)=><div key={i} className="lp-deg-row"><span>{s.l}</span><b style={{fontSize:14}}>{s.v}</b></div>)}
+      </div>
+      <div className="lp-tnote">{SITE.tarifNote}</div>
     </section>
 
     <section className="lp-sec" id="acces">
@@ -8348,33 +8370,19 @@ function Abonnement({onBack,onInscription}){
       <button className="lp-btn lp-btn-o" onClick={onBack}>← Accueil</button>
     </nav>
     <div style={{textAlign:'center',padding:'42px 28px 8px',maxWidth:760,margin:'0 auto'}}>
-        <div className="lp-kicker" style={{display:'inline-block'}}>Tarifs & paiement</div>
-        <h1 className="lp-pay-h1">Tarifs &amp; paiement</h1>
-        <p className="lp-pay-intro">{cfg&&cfg.intro?cfg.intro:'Découvrez nos formules, puis réglez votre abonnement en ligne si vous le souhaitez.'}</p>
+        <div className="lp-kicker" style={{display:'inline-block'}}>Paiement</div>
+        <h1 className="lp-pay-h1">Paiements</h1>
+        <p className="lp-pay-intro">{cfg&&cfg.intro?cfg.intro:'Récapitulatif des tarifs, puis réglez votre abonnement en ligne.'}</p>
       </div>
-      <section className="lp-sec" id="profils">
-      <div className="lp-kicker">Trouver le bon rythme</div>
-      <h2 className="lp-h2">Quelle formule selon le profil ?</h2>
-      <p style={{maxWidth:680,margin:'0 auto 22px',textAlign:'center',color:'var(--muted)',fontSize:14,lineHeight:1.6}}>Le bon nombre de créneaux dépend du niveau et de l'objectif de l'élève. Voici nos repères, en toute transparence.</p>
-      <div className="lp-profils">{SITE.profils.map((p,i)=><div key={i} className={"lp-profil"+(p.reco?" reco":"")}>{p.reco?<span className="lp-profil-reco">Recommandé</span>:null}<h3>{p.t}</h3><div className="lp-profil-f">{p.f}</div><p>{p.d}</p></div>)}</div>
-    </section>
-    <section className="lp-sec" id="tarifs">
-      <div className="lp-kicker">Tarifs</div>
-      <h2 className="lp-h2">Des formules claires et accessibles</h2>
-      <div className="lp-tarifs">{SITE.tarifs.map((tf,i)=><div key={i} className={"lp-tcard"+(tf.feat?" feat":"")}>{tf.tag?<span className="lp-tcard-tag">{tf.tag}</span>:null}<h3>{tf.titre}</h3><div className="lp-price"><b>{tf.prix}</b><span>{tf.unite}</span></div>{tf.eco?<div className="lp-tcard-eco">💸 {tf.eco}</div>:null}<div className="lp-tcard-desc">{tf.desc}</div><ul>{tf.items.map((it,j)=><li key={j}>{it}</li>)}</ul><button className="lp-btn" style={{marginTop:'auto'}} onClick={()=>onInscription()}>S'inscrire</button></div>)}</div>
-      <div className="lp-deg">
-        <div className="lp-deg-h">Tarif dégressif (nombre de créneaux / semaine)</div>
-        {SITE.degressif.map((d,i)=><div key={i} className="lp-deg-row"><span>{d.nb}</span><b>{d.total}</b></div>)}
+      <div style={{maxWidth:620,margin:'0 auto 4px',padding:'0 22px'}}>
+        <table style={{width:'100%',borderCollapse:'collapse',fontSize:14,background:'var(--white)',border:'1px solid var(--cream2)',borderRadius:8,overflow:'hidden'}}>
+          <thead><tr style={{background:'var(--cream)'}}><th style={{textAlign:'left',padding:'11px 14px',color:'var(--muted)',fontWeight:600,fontSize:12.5,textTransform:'uppercase',letterSpacing:.3}}>Formule</th><th style={{textAlign:'right',padding:'11px 14px',color:'var(--muted)',fontWeight:600,fontSize:12.5,textTransform:'uppercase',letterSpacing:.3}}>Tarif</th></tr></thead>
+          <tbody>{(SITE.tarifs||[]).map((tf,i)=><tr key={i} style={{borderTop:'1px solid var(--cream2)'}}><td style={{padding:'12px 14px'}}><b>{tf.titre}</b>{tf.tag?<span style={{marginLeft:8,fontSize:11,color:'var(--gold)',whiteSpace:'nowrap'}}>{tf.tag}</span>:null}</td><td style={{padding:'12px 14px',textAlign:'right',whiteSpace:'nowrap'}}><b style={{fontSize:16}}>{tf.prix}</b> <span style={{color:'var(--muted)',fontSize:12}}>{tf.unite}</span></td></tr>)}</tbody>
+        </table>
+        {SITE.tarifNote?<p style={{fontSize:12,color:'var(--muted)',marginTop:10,textAlign:'center'}}>{SITE.tarifNote}</p>:null}
+        <p style={{fontSize:12.5,color:'var(--muted)',marginTop:8,textAlign:'center'}}>Le détail des formules et des profils est sur la <a onClick={onBack} style={{color:'var(--gold)',cursor:'pointer',textDecoration:'underline'}}>page d'accueil</a>.</p>
       </div>
-      <p className="lp-deg-note">Plus vous cumulez de créneaux (matières ou enfants), plus le tarif baisse. Parrainage cumulable en plus.</p>
-      <div className="lp-deg" style={{marginTop:18}}>
-        <div className="lp-deg-h">Tarifs par discipline</div>
-        {SITE.tarifsSpec.map((s,i)=><div key={i} className="lp-deg-row"><span>{s.l}</span><b style={{fontSize:14}}>{s.v}</b></div>)}
-      </div>
-      <div className="lp-tnote">{SITE.tarifNote}</div>
-    </section>
-
-    {loading?null:offres.length?<section className="lp-sec" id="reglement">
+      {loading?null:offres.length?<section className="lp-sec" id="reglement">
         <div className="lp-kicker">Paiement</div>
         <h2 className="lp-h2">Régler en ligne</h2>
         <div className="lp-pay-grid">{offres.map((o,i)=><div key={o.id||i} className="lp-pay-card"><div className="lp-pay-label">{o.label}</div>{o.prix?<div className="lp-pay-prix">{o.prix}</div>:null}<a className="lp-btn" href={safeLink(o.lien)} target="_blank" rel="noreferrer">S'abonner →</a></div>)}</div>
