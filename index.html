@@ -408,7 +408,7 @@ footer nav{display:flex;gap:18px;flex-wrap:wrap}
 </head>
 <body>
 
-<div class="bandeau">🎓 <b>Inscriptions 2026 / 2027 ouvertes</b> — places limitées · 1er cours d'essai offert</div>
+<div class="bandeau" id="v-bandeau">🎓 <b>Inscriptions 2026 / 2027 ouvertes</b> — places limitées · 1er cours d'essai offert</div>
 
 <nav class="topnav" aria-label="Navigation principale">
   <a class="brand" href="#haut">
@@ -433,12 +433,12 @@ footer nav{display:flex;gap:18px;flex-wrap:wrap}
 <header class="hero">
   <div class="in">
     <div class="hero-date">La Courneuve (93) — depuis plus de 10 ans</div>
-    <h1>Remonter la moyenne, reprendre confiance, viser <span class="hl">la mention</span>.</h1>
-    <p class="sub">Le soutien scolaire connecté, du primaire au post-bac : des cours en petits groupes menés <b>en amont du programme</b>, un suivi individualisé et une assistance disponible à tout moment.</p>
+    <h1 id="v-hero-titre">Remonter la moyenne, reprendre confiance, viser <span class="hl">la mention</span>.</h1>
+    <p class="sub" id="v-hero-sub">Le soutien scolaire connecté, du primaire au post-bac : des cours en petits groupes menés <b>en amont du programme</b>, un suivi individualisé et une assistance disponible à tout moment.</p>
     <div class="hero-ctas">
       <a class="btn" href="https://adminpdbn.github.io/scolaris/#inscription">Inscrire mon enfant</a>
       <a class="btn btn-o" href="#tarifs">Voir les tarifs</a>
-      <span class="essai">→ 1er cours d'essai offert !</span>
+      <span class="essai" id="v-essai">→ 1er cours d'essai offert !</span>
     </div>
     <div class="chips">
       <span class="chip google"><a href="https://g.page/r/CSWi621Q4TVvEB0/review" rel="noopener" target="_blank">⭐ <b>Avis Google</b> — lisez ce que disent les familles</a></span>
@@ -652,7 +652,7 @@ footer nav{display:flex;gap:18px;flex-wrap:wrap}
         <div class="tr"><span>Primaire — 4×1h30/sem</span><b>90 € / mois</b></div>
       </div>
     </div>
-    <p class="tnote">Tarifs appliqués dès la rentrée de septembre 2026. Plus vous cumulez de créneaux (matières ou enfants d'une même famille), plus le tarif baisse.</p>
+    <p class="tnote" id="v-tarifnote">Tarifs appliqués dès la rentrée de septembre 2026. Plus vous cumulez de créneaux (matières ou enfants d'une même famille), plus le tarif baisse.</p>
     <span class="parrain">+ parrainage cumulable en plus !</span>
   </div>
 </section>
@@ -794,6 +794,29 @@ footer nav{display:flex;gap:18px;flex-wrap:wrap}
     entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('vu'); io.unobserve(e.target);} });
   },{threshold:.08});
   document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+(function(){
+  var URL_='https://gwmdurhncotftuxfgwkg.supabase.co';
+  var KEY_='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3bWR1cmhuY290ZnR1eGZnd2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NzYyMTAsImV4cCI6MjA5MTU1MjIxMH0.WDcPFpYyJIF8QcNsjUzckb0EUtbxw_iQ0hmN6OPCn08';
+  function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function hl(s){return esc(s).replace(/\*([^*]+)\*/g,'<span class="hl">$1</span>');}
+  function bd(s){return esc(s).replace(/\*([^*]+)\*/g,'<b>$1</b>');}
+  try{
+    if(!window.supabase) return;
+    var sb=window.supabase.createClient(URL_,KEY_);
+    sb.from('site_content').select('data').eq('id','vitrine').maybeSingle().then(function(r){
+      var d=(r&&r.data&&r.data.data)||{};
+      var b=document.getElementById('v-bandeau');
+      if(b&&d.bandeau){ if(d.bandeau.actif===false){b.style.display='none';} else if(d.bandeau.texte){b.innerHTML='🎓 '+bd(d.bandeau.texte);} }
+      if(d.heroTitre){var h=document.getElementById('v-hero-titre'); if(h)h.innerHTML=hl(d.heroTitre);}
+      if(d.heroSub){var s=document.getElementById('v-hero-sub'); if(s)s.innerHTML=esc(d.heroSub).replace(/\n/g,'<br>');}
+      if(d.essai){var e=document.getElementById('v-essai'); if(e)e.textContent=d.essai;}
+      if(d.tarifNote){var tn=document.getElementById('v-tarifnote'); if(tn)tn.textContent=d.tarifNote;}
+    }).catch(function(){});
+  }catch(_){}
 })();
 </script>
 </body>
