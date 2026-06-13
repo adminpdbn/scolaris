@@ -768,7 +768,10 @@ function Inscription({
   }), /*#__PURE__*/React.createElement("path", {
     d: "M20 24 L26 18 L32 24 L26 30 Z",
     fill: "white"
-  })), "PlusdeBonnesNotes")), sent ? /*#__PURE__*/React.createElement("div", {
+  })), "PlusdeBonnesNotes"), /*#__PURE__*/React.createElement("button", {
+    className: "lp-btn lp-btn-o",
+    onClick: onBack
+  }, "\u2190 Accueil")), sent ? /*#__PURE__*/React.createElement("div", {
     className: "lp-ok"
   }, /*#__PURE__*/React.createElement("div", {
     className: "lp-ok-ic"
@@ -789,8 +792,8 @@ function Inscription({
     }
   }, "Raja\xA0: 06 64 09 48 81", /*#__PURE__*/React.createElement("br", null), "Sipi\xA0: 07 51 62 31 62", /*#__PURE__*/React.createElement("br", null), "Youssef\xA0: 06 37 23 88 50"), /*#__PURE__*/React.createElement("button", {
     className: "lp-btn",
-    onClick: onLogin
-  }, "Espace membre \u2192")) : /*#__PURE__*/React.createElement("section", {
+    onClick: onBack
+  }, "\u2190 Retour \xE0 l'accueil")) : /*#__PURE__*/React.createElement("section", {
     className: "lp-sec"
   }, /*#__PURE__*/React.createElement("div", {
     className: "lp-kicker"
@@ -1089,14 +1092,14 @@ function Inscription({
 
 // ═══════════════════ GESTION DES DEMANDES WEB (admin) ═══════════════════
 
-const goApp = () => {
+const goHome = () => {
   try {
     window.location.href = './';
   } catch (_) {}
 };
 ReactDOM.createRoot(document.getElementById('root')).render(/*#__PURE__*/React.createElement(Inscription, {
-  onBack: goApp,
-  onLogin: goApp
+  onBack: goHome,
+  onLogin: goHome
 }));
 </script>
 </body>
