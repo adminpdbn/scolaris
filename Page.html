@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pgtitle">PlusdeBonnesNotes</title>
+<meta name="description" content="PlusdeBonnesNotes — soutien scolaire à La Courneuve.">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,900&family=Courier+Prime:wght@400;700&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#fbf8f1;--ink:#1c1c20;--bleu:#1a4fc4;--bleu2:#143a8f;--regle:#e6dfcf;--muted:#6b675e;--blanc:#fffdf8;--surl:#ffe66b}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:'Courier Prime',monospace;background:var(--paper);color:var(--ink);line-height:1.75;font-size:15.5px;-webkit-font-smoothing:antialiased}
+  ::selection{background:var(--surl)}
+  a{color:var(--bleu)}
+  .nav{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:14px;
+       padding:12px 22px;background:rgba(251,248,241,.94);backdrop-filter:blur(6px);border-bottom:1.5px solid var(--regle)}
+  .brand{display:flex;align-items:center;gap:9px;font-family:'Fraunces',serif;font-weight:900;font-size:17px;color:var(--ink);text-decoration:none}
+  .back{font-size:12.5px;text-decoration:none;color:var(--ink);border:1.5px solid var(--ink);border-radius:8px;padding:8px 14px;white-space:nowrap}
+  .back:hover{color:var(--bleu);border-color:var(--bleu)}
+  .wrap{max-width:760px;margin:0 auto;padding:48px 22px 80px}
+  .ptitle{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(28px,5vw,42px);line-height:1.12;letter-spacing:-.4px;margin-bottom:8px}
+  .rule{height:3px;width:64px;background:var(--bleu);border-radius:2px;margin-bottom:30px}
+  .body{font-size:16px}
+  .body h2{font-family:'Fraunces',serif;font-weight:700;font-size:24px;margin:30px 0 10px}
+  .body h3{font-family:'Fraunces',serif;font-weight:600;font-size:19px;margin:24px 0 8px}
+  .body p{margin:0 0 14px}
+  .body ul,.body ol{margin:0 0 16px 22px}
+  .body li{margin:4px 0}
+  .body a{text-decoration:underline;text-underline-offset:3px}
+  .body img{max-width:100%;height:auto;border-radius:10px;margin:14px 0;border:1.5px solid var(--regle)}
+  .body table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  .body th,.body td{border:1px solid var(--regle);padding:8px 12px;text-align:left}
+  .body th{background:var(--blanc)}
+  .body blockquote{border-left:4px solid var(--bleu);background:var(--blanc);padding:10px 16px;margin:14px 0;border-radius:0 8px 8px 0}
+  .state{max-width:760px;margin:0 auto;padding:90px 22px;text-align:center;color:var(--muted)}
+  .spin{width:34px;height:34px;border:3px solid var(--regle);border-top-color:var(--bleu);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  footer{border-top:1.5px solid var(--regle);background:var(--blanc);color:var(--muted);font-size:12.5px;text-align:center;padding:26px 22px}
+  footer a{color:var(--bleu);text-decoration:none}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a class="brand" href="./">
+    <svg width="22" height="22" viewBox="0 0 52 52" fill="none" aria-hidden="true"><circle cx="26" cy="26" r="24" fill="#4a7fd4" opacity="0.25"/><path d="M26 8 L38 18 L38 34 L26 42 L14 34 L14 18 Z" fill="#1a4fc4" opacity="0.92"/></svg>
+    PlusdeBonnesNotes
+  </a>
+  <a class="back" href="./">← Accueil</a>
+</nav>
+
+<div id="content"><div class="state"><div class="spin"></div>Chargement de la page…</div></div>
+
+<footer>PlusdeBonnesNotes — Soutien scolaire à La Courneuve · <a href="./">plusdebonnesnotes</a></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+(function(){
+  var URL_='https://gwmdurhncotftuxfgwkg.supabase.co';
+  var KEY_='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3bWR1cmhuY290ZnR1eGZnd2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NzYyMTAsImV4cCI6MjA5MTU1MjIxMH0.WDcPFpYyJIF8QcNsjUzckb0EUtbxw_iQ0hmN6OPCn08';
+  function param(n){var m=new RegExp('[?&]'+n+'=([^&]+)').exec(window.location.search);return m?decodeURIComponent(m[1].replace(/\+/g,' ')):'';}
+  function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function show(html){document.getElementById('content').innerHTML=html;}
+  function state(msg){show('<div class="state">'+esc(msg)+'</div>');}
+  var slug=param('p');
+  if(!slug){state('Aucune page demandée.');return;}
+  try{
+    if(!window.supabase){state('Impossible de charger la page.');return;}
+    var sb=window.supabase.createClient(URL_,KEY_);
+    sb.from('site_content').select('data').eq('id','pages').maybeSingle().then(function(r){
+      var items=(r&&r.data&&r.data.data&&r.data.data.items)||[];
+      var pg=items.filter(function(x){return x&&x.slug===slug;})[0];
+      if(!pg){state('Cette page n\'existe pas ou n\'est plus disponible.');return;}
+      document.getElementById('pgtitle').textContent=(pg.titre||'Page')+' — PlusdeBonnesNotes';
+      show('<div class="wrap"><h1 class="ptitle">'+esc(pg.titre||'')+'</h1><div class="rule"></div><div class="body">'+(pg.html||'')+'</div></div>');
+    }).catch(function(){state('Erreur de chargement.');});
+  }catch(_){state('Erreur de chargement.');}
+})();
+</script>
+</body>
+</html>
