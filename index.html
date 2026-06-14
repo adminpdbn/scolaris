@@ -454,6 +454,8 @@ textarea.fi{resize:vertical;min-height:68px;}
 .lp-fg.full{grid-column:1/-1;}
 .lp-fg label{font-family:var(--ff-mono);font-size:11px;letter-spacing:.5px;color:var(--navy);text-transform:uppercase;}
 .lp-in{font-family:var(--ff-mono);font-size:13.5px;padding:10px 12px;border:2px solid #333;border-radius:2px;background:#fff;color:var(--navy);width:100%;}
+.lp-bad{border-color:#c8362e !important;background:#fff5f4 !important;}
+.lp-bad-chips{outline:2px solid #c8362e;outline-offset:5px;border-radius:4px;}
 .lp-in:focus{outline:none;border-color:var(--gold);}
 textarea.lp-in{resize:vertical;}
 .lp-form-sec{font-family:var(--ff-mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin:24px 0 12px;border-top:1px dotted #ccc;padding-top:16px;}
@@ -660,12 +662,10 @@ function Inscription({
   const [sent, setSent] = useState(false);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  const [bad, setBad] = useState({});
   const [fileDom, setFileDom] = useState(null);
   const [fileBul, setFileBul] = useState(null);
-  const upd = (k, v) => setF(p => ({
-    ...p,
-    [k]: v
-  }));
+  const upd = (k, v) => { setF(p => ({ ...p, [k]: v })); setBad(p => p[k] ? { ...p, [k]: false } : p); };
   const toggleM = m => setF(p => ({
     ...p,
     matieres: p.matieres.includes(m) ? p.matieres.filter(x => x !== m) : [...p.matieres, m]
@@ -677,23 +677,29 @@ function Inscription({
       return;
     } // anti-spam (honeypot)
     const fail = (msg) => { setErr(msg); setBusy(false); setTimeout(function(){ try { var el = document.querySelector('.lp-err'); if (el && el.scrollIntoView) { el.scrollIntoView({behavior:'smooth', block:'center'}); } else { window.scrollTo({top:0, behavior:'smooth'}); } } catch (_) { try { window.scrollTo(0,0); } catch (e) {} } }, 40); };
-    const miss = [
-      [f.prenom.trim(), "le prénom de l'élève"],
-      [f.nom.trim(), "le nom de l'élève"],
-      [f.date_naissance, "la date de naissance"],
-      [f.etablissement.trim(), "l'établissement"],
-      [f.matieres.length, "au moins une matière"],
-      [f.parent_prenom.trim(), "le prénom du responsable"],
-      [f.parent_nom.trim(), "le nom du responsable"],
-      [f.tuteur1_lien, "le lien de parenté"],
-      [f.parent_tel.trim(), "le téléphone du responsable"],
-      [f.parent_email.trim(), "l'email du responsable"],
-      [f.adresse.trim(), "l'adresse"],
-      [f.ville.trim(), "la ville"],
-      [f.code_postal.trim(), "le code postal"]
-    ].filter(function (x) { return !x[0]; }).map(function (x) { return x[1]; });
-    if (miss.length) { fail("Dossier incomplet \u2014 merci de renseigner : " + miss.join(", ") + "."); return; }
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.parent_email.trim())) { fail("L'adresse email du responsable ne semble pas valide."); return; }
+    const checks = [
+      ['prenom', f.prenom.trim(), "le prénom de l'élève"],
+      ['nom', f.nom.trim(), "le nom de l'élève"],
+      ['date_naissance', f.date_naissance, "la date de naissance"],
+      ['etablissement', f.etablissement.trim(), "l'établissement"],
+      ['matieres', f.matieres.length, "au moins une matière"],
+      ['parent_prenom', f.parent_prenom.trim(), "le prénom du responsable"],
+      ['parent_nom', f.parent_nom.trim(), "le nom du responsable"],
+      ['tuteur1_lien', f.tuteur1_lien, "le lien de parenté"],
+      ['parent_tel', f.parent_tel.trim(), "le téléphone du responsable"],
+      ['parent_email', f.parent_email.trim(), "l'email du responsable"],
+      ['adresse', f.adresse.trim(), "l'adresse"],
+      ['ville', f.ville.trim(), "la ville"],
+      ['code_postal', f.code_postal.trim(), "le code postal"]
+    ];
+    const missing = checks.filter(function (c) { return !c[1]; });
+    if (missing.length) {
+      var b = {}; missing.forEach(function (c) { b[c[0]] = true; }); setBad(b);
+      fail("Dossier incomplet \u2014 merci de renseigner : " + missing.map(function (c) { return c[2]; }).join(", ") + ".");
+      return;
+    }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.parent_email.trim())) { setBad({ parent_email: true }); fail("L'adresse email du responsable ne semble pas valide."); return; }
+    setBad({});
     setBusy(true);
     const rec = {
       id: 'web' + Date.now(),
@@ -836,19 +842,19 @@ function Inscription({
   }, /*#__PURE__*/React.createElement("div", {
     className: "lp-fg"
   }, /*#__PURE__*/React.createElement("label", null, "Pr\xE9nom *"), /*#__PURE__*/React.createElement("input", {
-    className: "lp-in",
+    className: "lp-in" + (bad.prenom ? " lp-bad" : ""),
     value: f.prenom,
     onChange: e => upd('prenom', e.target.value)
   })), /*#__PURE__*/React.createElement("div", {
     className: "lp-fg"
   }, /*#__PURE__*/React.createElement("label", null, "Nom *"), /*#__PURE__*/React.createElement("input", {
-    className: "lp-in",
+    className: "lp-in" + (bad.nom ? " lp-bad" : ""),
     value: f.nom,
     onChange: e => upd('nom', e.target.value)
   })), /*#__PURE__*/React.createElement("div", {
     className: "lp-fg"
   }, /*#__PURE__*/React.createElement("label", null, "Date de naissance"), /*#__PURE__*/React.createElement("input", {
-    className: "lp-in",
+    className: "lp-in" + (bad.date_naissance ? " lp-bad" : ""),
     type: "date",
     value: f.date_naissance,
     onChange: e => upd('date_naissance', e.target.value)
@@ -864,7 +870,7 @@ function Inscription({
   }, n)))), /*#__PURE__*/React.createElement("div", {
     className: "lp-fg full"
   }, /*#__PURE__*/React.createElement("label", null, "\xC9tablissement scolaire actuel"), /*#__PURE__*/React.createElement("input", {
-    className: "lp-in",
+    className: "lp-in" + (bad.etablissement ? " lp-bad" : ""),
     value: f.etablissement,
     onChange: e => upd('etablissement', e.target.value),
     placeholder: "Nom du coll\xE8ge / lyc\xE9e"
@@ -879,7 +885,7 @@ function Inscription({
   }))), /*#__PURE__*/React.createElement("div", {
     className: "lp-fg full"
   }, /*#__PURE__*/React.createElement("label", null, "Mati\xE8res souhait\xE9es"), /*#__PURE__*/React.createElement("div", {
-    className: "lp-chips",
+    className: "lp-chips" + (bad.matieres ? " lp-bad-chips" : ""),
     style: {
       marginTop: 4
     }
@@ -897,19 +903,19 @@ function Inscription({
   }, /*#__PURE__*/React.createElement("div", {
     className: "lp-fg"
   }, /*#__PURE__*/React.createElement("label", null, "Nom *"), /*#__PURE__*/React.createElement("input", {
-    className: "lp-in",
+    className: "lp-in" + (bad.parent_nom ? " lp-bad" : ""),
     value: f.parent_nom,
     onChange: e => upd('parent_nom', e.target.value)
   })), /*#__PURE__*/React.createElement("div", {
     className: "lp-fg"
   }, /*#__PURE__*/React.createElement("label", null, "Pr\xE9nom"), /*#__PURE__*/React.createElement("input", {
-    className: "lp-in",
+    className: "lp-in" + (bad.parent_prenom ? " lp-bad" : ""),
     value: f.parent_prenom,
     onChange: e => upd('parent_prenom', e.target.value)
   })), /*#__PURE__*/React.createElement("div", {
     className: "lp-fg"
   }, /*#__PURE__*/React.createElement("label", null, "Lien avec l'\xE9l\xE8ve"), /*#__PURE__*/React.createElement("select", {
-    className: "lp-in",
+    className: "lp-in" + (bad.tuteur1_lien ? " lp-bad" : ""),
     value: f.tuteur1_lien,
     onChange: e => upd('tuteur1_lien', e.target.value)
   }, /*#__PURE__*/React.createElement("option", {
@@ -920,14 +926,14 @@ function Inscription({
   }, o)))), /*#__PURE__*/React.createElement("div", {
     className: "lp-fg"
   }, /*#__PURE__*/React.createElement("label", null, "T\xE9l\xE9phone *"), /*#__PURE__*/React.createElement("input", {
-    className: "lp-in",
+    className: "lp-in" + (bad.parent_tel ? " lp-bad" : ""),
     type: "tel",
     value: f.parent_tel,
     onChange: e => upd('parent_tel', e.target.value)
   })), /*#__PURE__*/React.createElement("div", {
     className: "lp-fg full"
   }, /*#__PURE__*/React.createElement("label", null, "Email"), /*#__PURE__*/React.createElement("input", {
-    className: "lp-in",
+    className: "lp-in" + (bad.parent_email ? " lp-bad" : ""),
     type: "email",
     value: f.parent_email,
     onChange: e => upd('parent_email', e.target.value)
@@ -979,20 +985,20 @@ function Inscription({
   }, /*#__PURE__*/React.createElement("div", {
     className: "lp-fg full"
   }, /*#__PURE__*/React.createElement("label", null, "Adresse compl\xE8te"), /*#__PURE__*/React.createElement("input", {
-    className: "lp-in",
+    className: "lp-in" + (bad.adresse ? " lp-bad" : ""),
     value: f.adresse,
     onChange: e => upd('adresse', e.target.value),
     placeholder: "N\xB0 et nom de rue, compl\xE9ment\u2026"
   })), /*#__PURE__*/React.createElement("div", {
     className: "lp-fg"
   }, /*#__PURE__*/React.createElement("label", null, "Code postal"), /*#__PURE__*/React.createElement("input", {
-    className: "lp-in",
+    className: "lp-in" + (bad.code_postal ? " lp-bad" : ""),
     value: f.code_postal,
     onChange: e => upd('code_postal', e.target.value)
   })), /*#__PURE__*/React.createElement("div", {
     className: "lp-fg"
   }, /*#__PURE__*/React.createElement("label", null, "Ville"), /*#__PURE__*/React.createElement("input", {
-    className: "lp-in",
+    className: "lp-in" + (bad.ville ? " lp-bad" : ""),
     value: f.ville,
     onChange: e => upd('ville', e.target.value)
   }))), /*#__PURE__*/React.createElement("div", {
