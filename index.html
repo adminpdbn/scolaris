@@ -118,8 +118,9 @@ a{color:var(--bleu)}
   box-shadow:0 2px 0 var(--bleu-fonce);
 }
 .nav-cta:hover{background:var(--bleu-fonce)}
-.burger{display:none;flex-direction:column;justify-content:center;gap:5px;width:44px;height:40px;background:#fff;border:1.5px solid var(--ink);border-radius:9px;cursor:pointer;padding:0 9px}
-.burger span{display:block;height:2.5px;width:100%;background:var(--ink);border-radius:2px}
+.burger{display:none;flex-direction:column;justify-content:center;gap:5px;width:30px;height:38px;background:transparent;border:none;cursor:pointer;padding:0;margin-left:auto}
+.burger span{display:block;height:2px;width:23px;background:var(--muted);border-radius:2px;transition:background .15s}
+.burger:active span{background:var(--ink)}
 .drawer-bg{position:fixed;inset:0;background:rgba(20,20,20,.42);opacity:0;visibility:hidden;transition:opacity .25s ease;z-index:99}
 .drawer-bg.open{opacity:1;visibility:visible}
 .drawer{position:fixed;top:0;right:0;height:100%;width:min(82vw,300px);background:var(--paper);box-shadow:-10px 0 34px rgba(0,0,0,.18);transform:translateX(100%);transition:transform .26s ease;z-index:100;display:flex;flex-direction:column;padding:22px 20px;gap:3px;overflow:auto}
