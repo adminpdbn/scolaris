@@ -3,913 +3,1144 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PlusdeBonnesNotes — Soutien scolaire à La Courneuve (93) | Maths, Physique, Français</title>
-<meta name="description" content="Soutien scolaire à La Courneuve depuis 10 ans : cours en petits groupes menés en amont du programme, du primaire au post-bac. Maths, physique-chimie, français, anglais (centre Cambridge). Dès 65 €/mois, 1er cours d'essai offert.">
-<link rel="canonical" href="https://plusdebonnesnotes.com/">
-<meta property="og:title" content="PlusdeBonnesNotes — Soutien scolaire à La Courneuve (93)">
-<meta property="og:description" content="Remonter la moyenne, reprendre confiance, viser la mention. Cours en petits groupes, suivi individualisé, assistance 24/7. Dès 65 €/mois.">
-<meta property="og:type" content="website">
-<meta property="og:locale" content="fr_FR">
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<title>Inscription 2026/2027 — PlusdeBonnesNotes</title>
+<meta name="description" content="Formulaire d'inscription au soutien scolaire PlusdeBonnesNotes — La Courneuve (93). Maths, physique, français, anglais. 1er cours d'essai offert.">
+<link rel="canonical" href="https://adminpdbn.github.io/scolaris/inscriptions.html">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Courier+Prime:wght@400;700&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "EducationalOrganization",
-  "name": "PlusdeBonnesNotes",
-  "description": "Soutien scolaire du primaire au post-bac à La Courneuve : cours en petits groupes, suivi individualisé, centre d'examen Cambridge.",
-  "url": "https://plusdebonnesnotes.com",
-  "email": "contact@plusdebonnesnotes.com",
-  "telephone": "+33157144504",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "75, rue Rateau",
-    "postalCode": "93120",
-    "addressLocality": "La Courneuve",
-    "addressCountry": "FR"
-  },
-  "geo": { "@type": "GeoCoordinates", "latitude": 48.9252, "longitude": 2.4043 },
-  "openingHoursSpecification": [
-    { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"], "opens": "17:00", "closes": "21:15" },
-    { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Saturday","Sunday"], "opens": "09:00", "closes": "20:00" }
-  ]
-}
-</script>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Special+Elite&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
 <style>
+/* ── LO-FI THEME ── */
 :root{
-  --paper:#fbf8f1;
-  --paper2:#f4efe3;
-  --ink:#1c1c20;
-  --bleu:#1a4fc4;
-  --bleu-fonce:#143a8f;
-  --rouge:#c8362e;
-  --surligneur:#ffe66b;
-  --regle:#e6dfcf;
-  --muted:#6b675e;
-  --blanc:#fffdf8;
-  --ff-d:'Fraunces',Georgia,serif;
-  --ff-m:'Courier Prime','Courier New',monospace;
-  --ff-h:'Caveat',cursive;
-  --marge:74px;
+  --navy:#1a1a1a;
+  --navy2:#2a2a2a;
+  --gold:#1a4fc4;
+  --gold2:#4a7fd4;
+  --cream:#f5f0e8;
+  --cream2:#e8e0d0;
+  --text:#1a1a1a;
+  --muted:#666;
+  --white:#faf7f2;
+  --ok:#3a6b3a;
+  --err:#8b2222;
+  --info:#1a3d6b;
+  --sw:210px;
+  --ff-mono:'Courier Prime',monospace;
+  --ff-serif:'Special Elite',serif;
+  --ff-hand:'Caveat',cursive;
 }
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-@media (prefers-reduced-motion:reduce){
-  html{scroll-behavior:auto}
-  *,*::before,*::after{animation:none!important;transition:none!important}
-}
-body{
-  font-family:var(--ff-m);
-  background:var(--paper);
-  color:var(--ink);
-  font-size:15.5px;
-  line-height:1.75;
-  -webkit-font-smoothing:antialiased;
-}
-::selection{background:var(--surligneur);color:var(--ink)}
-a{color:var(--bleu)}
-:focus-visible{outline:3px solid var(--bleu);outline-offset:3px;border-radius:2px}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--ff-mono);background:var(--cream);color:var(--text);min-height:100vh;
+  background-image:repeating-linear-gradient(0deg,rgba(0,0,0,.025) 0,rgba(0,0,0,.025) 1px,transparent 1px,transparent 28px);}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--cream2);}::-webkit-scrollbar-thumb{background:#aaa;border-radius:0;}
 
-/* ——— La marge rouge (signature) ——— */
-@media (min-width:1020px){
-  body::before{
-    content:'';position:fixed;top:0;bottom:0;left:var(--marge);
-    width:2px;background:var(--rouge);opacity:.32;z-index:0;pointer-events:none;
-  }
-  main,.bandeau,footer{padding-left:calc(var(--marge) + 2px)}
-  .topnav{padding-left:calc(var(--marge) + 2px)}
+/* LOGIN */
+.ls{display:flex;min-height:100vh;background:#111;}
+.ls-left{flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:52px 60px;position:relative;overflow:hidden;background:#111;}
+.ls-left::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.52);pointer-events:none;z-index:1;}
+.ls-classroom{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:85%;max-width:600px;pointer-events:none;z-index:0;opacity:.22;filter:none;}
+.ls-inner{position:relative;z-index:2;padding-bottom:8px;}
+.ls-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:2px;padding:4px 12px 4px 8px;margin-bottom:28px;}
+.ls-badge-dot{width:6px;height:6px;border-radius:50%;background:#4a7fd4;animation:pulse 2s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.ls-badge-txt{font-family:var(--ff-mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.6);}
+.ls-tag{font-family:var(--ff-serif);font-size:52px;color:#f5f0e8;font-weight:400;line-height:1.05;letter-spacing:1px;margin-bottom:20px;}
+.ls-tag strong{color:#4a7fd4;}
+.ls-tag em{color:#aaa;font-style:italic;}
+.ls-desc{color:rgba(255,255,255,.4);font-family:var(--ff-mono);font-size:13px;line-height:1.8;max-width:360px;margin-bottom:44px;}
+.ls-stats{display:flex;gap:0;border-top:1px solid rgba(255,255,255,.1);padding-top:28px;}
+.ls-stat{flex:1;padding-right:24px;}
+.ls-stat:not(:last-child){border-right:1px solid rgba(255,255,255,.1);margin-right:24px;}
+.ls-stat-n{font-family:var(--ff-serif);font-size:32px;color:#f5f0e8;line-height:1;}
+.ls-stat-l{font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:4px;}
+.ls-brand-top{position:absolute;top:48px;left:60px;z-index:3;display:flex;align-items:center;gap:10px;}
+.ls-brand-top-name{font-family:var(--ff-mono);font-size:12px;color:rgba(255,255,255,.5);letter-spacing:.5px;}
+.ls-right{width:420px;background:var(--cream);display:flex;flex-direction:column;justify-content:center;padding:52px 44px;position:relative;border-left:2px solid #333;}
+.ls-right-head{margin-bottom:32px;}
+.ls-right-head h2{font-family:var(--ff-serif);font-size:28px;color:var(--navy);line-height:1.2;margin-bottom:6px;}
+.ls-right-head p{font-size:12px;color:var(--muted);}
+
+/* Profile cards */
+.rc-card{border:1.5px solid var(--cream2);border-radius:2px;padding:13px 16px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px;background:var(--white);margin-bottom:8px;position:relative;}
+.rc-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:transparent;}
+.rc-card:hover{border-color:#aaa;background:#f0ebe0;}
+.rc-card:hover::before{background:var(--gold2);}
+.rc-card.on{border-color:#aaa;background:#f0ebe0;}
+.rc-card.on::before{background:var(--gold2);}
+.rc-card.on .rn{color:var(--navy);}
+.rc-icon-wrap{width:38px;height:38px;border-radius:2px;background:var(--cream2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ri{font-size:18px;line-height:1;}
+.rn{font-family:var(--ff-mono);font-weight:700;font-size:13px;color:var(--navy);}
+.rd{font-size:11px;color:var(--muted);margin-top:2px;}
+.rc-check{width:16px;height:16px;border-radius:0;border:1.5px solid #bbb;margin-left:auto;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.rc-card.on .rc-check{background:var(--navy);border-color:var(--navy);}
+.rc-check-inner{width:5px;height:5px;background:var(--cream);opacity:0;}
+.rc-card.on .rc-check-inner{opacity:1;}
+.ls-btn{width:100%;padding:12px;background:var(--navy);color:var(--cream);border:none;border-radius:2px;font-size:13px;font-family:var(--ff-mono);letter-spacing:.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;transition:all .15s;}
+.ls-btn:hover:not(:disabled){background:#333;}
+.ls-btn:disabled{opacity:.3;cursor:not-allowed;}
+.ls-btn-arrow{font-size:14px;}
+.ls-right-footer{position:absolute;bottom:24px;left:44px;right:44px;display:flex;align-items:center;justify-content:center;}
+.ls-right-footer-txt{font-size:10px;color:#bbb;letter-spacing:.5px;}
+
+/* LAYOUT */
+.app{display:flex;min-height:100vh;}
+:root{--sw-collapsed:56px;--sw-expanded:210px;}
+.sidebar{width:var(--sw-collapsed);background:#1a1a1a;display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;border-right:2px solid #333;transition:width .22s cubic-bezier(.4,0,.2,1);overflow:hidden;}
+.sidebar:hover,.sidebar.pinned{width:var(--sw-expanded);box-shadow:4px 0 24px rgba(0,0,0,.35);}
+.sb-brand{padding:18px 14px 14px;border-bottom:1px solid #333;position:relative;white-space:nowrap;}
+.sb-logo{font-size:18px;margin-bottom:2px;}
+.sb-title{font-family:var(--ff-serif);font-size:15px;color:#f5f0e8;letter-spacing:.5px;opacity:0;transition:opacity .15s ease .05s;}
+.sb-sub{font-size:9px;color:#444;text-transform:uppercase;letter-spacing:1px;margin-top:2px;opacity:0;transition:opacity .15s ease .05s;}
+.sidebar:hover .sb-title,.sidebar:hover .sb-sub,.sidebar.pinned .sb-title,.sidebar.pinned .sb-sub{opacity:1;}
+.sb-pin{position:absolute;top:18px;right:8px;width:22px;height:22px;background:rgba(255,255,255,.05);border:1px solid #333;color:#666;border-radius:50%;cursor:pointer;font-size:11px;display:none;align-items:center;justify-content:center;transition:all .15s;}
+.sidebar:hover .sb-pin,.sidebar.pinned .sb-pin{display:flex;}
+.sb-pin:hover{color:var(--gold);border-color:#555;background:rgba(255,255,255,.1);}
+.sb-pin.on{color:var(--gold);border-color:var(--gold);background:rgba(204,148,57,.15);}
+.sb-nav{flex:1;padding:10px 8px;overflow-y:auto;overflow-x:hidden;}
+.sb-sec{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:#444;padding:10px 8px 4px;white-space:nowrap;opacity:0;transition:opacity .15s ease .05s;}
+.sidebar:hover .sb-sec,.sidebar.pinned .sb-sec{opacity:1;}
+.ni{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:0;cursor:pointer;color:#666;font-size:11px;font-family:var(--ff-mono);transition:all .1s;margin-bottom:1px;border-left:2px solid transparent;white-space:nowrap;position:relative;}
+.ni:hover{background:rgba(255,255,255,.05);color:#ccc;border-left-color:#555;}
+.ni.on{background:#2a2a2a;color:#f5f0e8;border-left:3px solid var(--gold2);font-weight:700;}
+.ni-ic{font-size:13px;width:16px;text-align:center;flex-shrink:0;}
+.ni-lbl{opacity:0;transition:opacity .15s ease .05s;}
+.sidebar:hover .ni-lbl,.sidebar.pinned .ni-lbl{opacity:1;}
+.sb-user{padding:12px 14px;border-top:1px solid #333;display:flex;align-items:center;gap:8px;white-space:nowrap;}
+.sb-av{width:30px;height:30px;border-radius:2px;background:#333;border:1px solid #555;display:flex;align-items:center;justify-content:center;font-size:11px;font-family:var(--ff-mono);color:var(--gold2);flex-shrink:0;}
+.sb-uinfo{opacity:0;transition:opacity .15s ease .05s;min-width:0;flex:1;}
+.sidebar:hover .sb-uinfo,.sidebar.pinned .sb-uinfo{opacity:1;}
+.sb-uname{font-size:12px;font-family:var(--ff-mono);color:#ccc;}
+.sb-urole{font-size:9px;color:#555;letter-spacing:.5px;}
+.sb-out{margin-left:auto;background:none;border:none;color:#444;cursor:pointer;font-size:15px;padding:3px;transition:color .15s;flex-shrink:0;opacity:0;}
+.sidebar:hover .sb-out,.sidebar.pinned .sb-out{opacity:1;}
+.sb-out:hover{color:var(--err);}
+.main{margin-left:var(--sw-collapsed);flex:1;min-height:100vh;transition:margin-left .22s cubic-bezier(.4,0,.2,1);}
+.app.sidebar-pinned .main{margin-left:var(--sw-expanded);}
+
+/* TOPBAR */
+.topbar{background:var(--cream);border-bottom:2px solid #2a2a2a;padding:0 24px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.tb-ttl{font-family:var(--ff-serif);font-size:17px;color:var(--navy);letter-spacing:.5px;}
+.tb-act{display:flex;align-items:center;gap:8px;}
+
+/* PAGE */
+.pg{padding:20px 24px;}
+
+/* BUTTONS */
+.btn{padding:6px 13px;border-radius:2px;border:1.5px solid var(--navy);font-family:var(--ff-mono);font-size:11px;cursor:pointer;transition:all .12s;display:inline-flex;align-items:center;gap:5px;background:transparent;color:var(--navy);}
+.btn-p{background:var(--navy);color:var(--cream);border-color:var(--navy);}
+.btn-p:hover{background:#333;}
+.btn-o{background:transparent;border-color:var(--cream2);color:var(--text);}
+.btn-o:hover{border-color:var(--navy);}
+.btn-d{background:transparent;color:var(--err);border:1.5px solid #d5a0a0;}
+.btn-d:hover{background:var(--err);color:var(--cream);}
+.btn-sm{padding:4px 9px;font-size:10px;}
+.btn:disabled{opacity:.35;cursor:not-allowed;}
+
+/* STAT CARDS */
+.sg{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-bottom:20px;}
+.sc{background:var(--white);border-radius:0;padding:16px;position:relative;overflow:hidden;border:1.5px solid #ccc;border-bottom:3px solid var(--navy);}
+.sc::before{display:none;}
+.sc-ic{font-size:20px;margin-bottom:8px;opacity:.7;}
+.sc-v{font-family:var(--ff-serif);font-size:26px;font-weight:400;line-height:1;margin-bottom:2px;}
+.sc-l{font-size:10px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;}
+.c-gold .sc-v{color:var(--gold);}
+.c-navy .sc-v{color:var(--navy);}
+.c-ok .sc-v{color:var(--ok);}
+.c-info .sc-v{color:var(--info);}
+
+/* RESOURCE CARDS */
+.rg{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;}
+.res-card{background:var(--white);border-radius:0;padding:15px;border:1.5px solid var(--cream2);transition:all .15s;}
+.res-card:hover{border-color:#aaa;}
+.rtag{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:0;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;border:1px solid;}
+.t-f{background:#dde6f0;color:#1a3d6b;border-color:#1a3d6b;}
+.t-e{background:#f5ede0;color:#6b3a1a;border-color:#6b3a1a;}
+.t-t{background:#ddf0e4;color:#1a5c3a;border-color:#1a5c3a;}
+.t-c{background:#ede0f5;color:#4a1a6b;border-color:#4a1a6b;}
+.rc-ttl{font-family:var(--ff-mono);font-weight:700;font-size:13px;margin-bottom:5px;line-height:1.4;}
+.rc-meta{font-size:11px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;}
+.rc-foot{margin-top:10px;padding-top:8px;border-top:1px solid var(--cream2);display:flex;justify-content:space-between;align-items:center;}
+
+/* FILTERS */
+.fb{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.chip{padding:4px 10px;border-radius:0;border:1.5px solid var(--cream2);background:var(--white);font-size:11px;cursor:pointer;transition:all .1s;font-family:var(--ff-mono);color:var(--muted);}
+.chip:hover,.chip.on{border-color:var(--navy);background:var(--navy);color:var(--cream);}
+
+/* TABLES */
+.tbl{width:100%;border-collapse:collapse;background:var(--white);border-radius:0;overflow:hidden;border:1.5px solid #bbb;}
+.tbl th{background:var(--navy);color:rgba(245,240,232,.85);text-align:left;padding:9px 13px;font-size:10px;font-family:var(--ff-mono);text-transform:uppercase;letter-spacing:.8px;font-weight:400;}
+.tbl td{padding:9px 13px;border-bottom:1px solid var(--cream2);font-size:12px;font-family:var(--ff-mono);}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:#f0ebe0;}
+
+/* MODAL */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px;}
+.mo-box{background:var(--cream);border-radius:0;padding:24px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;border:2px solid var(--navy);}
+.mo-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;border-bottom:1px solid var(--cream2);padding-bottom:12px;}
+.mo-ttl{font-family:var(--ff-serif);font-size:17px;letter-spacing:.5px;}
+.mo-x{background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);line-height:1;font-family:var(--ff-mono);}
+
+/* FORMS */
+.fg{margin-bottom:12px;}
+.fl{display:block;font-size:10px;font-weight:700;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-family:var(--ff-mono);}
+.fi{width:100%;padding:7px 10px;border:1.5px solid var(--cream2);border-radius:0;font-family:var(--ff-mono);font-size:12px;background:var(--white);color:var(--text);}
+.fi:focus{outline:none;border-color:var(--navy);}
+textarea.fi{resize:vertical;min-height:68px;}
+.fa{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+
+/* TROPHIES */
+.trg{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:10px;}
+.tr-card{background:var(--white);border-radius:0;padding:14px 12px;text-align:center;border:1.5px solid var(--cream2);transition:all .15s;}
+.tr-card.earned{border-color:var(--gold2);background:#e8f0ff;}
+.tr-card.locked{opacity:.3;filter:grayscale(1);}
+.tr-icon{font-size:28px;margin-bottom:6px;}
+.tr-name{font-size:11px;font-family:var(--ff-mono);font-weight:700;margin-bottom:3px;}
+.tr-desc{font-size:10px;color:var(--muted);line-height:1.4;}
+.tr-badge{margin-top:5px;font-size:9px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+
+/* MODULE CARDS */
+.mc{background:var(--white);border-radius:0;overflow:hidden;border:1.5px solid var(--cream2);transition:all .15s;}
+.mc:hover{border-color:#aaa;}
+.mc-hd{height:80px;display:flex;align-items:center;justify-content:center;font-size:38px;position:relative;background:var(--cream2);}
+.mc-bd{padding:12px;}
+.mc-ttl{font-family:var(--ff-mono);font-weight:700;font-size:13px;margin-bottom:4px;}
+.mc-inf{font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:10px;}
+
+/* WELCOME BANNER */
+.wb{background:var(--navy);border-radius:0;padding:22px 26px;color:var(--cream);margin-bottom:20px;position:relative;overflow:hidden;border-left:4px solid var(--gold2);}
+.wb::before{content:'//';position:absolute;right:30px;top:16px;font-size:60px;color:rgba(201,168,76,.12);font-family:var(--ff-mono);}
+.wb h2{font-family:var(--ff-serif);font-size:20px;margin-bottom:4px;letter-spacing:.5px;}
+.wb p{color:rgba(245,240,232,.45);font-size:12px;}
+.gold{color:var(--gold2);}
+
+/* NOTE CARDS */
+.nc{background:var(--white);border-radius:0;padding:14px;border:1.5px solid var(--cream2);text-align:center;}
+.nc-sub{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:8px;font-family:var(--ff-mono);}
+.nc-v{font-family:var(--ff-serif);font-size:30px;font-weight:400;line-height:1;margin-bottom:2px;}
+.nc-max{font-size:11px;color:var(--muted);}
+.nc-note{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4;font-style:italic;}
+
+/* TABS */
+.tabs{display:flex;gap:0;background:transparent;padding:0;border-bottom:2px solid var(--navy);margin-bottom:18px;}
+.tab{flex:1;padding:7px 12px;text-align:center;border-radius:0;cursor:pointer;font-size:11px;transition:all .1s;color:var(--muted);border:none;background:transparent;font-family:var(--ff-mono);border-bottom:2px solid transparent;margin-bottom:-2px;letter-spacing:.3px;}
+.tab.on{background:var(--cream);color:var(--navy);font-weight:700;border-bottom:2px solid var(--cream);border-top:1.5px solid var(--navy);border-left:1.5px solid var(--navy);border-right:1.5px solid var(--navy);}
+
+/* EMPTY */
+.emp{text-align:center;padding:48px 20px;color:var(--muted);}
+.emp-icon{font-size:36px;margin-bottom:12px;opacity:.3;}
+.emp h3{font-family:var(--ff-serif);font-size:16px;color:var(--text);margin-bottom:6px;}
+.emp p{font-size:12px;max-width:260px;margin:0 auto 14px;font-family:var(--ff-mono);}
+
+/* PROGRESS */
+.pb{height:4px;background:var(--cream2);border-radius:0;overflow:hidden;}
+.pbf{height:100%;border-radius:0;background:var(--ok);transition:width .5s;}
+
+/* SEARCH */
+.sw{position:relative;}
+.sw::before{content:'>>';position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:10px;z-index:1;color:var(--muted);font-family:var(--ff-mono);}
+.si{padding:7px 10px 7px 28px;border:1.5px solid var(--cream2);border-radius:0;font-family:var(--ff-mono);font-size:12px;background:var(--white);}
+.si:focus{outline:none;border-color:var(--navy);}
+
+/* SECTION HEADER */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.st{font-family:var(--ff-serif);font-size:16px;letter-spacing:.5px;}
+
+/* ELEVE PANEL */
+.epanel{background:var(--white);border-radius:0;border:1.5px solid var(--cream2);overflow:hidden;}
+.eitem{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--cream2);display:flex;align-items:center;justify-content:space-between;transition:background .1s;}
+.eitem:last-child{border-bottom:none;}
+.eitem:hover{background:#f0ebe0;}
+.eitem.on{background:var(--navy);}
+.eitem.on .ei-n{color:var(--cream);}
+.eitem.on .ei-l{color:rgba(245,240,232,.4);}
+.ei-n{font-size:12px;font-family:var(--ff-mono);font-weight:700;}
+.ei-l{font-size:10px;color:var(--muted);}
+
+/* TIMETABLE */
+.tt-wrap{background:var(--white);border-radius:0;border:1.5px solid #bbb;overflow:hidden;margin-bottom:20px;}
+.tt-head{display:flex;border-bottom:2px solid var(--navy);}
+.tt-time-col{width:48px;flex-shrink:0;border-right:1px solid var(--cream2);}
+.tt-day-hd{flex:1;text-align:center;padding:8px 5px;border-right:1px solid var(--cream2);font-size:10px;font-family:var(--ff-mono);font-weight:700;color:var(--navy);background:var(--cream);letter-spacing:1px;}
+.tt-body{display:flex;overflow-x:auto;}
+.tt-times{width:48px;flex-shrink:0;border-right:1px solid var(--cream2);}
+.tt-hour-lbl{display:flex;align-items:flex-start;justify-content:flex-end;padding:2px 5px 0 0;font-size:9px;color:var(--muted);border-bottom:1px solid var(--cream2);font-family:var(--ff-mono);}
+.tt-days{display:flex;flex:1;}
+.tt-day-col{flex:1;min-width:86px;position:relative;border-right:1px solid var(--cream2);}
+.tt-day-col:last-child{border-right:none;}
+.tt-cell{border-bottom:1px solid rgba(0,0,0,.05);}
+.tt-event{position:absolute;left:2px;right:2px;border-radius:0;padding:3px 5px;overflow:hidden;cursor:default;z-index:1;border-left:3px solid;}
+.tt-ev-ttl{font-size:10px;font-weight:700;line-height:1.3;font-family:var(--ff-mono);}
+.tt-ev-sub{font-size:9px;opacity:.8;}
+.tt-ev-time{font-size:8px;opacity:.6;margin-top:1px;}
+
+/* APPEL */
+.appel-row{display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--cream2);justify-content:space-between;font-family:var(--ff-mono);}
+.appel-row:last-child{border-bottom:none;}
+.appel-stat-btn{padding:4px 9px;border-radius:0;font-size:10px;font-weight:700;cursor:pointer;font-family:var(--ff-mono);transition:all .1s;border:1.5px solid transparent;}
+.appel-footer{padding:8px 14px;background:var(--cream2);display:flex;gap:12px;font-size:11px;font-family:var(--ff-mono);}
+
+/* MBADGE */
+.mbadge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:0;font-size:9px;font-weight:700;font-family:var(--ff-mono);border:1px solid;}
+.mb-ok{background:#e8f3e8;color:var(--ok);border-color:var(--ok);}
+.mb-full{background:#f3e8e8;color:var(--err);border-color:var(--err);}
+.mb-enr{background:#dde6f0;color:var(--info);border-color:var(--info);}
+
+/* FACTURATION */
+.fam-card{background:var(--white);border-radius:0;border:1.5px solid var(--cream2);overflow:hidden;transition:all .15s;}
+.fam-card:hover{border-color:#aaa;}
+.fam-hd{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--cream2);cursor:pointer;}
+.fam-hd:hover{background:#f0ebe0;}
+.fam-name{font-family:var(--ff-serif);font-size:14px;}
+.fam-sub{font-size:10px;color:var(--muted);margin-top:2px;font-family:var(--ff-mono);}
+.fam-bd{padding:12px 16px;}
+.fact-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--cream2);font-family:var(--ff-mono);}
+.fact-row:last-child{border-bottom:none;}
+.stat-badge{padding:2px 8px;border-radius:0;font-size:10px;font-weight:700;font-family:var(--ff-mono);border:1px solid;}
+.s-paye{background:#e8f3e8;color:var(--ok);border-color:var(--ok);}
+.s-attente{background:#e8f0ff;color:#1a4fc4;border-color:#1a4fc4;}
+.s-retard{background:#f3e8e8;color:var(--err);border-color:var(--err);}
+.fact-total{background:var(--cream2);border-radius:0;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;margin-top:10px;}
+
+/* DRAG & DROP PLANNING */
+.plan-slot.dragging{opacity:.4;transform:scale(.97);cursor:grabbing;}
+.plan-slot{cursor:grab;}
+.drop-target{background:rgba(139,98,0,.06)!important;outline:2px dashed rgba(139,98,0,.4);outline-offset:-2px;}
+.drop-preview{position:absolute;left:2px;right:2px;border-radius:0;background:rgba(139,98,0,.1);border:2px dashed rgba(139,98,0,.4);pointer-events:none;z-index:3;}
+
+/* SPHERE (no-op in lo-fi) */
+.sphere-wrap,.sphere,.sphere-ring,.sphere-dot,.sphere-core,.sphere-wrap2,.sphere2{display:none;}
+
+@keyframes fi{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.fa-in{animation:fi .2s ease;}
+@media(max-width:768px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.ls-left{display:none}.ls-right{width:100%}}
+
+/* GOODNOTES */
+.gn-dropzone{border:2px dashed var(--cream2);border-radius:0;padding:28px 18px;text-align:center;cursor:pointer;transition:all .15s;background:var(--white);}
+.gn-dropzone:hover,.gn-dropzone.drag{border-color:var(--gold);background:#f0ebe0;}
+.gn-dropzone input{display:none;}
+.gn-icon{font-size:30px;margin-bottom:8px;}
+.gn-analyzing{display:flex;flex-direction:column;align-items:center;gap:10px;padding:24px 0;}
+.gn-spinner{width:30px;height:30px;border:2px solid var(--cream2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.gn-devoir{background:#e8f0ff;border-radius:0;padding:7px 10px;font-size:11px;border-left:3px solid var(--gold);margin-top:6px;font-family:var(--ff-mono);}
+.preview-thumb{width:100%;max-height:160px;object-fit:contain;border-radius:0;margin-bottom:10px;border:1px solid var(--cream2);}
+
+/* PLANNING ADMIN */
+.plan-grid{display:grid;grid-template-columns:52px repeat(7,1fr);background:var(--white);border-radius:0;border:1.5px solid #bbb;overflow:hidden;margin-bottom:18px;}
+.plan-hd{padding:8px 5px;text-align:center;font-size:10px;font-family:var(--ff-mono);font-weight:700;color:var(--navy);background:var(--cream);border-bottom:2px solid var(--navy);border-right:1px solid var(--cream2);letter-spacing:.8px;}
+.plan-hd:last-child{border-right:none;}
+.plan-time-lbl{font-size:9px;color:var(--muted);font-family:var(--ff-mono);text-align:right;padding:0 4px 0 0;border-right:1px solid var(--cream2);display:flex;align-items:flex-start;justify-content:flex-end;padding-top:2px;}
+.plan-day-col{position:relative;border-right:1px solid var(--cream2);}
+.plan-day-col:last-child{border-right:none;}
+.plan-cell{border-bottom:1px solid rgba(0,0,0,.04);cursor:pointer;}
+.plan-cell:hover{background:rgba(139,98,0,.04);}
+.plan-slot{position:absolute;left:2px;right:2px;border-radius:0;padding:3px 5px;overflow:hidden;cursor:pointer;z-index:2;border-left:3px solid;transition:all .1s;}
+.plan-slot:hover{filter:brightness(.93);}
+.plan-slot.conflict{outline:2px solid var(--err);}
+.conflict-badge{position:absolute;top:2px;right:3px;background:var(--err);color:var(--cream);border-radius:0;font-size:8px;font-weight:700;padding:1px 4px;font-family:var(--ff-mono);}
+.conflict-panel{background:#f3e8e8;border:1.5px solid var(--err);border-radius:0;padding:10px 14px;margin-bottom:14px;}
+.conflict-item{font-size:11px;color:var(--err);padding:2px 0;font-family:var(--ff-mono);}
+
+/* STATISTIQUES */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-bottom:24px;}
+.kpi{background:var(--white);border-radius:0;padding:16px;border:1.5px solid #bbb;position:relative;border-bottom:3px solid var(--navy);}
+.kpi::after{display:none;}
+.kpi.k-rev{border-bottom-color:var(--ok);}
+.kpi.k-pend{border-bottom-color:#1a4fc4;}
+.kpi.k-retard{border-bottom-color:var(--err);}
+.kpi.k-mrr{border-bottom-color:var(--gold2);}
+.kpi.k-salary{border-bottom-color:var(--navy);}
+.kpi.k-margin{border-bottom-color:#4a1a6b;}
+.kpi-icon{font-size:18px;margin-bottom:8px;}
+.kpi-val{font-family:var(--ff-serif);font-size:28px;font-weight:400;line-height:1;margin-bottom:3px;}
+.kpi-lbl{font-size:11px;color:var(--muted);margin-bottom:4px;font-family:var(--ff-mono);}
+.kpi-sub{font-size:10px;font-weight:700;font-family:var(--ff-mono);}
+.bar-chart{display:flex;gap:6px;align-items:flex-end;height:130px;padding:0 2px;}
+.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.bar-col{width:100%;border-radius:0;transition:height .5s ease;}
+.bar-lbl{font-size:9px;color:var(--muted);text-align:center;font-family:var(--ff-mono);}
+.bar-val{font-size:9px;font-weight:700;text-align:center;min-height:12px;font-family:var(--ff-mono);}
+.donut-wrap{display:flex;align-items:center;gap:20px;}
+.donut-legend{display:flex;flex-direction:column;gap:6px;}
+.donut-item{display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--ff-mono);}
+.prog-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.prog-label{font-size:11px;font-family:var(--ff-mono);width:140px;flex-shrink:0;}
+.prog-bar{flex:1;height:6px;background:var(--cream2);border-radius:0;overflow:hidden;}
+.prog-fill{height:100%;border-radius:0;transition:width .6s ease;}
+.prog-pct{font-size:10px;font-weight:700;width:38px;text-align:right;font-family:var(--ff-mono);}
+.stat-section{background:var(--white);border-radius:0;padding:18px;border:1.5px solid var(--cream2);margin-bottom:18px;}
+.stat-section-ttl{font-family:var(--ff-serif);font-size:15px;margin-bottom:14px;letter-spacing:.5px;}
+
+/* ══ LANDING PAGE (accueil public) ══ */
+.lp{min-height:100vh;background:var(--cream);}
+.lp-nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:14px 28px;background:rgba(245,240,232,.92);backdrop-filter:blur(6px);border-bottom:2px solid #333;}
+.lp-nav-brand{display:flex;align-items:center;gap:9px;font-family:var(--ff-serif);font-size:17px;color:var(--navy);}
+.lp-nav-links{display:flex;gap:22px;align-items:center;}
+.lp-nav-links a{font-family:var(--ff-mono);font-size:12px;color:var(--muted);text-decoration:none;letter-spacing:.5px;cursor:pointer;border-bottom:1px solid transparent;padding-bottom:2px;}
+.lp-nav-links a:hover{color:var(--gold);border-bottom-color:var(--gold);}
+.lp-btn{font-family:var(--ff-mono);font-size:12px;letter-spacing:.5px;padding:9px 18px;border:2px solid var(--navy);background:var(--navy);color:var(--cream);cursor:pointer;border-radius:2px;text-decoration:none;display:inline-block;transition:.15s;}
+.lp-btn:hover{background:var(--gold);border-color:var(--gold);color:#fff;}
+.lp-btn-o{background:transparent;color:var(--navy);}
+.lp-hero{background:#111;color:var(--cream);padding:70px 28px 80px;position:relative;overflow:hidden;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.02) 0,rgba(255,255,255,.02) 1px,transparent 1px,transparent 28px);}
+.lp-hero-in{max-width:880px;margin:0 auto;position:relative;z-index:2;}
+.lp-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:2px;padding:4px 12px 4px 8px;margin-bottom:24px;}
+.lp-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--gold2);animation:pulse 2s ease infinite;}
+.lp-badge-txt{font-family:var(--ff-mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.6);}
+.lp-hero h1{font-family:var(--ff-serif);font-size:clamp(38px,6vw,64px);line-height:1.05;margin-bottom:20px;font-weight:400;}
+.lp-hero h1 em{color:var(--gold2);font-style:italic;}
+.lp-hero p{font-family:var(--ff-mono);font-size:15px;line-height:1.7;color:rgba(245,240,232,.8);max-width:560px;margin-bottom:30px;}
+.lp-hero-cta{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:48px;}
+.lp-stats{display:flex;gap:40px;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.15);padding-top:26px;}
+.lp-stat-n{font-family:var(--ff-serif);font-size:34px;color:var(--cream);}
+.lp-stat-l{font-family:var(--ff-mono);font-size:11px;color:rgba(245,240,232,.55);letter-spacing:.5px;}
+.lp-sec{max-width:960px;margin:0 auto;padding:64px 28px;}
+.lp-kicker{font-family:var(--ff-mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+.lp-h2{font-family:var(--ff-serif);font-size:clamp(26px,4vw,38px);color:var(--navy);margin-bottom:16px;line-height:1.15;}
+.lp-lead{font-family:var(--ff-mono);font-size:14px;line-height:1.8;color:#444;max-width:660px;margin-bottom:28px;}
+.lp-chips{display:flex;flex-wrap:wrap;gap:9px;}
+.lp-chip{font-family:var(--ff-mono);font-size:12px;padding:6px 13px;background:#fff;border:1.5px solid #333;border-radius:2px;color:var(--navy);}
+.lp-feats{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-top:36px;}
+.lp-feat{background:#fff;border:2px solid #333;border-radius:2px;padding:22px;box-shadow:4px 4px 0 rgba(0,0,0,.08);}
+.lp-feat-ic{font-size:24px;margin-bottom:10px;}
+.lp-feat h3{font-family:var(--ff-serif);font-size:17px;color:var(--navy);margin-bottom:7px;}
+.lp-feat p{font-family:var(--ff-mono);font-size:12.5px;line-height:1.65;color:#555;}
+.lp-tarifs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-top:30px;}
+.lp-tcard{background:#fff;border:2px solid #333;border-radius:2px;padding:26px 22px;display:flex;flex-direction:column;box-shadow:5px 5px 0 rgba(0,0,0,.08);}
+.lp-tcard.feat{border-color:var(--gold);box-shadow:5px 5px 0 rgba(26,79,196,.18);}
+.lp-tcard-tag{align-self:flex-start;font-family:var(--ff-mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;background:var(--gold);color:#fff;padding:3px 9px;border-radius:2px;margin-bottom:14px;}
+.lp-tcard h3{font-family:var(--ff-serif);font-size:20px;color:var(--navy);margin-bottom:10px;}
+.lp-price{display:flex;align-items:baseline;gap:7px;margin-bottom:6px;}
+.lp-price b{font-family:var(--ff-serif);font-size:36px;color:var(--gold);font-weight:400;}
+.lp-price span{font-family:var(--ff-mono);font-size:12px;color:var(--muted);}
+.lp-tcard-desc{font-family:var(--ff-mono);font-size:12.5px;color:#555;line-height:1.6;margin-bottom:16px;}
+.lp-tcard ul{list-style:none;margin:0 0 20px;padding:0;}
+.lp-tcard li{font-family:var(--ff-mono);font-size:12.5px;color:#333;padding:5px 0 5px 22px;position:relative;border-bottom:1px dotted #ccc;}
+.lp-tcard li::before{content:'\2713';position:absolute;left:0;color:var(--ok);font-weight:700;}
+.lp-tnote{font-family:var(--ff-hand);font-size:17px;color:var(--muted);margin-top:22px;text-align:center;}
+.lp-loc{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:stretch;margin-top:30px;}
+.lp-map{border:2px solid #333;border-radius:2px;overflow:hidden;min-height:300px;box-shadow:5px 5px 0 rgba(0,0,0,.08);background:#ddd;}
+.lp-map iframe{width:100%;height:100%;min-height:320px;border:0;display:block;}
+.lp-locinfo{display:flex;flex-direction:column;gap:18px;}
+.lp-locrow{background:#fff;border:2px solid #333;border-radius:2px;padding:18px;box-shadow:4px 4px 0 rgba(0,0,0,.08);}
+.lp-locrow h4{font-family:var(--ff-mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
+.lp-locrow p{font-family:var(--ff-mono);font-size:13.5px;color:var(--navy);line-height:1.7;}
+.lp-hr{display:flex;justify-content:space-between;border-bottom:1px dotted #ccc;padding:4px 0;font-family:var(--ff-mono);font-size:13.5px;color:var(--navy);}
+.lp-faq-item{border:2px solid #333;border-radius:2px;background:#fff;margin-bottom:12px;overflow:hidden;box-shadow:3px 3px 0 rgba(0,0,0,.06);}
+.lp-faq-q{display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;padding:16px 18px;font-family:var(--ff-mono);font-size:13.5px;font-weight:700;color:var(--navy);user-select:none;}
+.lp-faq-q:hover{background:#faf7f2;}
+.lp-faq-tg{font-family:var(--ff-serif);font-size:22px;color:var(--gold);flex-shrink:0;line-height:1;}
+.lp-faq-a{padding:0 18px 16px;font-family:var(--ff-mono);font-size:13px;line-height:1.7;color:#555;}
+.lp-cta-band{background:#111;color:var(--cream);text-align:center;padding:56px 28px;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.02) 0,rgba(255,255,255,.02) 1px,transparent 1px,transparent 28px);}
+.lp-cta-band h2{font-family:var(--ff-serif);font-size:clamp(24px,4vw,34px);margin-bottom:14px;}
+.lp-cta-band p{font-family:var(--ff-mono);font-size:14px;color:rgba(245,240,232,.75);margin-bottom:26px;}
+.lp-contact-grid{display:flex;justify-content:center;gap:30px;flex-wrap:wrap;margin-bottom:30px;}
+.lp-contact-grid a,.lp-contact-grid span{font-family:var(--ff-mono);font-size:13.5px;color:var(--cream);text-decoration:none;display:flex;align-items:center;gap:8px;}
+.lp-contact-grid a:hover{color:var(--gold2);}
+.lp-footer{background:#0a0a0a;color:rgba(245,240,232,.5);text-align:center;padding:26px;font-family:var(--ff-mono);font-size:11px;letter-spacing:.5px;}
+.lp-back{position:absolute;top:18px;left:22px;font-family:var(--ff-mono);font-size:12px;color:var(--muted);cursor:pointer;background:none;border:none;display:flex;align-items:center;gap:6px;z-index:5;}
+.lp-back:hover{color:var(--gold);}
+@media(max-width:760px){.lp-nav-links{display:none;}.lp-loc{grid-template-columns:1fr;}.lp-stats{gap:24px;}.lp-nav{padding:12px 16px;}.lp-sec{padding:48px 18px;}}
+
+.lp-deg{margin-top:34px;background:#fff;border:2px solid #333;border-radius:2px;box-shadow:5px 5px 0 rgba(0,0,0,.08);overflow:hidden;max-width:460px;}
+.lp-deg-h{font-family:var(--ff-mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#fff;background:var(--navy);padding:11px 18px;}
+.lp-deg-row{display:flex;justify-content:space-between;align-items:center;padding:11px 18px;border-bottom:1px dotted #ccc;font-family:var(--ff-mono);font-size:13.5px;color:var(--navy);}
+.lp-deg-row:last-child{border-bottom:none;}
+.lp-deg-row b{font-family:var(--ff-serif);font-size:18px;color:var(--gold);}
+.lp-deg-note{font-family:var(--ff-mono);font-size:12px;color:var(--muted);margin-top:12px;max-width:460px;line-height:1.6;}
+
+.lp-form{max-width:660px;margin:0 auto;}
+.lp-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.lp-fg{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+.lp-fg.full{grid-column:1/-1;}
+.lp-fg label{font-family:var(--ff-mono);font-size:11px;letter-spacing:.5px;color:var(--navy);text-transform:uppercase;}
+.lp-in{font-family:var(--ff-mono);font-size:13.5px;padding:10px 12px;border:2px solid #333;border-radius:2px;background:#fff;color:var(--navy);width:100%;}
+.lp-in:focus{outline:none;border-color:var(--gold);}
+textarea.lp-in{resize:vertical;}
+.lp-form-sec{font-family:var(--ff-mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin:24px 0 12px;border-top:1px dotted #ccc;padding-top:16px;}
+.lp-err{background:#fdecea;border:2px solid #e0b4b4;color:#8b2222;padding:10px 14px;border-radius:2px;font-family:var(--ff-mono);font-size:12.5px;margin-bottom:14px;}
+.lp-chip-sel{background:var(--navy)!important;color:var(--cream)!important;border-color:var(--navy)!important;}
+.lp-ok{max-width:520px;margin:60px auto;text-align:center;background:#fff;border:2px solid #333;border-radius:2px;padding:48px 32px;box-shadow:6px 6px 0 rgba(0,0,0,.1);}
+.lp-ok-ic{width:64px;height:64px;border-radius:50%;background:#EEFFF6;border:2px solid #1a7a4a;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 20px;}
+.lp-ok h2{font-family:var(--ff-serif);font-size:26px;color:var(--navy);margin-bottom:12px;}
+.lp-ok p{font-family:var(--ff-mono);font-size:13.5px;color:#555;line-height:1.7;margin-bottom:24px;}
+@media(max-width:600px){.lp-form-grid{grid-template-columns:1fr;}}
+
+.lp-fab{position:fixed;bottom:22px;right:22px;z-index:60;font-family:var(--ff-mono);font-size:13px;font-weight:700;letter-spacing:.3px;padding:13px 20px;border:2px solid var(--navy);background:var(--gold);color:#fff;border-radius:40px;cursor:pointer;box-shadow:4px 4px 0 rgba(0,0,0,.2);animation:fabIn .4s ease;}
+.lp-fab:hover{background:var(--navy);}
+@keyframes fabIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+@media(max-width:600px){.lp-fab{bottom:14px;right:14px;font-size:12px;padding:11px 16px;}}
+
+.lp-mission{background:#111;color:var(--cream);padding:40px 28px;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.02) 0,rgba(255,255,255,.02) 1px,transparent 1px,transparent 28px);}
+.lp-mission-in{max-width:900px;margin:0 auto;}
+.lp-mission-k{font-family:var(--ff-mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold2);margin-bottom:10px;}
+.lp-mission h2{font-family:var(--ff-serif);font-size:clamp(19px,3vw,26px);line-height:1.2;margin-bottom:12px;font-weight:400;}
+.lp-mission h2 em{color:var(--gold2);font-style:italic;}
+.lp-mission p{font-family:var(--ff-mono);font-size:12.5px;line-height:1.7;color:rgba(245,240,232,.8);margin-bottom:10px;max-width:640px;}
+.lp-mission-pts{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:18px 0 16px;}
+.lp-mission-pt{border:1px solid rgba(255,255,255,.13);border-radius:4px;padding:12px;background:rgba(255,255,255,.03);}
+.lp-mission-pt .ic{font-size:18px;}
+.lp-mission-pt h4{font-family:var(--ff-serif);font-size:13.5px;margin:5px 0 3px;color:var(--cream);}
+.lp-mission-pt p{font-size:12px;color:rgba(245,240,232,.65);margin:0;line-height:1.6;}
+
+/* ══ OPTIMISATION SMARTPHONE (iOS / Android) ══ */
+html{-webkit-text-size-adjust:100%;}
+@media(max-width:600px){
+  /* Empêche le zoom auto d'iOS au focus des champs */
+  input, select, textarea, .lp-in, .fi { font-size:16px !important; }
+  /* Barre du haut compacte, autorise le retour à la ligne */
+  .lp-nav{flex-direction:column;align-items:stretch;gap:9px;padding:10px 14px;}
+  .lp-nav>div:last-child{display:flex;gap:8px;}
+  .lp-nav>div:last-child .lp-btn{flex:1;padding:11px 6px;font-size:12px;white-space:nowrap;}
+  .lp-nav-brand{justify-content:center;font-size:15px;}
+  
+  /* Hero plus court, boutons empilés pleine largeur */
+  .lp-hero{padding:46px 18px 52px;}
+  .lp-hero-cta{flex-direction:column;align-items:stretch;}
+  .lp-stats{gap:18px 22px;}
+  .lp-stat-n{font-size:28px;}
+  /* Sections resserrées */
+  .lp-sec{padding:40px 18px;}
+  .lp-mission{padding:34px 18px;}
+  .lp-cta-band{padding:42px 18px;}
+  /* Cibles tactiles plus grandes */
+  .lp-btn{min-height:46px;display:inline-flex;align-items:center;justify-content:center;}
+  /* Bouton flottant : respecte la zone sûre iPhone */
+  .lp-fab{bottom:calc(14px + env(safe-area-inset-bottom));right:14px;}
+  /* Blocs tarifs / dégressif en pleine largeur */
+  .lp-deg{max-width:100%;}
+  .lp-form-sec{margin:18px 0 10px;}
+  .lp-contact-grid{gap:14px 22px;}
+}
+@media(max-width:380px){
+  .lp-nav-brand{font-size:14px;}
+  .lp-nav>div:last-child .lp-btn{font-size:11px;padding:10px 4px;}
 }
 
-/* ——— Bandeau annonce ——— */
-.bandeau{
-  background:var(--ink);color:var(--paper);
-  font-size:12.5px;text-align:center;padding:8px 16px;letter-spacing:.4px;
+.lp-banner{background:var(--gold);color:#fff;text-align:center;padding:9px 16px;font-family:var(--ff-mono);font-size:12.5px;font-weight:700;letter-spacing:.3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;}
+.lp-banner u{text-underline-offset:2px;}
+.lp-banner:hover{background:var(--navy);}
+.lp-wa-wrap{position:fixed;bottom:22px;left:22px;z-index:60;}
+.lp-wa{display:flex;align-items:center;gap:8px;font-family:var(--ff-mono);font-size:13px;font-weight:700;padding:12px 17px;background:#25D366;color:#fff;border:2px solid #1da851;border-radius:40px;cursor:pointer;text-decoration:none;box-shadow:4px 4px 0 rgba(0,0,0,.2);animation:fabIn .4s ease;}
+.lp-wa-menu{position:absolute;bottom:calc(100% + 10px);left:0;background:#fff;border:2px solid #333;border-radius:8px;box-shadow:4px 4px 0 rgba(0,0,0,.15);overflow:hidden;min-width:210px;animation:fabIn .2s ease;}
+.lp-wa-menu-h{font-family:var(--ff-mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#fff;background:#25D366;padding:8px 14px;}
+.lp-wa-item{display:flex;align-items:center;gap:8px;padding:11px 14px;font-family:var(--ff-mono);font-size:13px;color:var(--navy);text-decoration:none;border-bottom:1px dotted #e0e0e0;cursor:pointer;}
+.lp-wa-item:last-child{border-bottom:none;}
+.lp-wa-item:hover{background:#f0fff5;color:#1da851;}
+.lp-wa:hover{background:#1da851;color:#fff;}
+@media(max-width:600px){
+  .lp-banner{font-size:11px;padding:8px 12px;}
+  .lp-wa-wrap{bottom:calc(14px + env(safe-area-inset-bottom));left:14px;}
+  .lp-wa{font-size:12px;padding:10px 13px;}
 }
-.bandeau b{color:var(--surligneur);font-weight:700}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-/* ——— Nav ——— */
-.topnav{
-  position:sticky;top:0;z-index:50;
-  background:rgba(251,248,241,.94);backdrop-filter:blur(6px);
-  border-bottom:1.5px solid var(--regle);
-  display:flex;align-items:center;gap:18px;
-  padding-top:10px;padding-bottom:10px;padding-right:20px;
-}
-.topnav .brand{
-  display:flex;align-items:center;gap:9px;
-  font-family:var(--ff-d);font-weight:900;font-size:17px;color:var(--ink);
-  text-decoration:none;white-space:nowrap;padding-left:18px;
-}
-.topnav .brand svg{flex:none}
-.navlinks{
-  display:flex;gap:4px;align-items:center;overflow-x:auto;
-  -webkit-overflow-scrolling:touch;scrollbar-width:none;flex:1;
-}
-.navlinks::-webkit-scrollbar{display:none}
-.navlinks a{
-  font-size:12.5px;color:var(--ink);text-decoration:none;
-  padding:7px 11px;border-radius:6px;white-space:nowrap;letter-spacing:.2px;
-}
-.navlinks a:hover{background:var(--paper2);color:var(--bleu)}
-.nav-cta{
-  font-size:12.5px;font-weight:700;text-decoration:none;white-space:nowrap;
-  background:var(--bleu);color:#fff;padding:9px 16px;border-radius:8px;
-  box-shadow:0 2px 0 var(--bleu-fonce);
-}
-.nav-cta:hover{background:var(--bleu-fonce)}
-.burger{display:none;flex-direction:column;justify-content:center;gap:5px;width:30px;height:38px;background:transparent;border:none;cursor:pointer;padding:0;margin-left:auto}
-.burger span{display:block;height:2px;width:23px;background:var(--muted);border-radius:2px;transition:background .15s}
-.burger:active span{background:var(--ink)}
-.drawer-bg{position:fixed;inset:0;background:rgba(20,20,20,.42);opacity:0;visibility:hidden;transition:opacity .25s ease;z-index:99}
-.drawer-bg.open{opacity:1;visibility:visible}
-.drawer{position:fixed;top:0;right:0;height:100%;width:min(82vw,300px);background:var(--paper);box-shadow:-10px 0 34px rgba(0,0,0,.18);transform:translateX(100%);transition:transform .26s ease;z-index:100;display:flex;flex-direction:column;padding:22px 20px;gap:3px;overflow:auto}
-.drawer.open{transform:none}
-.drawer-close{align-self:flex-end;background:transparent;border:none;font-size:24px;line-height:1;color:var(--muted);cursor:pointer;margin-bottom:8px}
-.drawer a{font-size:16px;color:var(--ink);text-decoration:none;padding:12px 8px;border-bottom:1px solid var(--regle)}
-.drawer a:hover{color:var(--bleu)}
-.drawer .d-pay{color:var(--bleu);font-weight:700}
-.drawer .d-login{margin-top:10px;border:1.5px solid var(--ink);border-radius:9px;text-align:center;border-bottom:1.5px solid var(--ink)}
-.drawer .d-cta{margin-top:10px;background:var(--bleu);color:#fff;border-radius:9px;text-align:center;font-weight:700;border-bottom:none}
-.nav-login{
-  font-size:12.5px;color:var(--ink);text-decoration:none;white-space:nowrap;
-  padding:8px 13px;border:1.5px solid var(--ink);border-radius:8px;
-}
-.nav-login:hover{border-color:var(--bleu);color:var(--bleu)}
+.lp-promesse{font-family:var(--ff-hand);font-size:clamp(22px,3.2vw,30px);color:#fff;margin:8px 0 2px;line-height:1.15;}
+.lp-trust{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:18px;}
+.lp-google{display:inline-flex;align-items:center;gap:6px;font-family:var(--ff-mono);font-size:12px;font-weight:700;color:#fff;background:var(--gold);padding:7px 14px;border-radius:30px;text-decoration:none;letter-spacing:.5px;border:1.5px solid var(--gold2);}
+.lp-google:hover{background:var(--gold2);}
+.lp-trust-chip{font-family:var(--ff-mono);font-size:11.5px;color:var(--cream);border:1px solid rgba(245,240,232,.35);padding:5px 11px;border-radius:30px;}
+.lp-tcard-eco{display:inline-block;font-family:var(--ff-mono);font-size:11px;font-weight:700;color:#1a6b46;background:#eafaf0;border:1px solid #b8dbb8;border-radius:4px;padding:4px 9px;margin:2px 0 8px;line-height:1.3;}
 
-@media (max-width:820px){
-  .navlinks{display:none}
-  .nav-login{display:none}
-  .nav-cta{display:none}
-  .burger{display:flex}
-  .topnav{gap:10px}
-  .topnav .brand{font-size:15px}
-}
-@media (min-width:821px){ .drawer,.drawer-bg{display:none} }
+.lp-profils{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-top:8px;}
+.lp-profil{position:relative;background:var(--white);border:2px solid var(--cream2);border-radius:8px;padding:22px 18px 18px;}
+.lp-profil.reco{border-color:var(--gold);box-shadow:0 0 0 3px rgba(26,79,196,.12);}
+.lp-profil-reco{position:absolute;top:-11px;left:18px;background:var(--gold);color:#fff;font-family:var(--ff-mono);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:20px;}
+.lp-profil-ic{font-size:30px;margin-bottom:6px;}
+.lp-profil h3{font-family:var(--ff-serif);font-size:16px;color:var(--navy);margin:0 0 4px;line-height:1.2;}
+.lp-profil-f{font-family:var(--ff-mono);font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px;}
+.lp-profil p{font-size:13px;color:var(--muted);line-height:1.5;margin:0;}
 
-/* ——— Post-it annonces ——— */
-.annonces-sec{padding:42px 22px 6px}
-.annonces-sec .in{max-width:980px;margin:0 auto;position:relative}
-.annonces-sec .pi-kicker{font-size:12px;letter-spacing:2.5px;text-transform:uppercase;color:var(--bleu);font-weight:700;margin-bottom:18px}
-.postits{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
-@media (max-width:980px){.postits{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:560px){.postits{grid-template-columns:1fr}}
-.postit{position:relative;width:auto;min-height:148px;padding:26px 22px 20px;background:#fff3a8;color:#3a3320;
-  box-shadow:0 10px 20px rgba(0,0,0,.13);transform:rotate(-2deg);transition:transform .15s ease}
-.postit:nth-child(3n+2){transform:rotate(1.6deg)}
-.postit:nth-child(3n+3){transform:rotate(-1deg)}
-.postit.pi-jaune{background:#fff3a8}
-.postit.pi-bleu{background:#cfe6ff}
-.postit.pi-vert{background:#cfead0}
-.postit.pi-rose{background:#ffd6e6}
-.postit:hover{transform:rotate(0) scale(1.025)}
-.postit::before{content:'';position:absolute;top:-11px;left:50%;width:84px;height:23px;
-  transform:translateX(-50%) rotate(-3deg);background:rgba(255,255,255,.55);border:1px solid rgba(0,0,0,.05)}
-.postit .pi-tag{font-family:var(--ff-m);font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:#9a6a00;font-weight:700;margin-bottom:5px;display:inline-block}
-.postit.pi-jaune .pi-tag{color:#9a6a00}
-.postit.pi-bleu .pi-tag{color:#1a4fc4}
-.postit.pi-vert .pi-tag{color:#2e7d32}
-.postit.pi-rose .pi-tag{color:#c2185b}
-.postit .pi-titre{font-family:var(--ff-h);font-size:25px;font-weight:700;line-height:1.08;margin-bottom:4px}
-.postit .pi-corps{font-family:var(--ff-h);font-size:19px;line-height:1.22}
-.postit .pi-cta{display:inline-block;margin-top:10px;font-family:var(--ff-m);font-size:12px;font-weight:700;color:var(--bleu);text-decoration:underline;text-underline-offset:3px}
+.lp-communique{background:linear-gradient(180deg,#fff,var(--cream));border-top:3px solid var(--gold);border-bottom:1px solid var(--cream2);padding:32px 28px;}
+.lp-comm-inner{max-width:820px;margin:0 auto;text-align:center;}
+.lp-comm-tag{display:inline-block;font-family:var(--ff-mono);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);background:rgba(26,79,196,.08);border:1px solid rgba(26,79,196,.25);padding:4px 12px;border-radius:20px;margin-bottom:12px;}
+.lp-comm-ttl{font-family:var(--ff-serif);font-size:clamp(20px,3vw,28px);color:var(--navy);margin:0 0 10px;}
+.lp-comm-txt{font-size:15px;line-height:1.7;color:#333;white-space:pre-line;margin:0 0 16px;}
 
-/* ——— Sections / structure ——— */
-main{position:relative;z-index:1}
-section{position:relative;padding:74px 22px;scroll-margin-top:72px}
-.in{max-width:980px;margin:0 auto;position:relative}
-.num{
-  font-family:var(--ff-h);font-size:26px;color:var(--rouge);
-  position:absolute;left:-58px;top:-4px;transform:rotate(-6deg);display:none;
-}
-@media (min-width:1020px){.num{display:block}}
-.kicker{
-  font-size:12px;letter-spacing:2.5px;text-transform:uppercase;
-  color:var(--bleu);font-weight:700;margin-bottom:14px;
-}
-h2{
-  font-family:var(--ff-d);font-weight:900;font-size:clamp(26px,4vw,38px);
-  line-height:1.15;margin-bottom:18px;letter-spacing:-.3px;
-}
-.lead{max-width:680px;color:var(--muted)}
-.hl{
-  background:linear-gradient(transparent 52%,var(--surligneur) 52%,var(--surligneur) 94%,transparent 94%);
-  padding:0 2px;
-}
+.lp-hero-in.has-aside{max-width:1200px;display:grid;grid-template-columns:300px minmax(0,1fr);gap:44px;align-items:center;}
+.lp-hero-news{order:-1;display:flex;flex-direction:column;gap:14px;}
+.lp-news-h{font-family:var(--ff-mono);font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--gold2);opacity:.9;}
+.lp-news-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-left:3px solid var(--gold2);border-radius:6px;padding:14px 16px;text-align:left;}
+.lp-news-tag{display:inline-block;font-family:var(--ff-mono);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold2);margin-bottom:6px;}
+.lp-news-ttl{font-family:var(--ff-serif);font-size:17px;color:#fff;line-height:1.2;margin-bottom:6px;}
+.lp-news-txt{font-size:13px;line-height:1.55;color:rgba(245,240,232,.85);white-space:pre-line;}
+.lp-news-link{display:inline-block;margin-top:10px;background:none;border:none;padding:0;cursor:pointer;font-family:var(--ff-mono);font-size:12.5px;font-weight:700;color:var(--gold2);text-decoration:none;}
+.lp-news-link:hover{text-decoration:underline;}
+@media(max-width:900px){.lp-hero-in.has-aside{display:block;max-width:880px;}.lp-hero-news{margin-top:34px;}}
 
-/* ——— Hero ——— */
-.hero{
-  padding:84px 22px 78px;
-  background:
-    repeating-linear-gradient(to bottom,transparent 0 27px,var(--regle) 27px 28px);
-  border-bottom:1.5px solid var(--regle);
-}
-.hero .in{max-width:980px}
-.hero-date{
-  font-family:var(--ff-h);font-size:21px;color:var(--bleu);margin-bottom:6px;
-}
-.hero h1{
-  font-family:var(--ff-d);font-weight:900;
-  font-size:clamp(34px,6vw,62px);line-height:1.08;letter-spacing:-.5px;
-  max-width:840px;margin-bottom:22px;
-}
-.hero h1 .hl{white-space:nowrap}
-.hero .sub{
-  max-width:640px;font-size:16px;color:var(--ink);margin-bottom:30px;
-}
-.hero-ctas{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:26px}
-.btn{
-  display:inline-block;font-family:var(--ff-m);font-weight:700;font-size:14.5px;
-  background:var(--bleu);color:#fff;text-decoration:none;
-  padding:14px 26px;border-radius:10px;box-shadow:0 3px 0 var(--bleu-fonce);
-  transition:transform .12s ease;
-}
-.btn:hover{transform:translateY(-1px);background:var(--bleu-fonce)}
-.btn-o{
-  background:transparent;color:var(--ink);box-shadow:none;
-  border:2px solid var(--ink);padding:12px 24px;
-}
-.btn-o:hover{color:var(--bleu);border-color:var(--bleu);background:transparent}
-.essai{
-  font-family:var(--ff-h);font-size:20px;color:var(--rouge);transform:rotate(-2deg);
-}
-.chips{display:flex;gap:10px;flex-wrap:wrap}
-.chip{
-  font-size:12px;background:var(--blanc);border:1.5px solid var(--regle);
-  border-radius:999px;padding:6px 13px;color:var(--ink);
-}
-.chip a{color:inherit;text-decoration:none}
-.chip.google b{color:var(--bleu)}
+.lp-page-overlay{position:fixed;inset:0;z-index:1000;overflow-y:auto;background:var(--cream);}
+.lp-page{max-width:820px;margin:0 auto;padding:40px 28px 60px;}
+.lp-page-title{font-family:var(--ff-serif);font-size:clamp(28px,5vw,44px);color:var(--navy);margin:0 0 24px;line-height:1.1;}
+.lp-page-body{font-size:16px;line-height:1.75;color:#2a2a2a;}
+.lp-page-body h2{font-family:var(--ff-serif);font-size:26px;color:var(--navy);margin:32px 0 12px;}
+.lp-page-body h3{font-family:var(--ff-serif);font-size:20px;color:var(--navy);margin:24px 0 10px;}
+.lp-page-body p{margin:0 0 16px;}
+.lp-page-body ul,.lp-page-body ol{margin:0 0 16px 22px;}
+.lp-page-body li{margin:4px 0;}
+.lp-page-body a{color:var(--gold);text-decoration:underline;}
+.lp-page-body img{max-width:100%;height:auto;border-radius:6px;margin:14px 0;}
+.lp-page-body table,.pg-tbl{border-collapse:collapse;width:100%;margin:18px 0;font-size:14px;}
+.lp-page-body td,.lp-page-body th,.pg-tbl td,.pg-tbl th{border:1px solid var(--cream2);padding:8px 12px;text-align:left;}
+.lp-page-body th,.pg-tbl th{background:#fff;font-weight:bold;}
+.lp-foot-mini{text-align:center;padding:26px;font-family:var(--ff-mono);font-size:12px;color:var(--muted);border-top:1px solid var(--cream2);}
+.pg-tools{display:flex;flex-wrap:wrap;gap:4px;background:#fff;border:1px solid var(--cream2);border-bottom:none;border-radius:8px 8px 0 0;padding:8px;}
+.pg-tools button{background:#f5f0e8;border:1px solid var(--cream2);border-radius:4px;min-width:32px;height:30px;padding:0 8px;cursor:pointer;font-size:13px;font-family:var(--ff-mono);color:var(--navy);}
+.pg-tools button:hover{background:var(--cream2);}
+.pg-tools .sep{width:1px;background:var(--cream2);margin:0 4px;align-self:stretch;}
+.pg-editor{min-height:340px;background:#fff;border:1px solid var(--cream2);border-radius:0 0 8px 8px;padding:18px 20px;font-size:15px;line-height:1.7;color:#2a2a2a;outline:none;}
+.pg-editor:focus{border-color:var(--gold2);}
+.pg-editor h2{font-family:var(--ff-serif);font-size:24px;color:var(--navy);margin:18px 0 8px;}
+.pg-editor h3{font-family:var(--ff-serif);font-size:19px;color:var(--navy);margin:14px 0 6px;}
+.pg-editor img{max-width:100%;height:auto;}
+.pg-editor table{border-collapse:collapse;margin:12px 0;width:100%;}
+.pg-editor td,.pg-editor th{border:1px solid var(--cream2);padding:6px 10px;}
 
-/* ——— Stats ——— */
-.stats{padding:0 22px;border-bottom:1.5px solid var(--regle);background:var(--blanc)}
-.stats .in{
-  display:grid;grid-template-columns:repeat(4,1fr);
-  max-width:980px;
-}
-.stat{padding:26px 10px;text-align:center;border-left:1.5px solid var(--regle)}
-.stat:first-child{border-left:none}
-.stat b{font-family:var(--ff-d);font-weight:900;font-size:clamp(22px,3vw,30px);display:block;color:var(--bleu)}
-.stat span{font-size:12px;color:var(--muted);letter-spacing:.4px}
-@media (max-width:640px){
-  .stats .in{grid-template-columns:1fr 1fr}
-  .stat:nth-child(3){border-left:none}
-  .stat{border-top:1.5px solid var(--regle)}
-  .stat:nth-child(-n+2){border-top:none}
-}
+.lp-pay-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;max-width:760px;margin:0 auto;}
+.lp-pay-card{background:var(--white);border:2px solid var(--cream2);border-radius:8px;padding:22px 18px;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center;}
+.lp-pay-label{font-family:var(--ff-serif);font-size:17px;color:var(--navy);}
+.lp-pay-prix{font-family:var(--ff-mono);font-size:22px;font-weight:700;color:var(--gold);}
 
-/* ——— Profils ——— */
-.profils{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:34px}
-.profil{
-  background:var(--blanc);border:1.5px solid var(--regle);border-radius:12px;
-  padding:24px 22px;position:relative;
-}
-.profil.reco{border:2px solid var(--bleu);box-shadow:0 4px 0 rgba(26,79,196,.15)}
-.profil .reco-tag{
-  position:absolute;top:-13px;left:18px;background:var(--bleu);color:#fff;
-  font-size:11px;font-weight:700;letter-spacing:.8px;padding:4px 11px;border-radius:999px;
-}
-.profil h3{font-family:var(--ff-d);font-weight:700;font-size:18px;line-height:1.3;margin-bottom:4px}
-.profil .f{font-size:12px;color:var(--rouge);font-weight:700;letter-spacing:.4px;margin-bottom:10px}
-.profil p{font-size:13.5px;color:var(--muted);line-height:1.7}
-@media (max-width:860px){.profils{grid-template-columns:1fr}}
-
-/* ——— Méthode ——— */
-.methode .colonnes{display:grid;grid-template-columns:1.1fr .9fr;gap:44px;align-items:start;margin-top:8px}
-.schema{
-  background:var(--blanc);border:1.5px solid var(--regle);border-radius:12px;padding:26px;
-}
-.schema .ligne{display:flex;gap:14px;align-items:flex-start;padding:13px 0}
-.schema .ligne + .ligne{border-top:1.5px dashed var(--regle)}
-.schema .pt{
-  flex:none;width:30px;height:30px;border-radius:50%;
-  background:var(--bleu);color:#fff;font-weight:700;font-size:14px;
-  display:flex;align-items:center;justify-content:center;
-}
-.schema .ligne:nth-child(2) .pt{background:var(--rouge)}
-.schema .ligne:nth-child(3) .pt{background:var(--ink)}
-.schema b{font-size:14px;display:block;margin-bottom:2px}
-.schema p{font-size:13px;color:var(--muted);line-height:1.65}
-.annot{
-  font-family:var(--ff-h);font-size:21px;color:var(--bleu);
-  transform:rotate(-2deg);display:inline-block;margin-top:18px;
-}
-@media (max-width:860px){.methode .colonnes{grid-template-columns:1fr;gap:26px}}
-
-/* ——— Matières ——— */
-.matieres{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px;max-width:760px}
-.mat{
-  font-size:13px;background:var(--blanc);border:1.5px solid var(--regle);
-  padding:8px 15px;border-radius:8px;
-}
-.mat.acc{border-color:var(--bleu);color:var(--bleu);font-weight:700}
-
-/* ——— Atouts ——— */
-.atouts{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:34px}
-.atout{
-  background:var(--blanc);border:1.5px solid var(--regle);border-radius:12px;padding:22px;
-}
-.atout .ic{font-size:22px;display:block;margin-bottom:10px}
-.atout b{font-size:14.5px;display:block;margin-bottom:6px}
-.atout p{font-size:13px;color:var(--muted);line-height:1.65}
-@media (max-width:860px){.atouts{grid-template-columns:1fr 1fr}}
-@media (max-width:580px){.atouts{grid-template-columns:1fr}}
-
-/* ——— Encart stages ——— */
-.encart{
-  background:var(--blanc);border:1.5px solid var(--regle);border-left:5px solid var(--bleu);
-  border-radius:12px;padding:26px 28px;display:flex;gap:24px;align-items:center;justify-content:space-between;
-}
-.encart h3{font-family:var(--ff-d);font-weight:700;font-size:19px;margin-bottom:8px}
-.encart p{font-size:13.5px;color:var(--muted);line-height:1.7;max-width:680px}
-.encart-ic{font-size:38px;flex:none}
-@media (max-width:640px){.encart{flex-direction:column-reverse;align-items:flex-start;gap:10px}}
-
-/* ——— Tarifs ——— */
-.tarifs-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:36px}
-.tcard{
-  background:var(--blanc);border:1.5px solid var(--regle);border-radius:14px;
-  padding:26px 22px;display:flex;flex-direction:column;position:relative;
-}
-.tcard.feat{border:2px solid var(--bleu);box-shadow:0 5px 0 rgba(26,79,196,.14)}
-.tcard .tag{
-  position:absolute;top:-13px;left:16px;background:var(--bleu);color:#fff;
-  font-size:10.5px;font-weight:700;letter-spacing:.8px;padding:4px 11px;border-radius:999px;
-}
-.tcard h3{font-family:var(--ff-d);font-weight:700;font-size:17px;margin-bottom:10px}
-.prix{display:flex;align-items:baseline;gap:7px;margin-bottom:8px}
-.prix b{font-family:var(--ff-d);font-weight:900;font-size:34px;letter-spacing:-1px}
-.prix span{font-size:11.5px;color:var(--muted)}
-.eco{
-  font-size:11.5px;background:#eef3ff;border:1px solid #c9d8ff;color:var(--bleu-fonce);
-  border-radius:8px;padding:6px 10px;margin-bottom:12px;line-height:1.5;
-}
-.tcard .desc{font-size:12.5px;color:var(--muted);line-height:1.65;margin-bottom:14px}
-.tcard ul{list-style:none;margin-bottom:18px}
-.tcard li{
-  font-size:12.5px;padding:5px 0 5px 22px;position:relative;
-}
-.tcard li::before{content:'✓';position:absolute;left:2px;color:var(--bleu);font-weight:700}
-.tcard .btn{margin-top:auto;text-align:center;font-size:13px;padding:12px 16px}
-@media (max-width:1000px){.tarifs-grid{grid-template-columns:1fr 1fr}}
-@media (max-width:580px){.tarifs-grid{grid-template-columns:1fr}}
-
-.tables{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:26px}
-.tbl{background:var(--blanc);border:1.5px solid var(--regle);border-radius:12px;overflow:hidden}
-.tbl .th{
-  font-size:11.5px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;
-  background:var(--paper2);padding:12px 18px;color:var(--ink);
-}
-.tbl .tr{
-  display:flex;justify-content:space-between;gap:14px;align-items:baseline;
-  padding:10px 18px;font-size:13px;border-top:1px solid var(--regle);
-}
-.tbl .tr b{font-size:14px;white-space:nowrap}
-.tnote{font-size:12.5px;color:var(--muted);margin-top:18px;max-width:640px}
-.parrain{
-  font-family:var(--ff-h);font-size:22px;color:var(--rouge);
-  transform:rotate(-1.5deg);display:inline-block;margin-top:10px;
-}
-@media (max-width:760px){.tables{grid-template-columns:1fr}}
-
-/* ——— Infos pratiques ——— */
-.infos{background:var(--blanc);border-top:1.5px solid var(--regle);border-bottom:1.5px solid var(--regle)}
-.infos-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:30px;align-items:start}
-.icard{margin-bottom:26px}
-.icard .th{
-  font-size:11.5px;letter-spacing:1.6px;text-transform:uppercase;font-weight:700;
-  color:var(--bleu);margin-bottom:10px;
-}
-.icard .row{
-  display:flex;justify-content:space-between;gap:16px;font-size:13.5px;
-  padding:7px 0;border-bottom:1px dashed var(--regle);
-}
-.icard .row span:last-child{font-weight:700;text-align:right}
-.map{
-  border:1.5px solid var(--regle);border-radius:12px;overflow:hidden;
-  aspect-ratio:4/3;background:var(--paper2);
-}
-.map iframe{width:100%;height:100%;border:0;display:block}
-.adresse{font-size:14px;margin-bottom:14px}
-.adresse b{font-family:var(--ff-d)}
-@media (max-width:820px){.infos-grid{grid-template-columns:1fr}}
-
-/* ——— FAQ ——— */
-.faq details{
-  background:var(--blanc);border:1.5px solid var(--regle);border-radius:12px;
-  margin-bottom:12px;overflow:hidden;
-}
-.faq summary{
-  cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:16px;
-  align-items:center;padding:17px 20px;font-weight:700;font-size:14px;line-height:1.5;
-}
-.faq summary::-webkit-details-marker{display:none}
-.faq summary::after{
-  content:'+';font-family:var(--ff-d);font-size:22px;color:var(--bleu);flex:none;
-  transition:transform .15s ease;
-}
-.faq details[open] summary::after{transform:rotate(45deg)}
-.faq details[open]{border-color:var(--bleu)}
-.faq .rep{padding:0 20px 18px;font-size:13.5px;color:var(--muted);line-height:1.75;max-width:760px}
-.faq .rep a{font-weight:700}
-
-/* ——— Contact ——— */
-.contact .ctas{display:flex;gap:14px;flex-wrap:wrap;margin:26px 0 34px}
-.wa{
-  display:inline-flex;align-items:center;gap:9px;
-  background:#1fa855;color:#fff;text-decoration:none;font-weight:700;font-size:13.5px;
-  padding:12px 20px;border-radius:10px;box-shadow:0 3px 0 #157a3d;
-}
-.wa:hover{background:#178a46}
-.tels{display:flex;flex-wrap:wrap;gap:10px}
-.tel{
-  font-size:13px;background:var(--blanc);border:1.5px solid var(--regle);
-  border-radius:8px;padding:9px 15px;text-decoration:none;color:var(--ink);
-}
-.tel b{color:var(--bleu)}
-.tel:hover{border-color:var(--bleu)}
-.sms{font-family:var(--ff-h);font-size:20px;color:var(--bleu);display:inline-block;margin-top:14px;transform:rotate(-1.5deg)}
-
-/* ——— Footer ——— */
-footer{
-  background:var(--ink);color:#b9b4a6;font-size:12.5px;
-  padding:40px 22px;
-}
-footer .in{
-  max-width:980px;margin:0 auto;display:flex;justify-content:space-between;
-  gap:24px;flex-wrap:wrap;align-items:center;
-}
-footer .fbrand{font-family:var(--ff-d);font-weight:900;color:#fff;font-size:16px}
-footer a{color:var(--paper);text-decoration:none}
-footer a:hover{color:var(--surligneur)}
-footer nav{display:flex;gap:18px;flex-wrap:wrap}
-
-/* ——— Reveal ——— */
-.reveal{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
-.reveal.vu{opacity:1;transform:none}
-@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none}}
+.lp-pay-page{max-width:900px;margin:0 auto;padding:48px 28px 60px;}
+.lp-pay-h1{font-family:var(--ff-serif);font-size:clamp(28px,5vw,44px);color:var(--navy);text-align:center;margin:6px 0 12px;line-height:1.1;}
+.lp-pay-intro{text-align:center;color:var(--muted);font-size:15px;max-width:640px;margin:0 auto 32px;line-height:1.65;}
 </style>
 </head>
 <body>
-
-<div class="bandeau" id="v-bandeau">🎓 <b>Inscriptions 2026 / 2027 ouvertes</b> — places limitées · 1er cours d'essai offert</div>
-
-<nav class="topnav" aria-label="Navigation principale">
-  <a class="brand" href="#haut">
-    <svg width="22" height="22" viewBox="0 0 52 52" fill="none" aria-hidden="true"><circle cx="26" cy="26" r="24" fill="#4a7fd4" opacity="0.25"/><path d="M26 8 L38 18 L38 34 L26 42 L14 34 L14 18 Z" fill="#1a4fc4" opacity="0.92"/></svg>
-    PlusdeBonnesNotes
-  </a>
-  <div class="navlinks">
-    <a href="#methode">La méthode</a>
-    <a href="#atouts">Nos atouts</a>
-    <a href="#tarifs">Tarifs</a>
-    <a href="paiement.html">Paiement</a>
-    <a href="#infos">Accès &amp; horaires</a>
-    <a href="#faq">FAQ</a>
-    <a href="#contact">Contact</a>
-  </div>
-  <a class="nav-login" href="membre.html">Espace membre</a>
-  <a class="nav-cta" href="inscriptions.html">S'inscrire</a>
-  <button class="burger" id="burger" aria-label="Ouvrir le menu" aria-expanded="false"><span></span><span></span><span></span></button>
-</nav>
-<div class="drawer-bg" id="drawerBg"></div>
-<aside class="drawer" id="drawer" aria-label="Menu">
-  <button class="drawer-close" id="drawerClose" aria-label="Fermer le menu">✕</button>
-  <a href="#methode">La méthode</a>
-  <a href="#atouts">Nos atouts</a>
-  <a href="#tarifs">Tarifs</a>
-  <a class="d-pay" href="paiement.html">Paiement en ligne</a>
-  <a href="#infos">Accès &amp; horaires</a>
-  <a href="#faq">FAQ</a>
-  <a href="#contact">Contact</a>
-  <a class="d-login" href="membre.html">Espace membre</a>
-  <a class="d-cta" href="inscriptions.html">S'inscrire</a>
-</aside>
-
-<main id="haut">
-
-<!-- ═══════════ HERO ═══════════ -->
-<header class="hero">
-  <div class="in">
-    <div class="hero-date">La Courneuve (93) — depuis plus de 10 ans</div>
-    <h1 id="v-hero-titre">Se perfectionner, remonter la moyenne, reprendre confiance, viser <span class="hl">la mention</span>.</h1>
-    <p class="sub" id="v-hero-sub">Le soutien scolaire connecté, du primaire au post-bac : des cours en petits groupes menés <b>en amont du programme</b>, un suivi individualisé et une assistance disponible à tout moment.</p>
-    <div class="hero-ctas">
-      <a class="btn" href="inscriptions.html">Inscrire mon enfant</a>
-      <a class="btn btn-o" href="#tarifs">Voir les tarifs</a>
-      <span class="essai" id="v-essai">→ 1er cours d'essai offert !</span>
-    </div>
-    <div class="chips">
-      <span class="chip google"><a href="https://www.google.com/maps/search/?api=1&amp;query=PlusdeBonnesNotes%20La%20Courneuve" rel="noopener" target="_blank">⭐ <b>Avis Google</b> — lisez ce que disent les familles</a></span>
-      <span class="chip">📹 Cours en visio</span>
-      <span class="chip">🎓 Centre Cambridge agréé</span>
-      <span class="chip">💬 Assistance 24/7</span>
-    </div>
-  </div>
-</header>
-
-<!-- ═══════════ STATS ═══════════ -->
-<div class="stats">
-  <div class="in">
-    <div class="stat"><b>10 ans</b><span>d'expérience</span></div>
-    <div class="stat"><b>2 000+</b><span>élèves accompagnés</span></div>
-    <div class="stat"><b>12+</b><span>professeurs</span></div>
-    <div class="stat"><b>Cambridge</b><span>centre d'examen agréé</span></div>
-  </div>
-</div>
-
-<!-- ═══════════ ANNONCES (post-it) ═══════════ -->
-<section class="annonces-sec" id="annonces" style="display:none">
-  <div class="in">
-    <div class="pi-kicker">À l'affiche</div>
-    <div class="postits" id="postit-board"></div>
-  </div>
-</section>
-
-<!-- ═══════════ PROFILS ═══════════ -->
-<section id="profils">
-  <div class="in reveal">
-    <span class="num" aria-hidden="true">1.</span>
-    <div class="kicker">Pour qui ?</div>
-    <h2>Chaque élève a sa formule</h2>
-    <p class="lead">Bon niveau à entretenir, fondamentaux à consolider ou examen à préparer : l'accompagnement s'adapte au profil — jamais l'inverse.</p>
-    <div class="profils">
-      <div class="profil">
-        <h3>Bon niveau : maintenir &amp; approfondir</h3>
-        <div class="f">1 créneau · 2 h / semaine</div>
-        <p>Votre enfant est déjà à l'aise. Objectif : consolider, prendre de l'avance sur le programme et viser l'excellence.</p>
-      </div>
-      <div class="profil reco">
-        <span class="reco-tag">RECOMMANDÉ</span>
-        <h3>Deux matières en synergie</h3>
-        <div class="f">2 créneaux · 2 matières</div>
-        <p>Deux créneaux, c'est souvent deux matières — et c'est là tout l'intérêt. Nos profs se coordonnent, et les matières se renforcent : maths et physique pour les profils scientifiques, maths et français pour les fondamentaux. C'est cette synergie qui fait vraiment progresser, bien plus que deux cours isolés.</p>
-      </div>
-      <div class="profil">
-        <h3>Objectif examen ou difficultés marquées</h3>
-        <div class="f">3 créneaux et +</div>
-        <p>Préparation au brevet ou au bac, remise à niveau intensive : un accompagnement renforcé, au tarif dégressif.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════ MÉTHODE ═══════════ -->
-<section id="methode">
-  <div class="in reveal">
-    <span class="num" aria-hidden="true">2.</span>
-    <div class="kicker">La méthode</div>
-    <h2>Découvrir la notion <span class="hl">avant la classe</span></h2>
-    <div class="colonnes">
-      <div>
-        <p class="lead" style="margin-bottom:16px">Nos cours ne sont pas de simples séances de rattrapage : nous suivons une progression alignée sur le programme mais menée <b>légèrement en amont</b>, pour que l'élève découvre les notions avec nous avant la classe — et arrive en terrain connu.</p>
-        <p class="lead">Bases reconstruites pour les élèves en difficulté, approfondissement pour les plus à l'aise : un accompagnement toujours personnalisé, par des enseignants qui travaillent en coordination pour un suivi global et précis de chaque élève.</p>
-        <span class="annot">Le cours en classe devient une consolidation, pas une découverte !</span>
-      </div>
-      <div class="schema" role="img" aria-label="Les trois temps de la méthode">
-        <div class="ligne">
-          <span class="pt">1</span>
-          <div><b>Chez nous, d'abord</b><p>L'élève découvre la notion en petit groupe, à son rythme, sans pression de note.</p></div>
-        </div>
-        <div class="ligne">
-          <span class="pt">2</span>
-          <div><b>En classe, ensuite</b><p>Il reconnaît la notion, participe, gagne en confiance — et en moyenne.</p></div>
-        </div>
-        <div class="ligne">
-          <span class="pt">3</span>
-          <div><b>Entre les deux, toujours</b><p>Aide aux devoirs et assistance WhatsApp 24/7 : aucune question ne reste sans réponse.</p></div>
-        </div>
-      </div>
-    </div>
-    <div style="margin-top:44px">
-      <div class="kicker" style="margin-bottom:8px">Les matières</div>
-      <div class="matieres">
-        <span class="mat acc">Mathématiques</span>
-        <span class="mat acc">Maths expertes</span>
-        <span class="mat acc">Physique-Chimie</span>
-        <span class="mat">Français</span>
-        <span class="mat">Histoire-Géo</span>
-        <span class="mat">SVT</span>
-        <span class="mat">Philosophie &amp; orientation</span>
-        <span class="mat">Anglais</span>
-        <span class="mat">Arabe</span>
-        <span class="mat">Tamoul</span>
-        <span class="mat">Orthophonie</span>
-        <span class="mat">Prépa scientifique</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════ ATOUTS ═══════════ -->
-<section id="atouts" style="padding-top:30px">
-  <div class="in reveal">
-    <span class="num" aria-hidden="true">3.</span>
-    <div class="kicker">Nos atouts</div>
-    <h2>Tout est pensé pour que <span class="hl">rien ne se perde</span></h2>
-    <div class="atouts">
-      <div class="atout"><span class="ic">📹</span><b>Cours en visio</b><p>Tous nos cours sont accessibles en visioconférence : idéal en cas d'empêchement ou de maladie, et pour nos élèves francophones partout dans le monde.</p></div>
-      <div class="atout"><span class="ic">🎥</span><b>Cours enregistrés</b><p>Une absence ? Le cours est enregistré (visio + trace écrite) et mis à disposition : aucun cours n'est perdu, votre abonnement reste pleinement rentabilisé.</p></div>
-      <div class="atout"><span class="ic">🗓️</span><b>Cours pendant les vacances</b><p>Pendant les petites vacances scolaires, les cours sont maintenus sous forme de stages de révision et de prise d'avance.</p></div>
-      <div class="atout"><span class="ic">👥</span><b>Petits groupes</b><p>Des effectifs maîtrisés : chaque élève est vu, entendu et accompagné — pas simplement présent.</p></div>
-      <div class="atout"><span class="ic">📈</span><b>En amont du programme</b><p>L'élève aborde la notion avec nous avant la classe : le cours devient une consolidation, pas une découverte.</p></div>
-      <div class="atout"><span class="ic">💬</span><b>Assistance WhatsApp 24/7</b><p>Une question, un exercice, une difficulté ? Une réponse de notre équipe à tout moment, 7j/7.</p></div>
-      <div class="atout"><span class="ic">📝</span><b>Aide aux devoirs</b><p>Des créneaux dédiés au travail personnel, calés sur ce qui est traité en classe.</p></div>
-      <div class="atout"><span class="ic">🎓</span><b>Centre Cambridge</b><p>Depuis 4 ans, centre d'examen Cambridge : validez officiellement votre niveau d'anglais dans nos locaux, même sans être inscrit.</p></div>
-      <div class="atout"><span class="ic">🔬</span><b>Cours post-bac</b><p>Classe préparatoire scientifique le dimanche (3 h, maths &amp; physique-chimie) pour réussir dans le supérieur.</p></div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════ COUP DE POUCE STAGES ═══════════ -->
-<section id="stages" style="padding-top:0">
-  <div class="in reveal">
-    <div class="encart">
-      <div>
-        <div class="kicker" style="margin-bottom:8px">En plus des cours</div>
-        <h3>Un coup de pouce pour les stages</h3>
-        <p>Grâce au réseau de nos professeurs et à leurs activités variées, nous pouvons accompagner nos élèves dans leur recherche de stage en entreprise — et les aider à préparer CV, lettre de motivation et entretiens.</p>
-      </div>
-      <span class="encart-ic" aria-hidden="true">🤝</span>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════ TARIFS ═══════════ -->
-<section id="tarifs">
-  <div class="in reveal">
-    <span class="num" aria-hidden="true">4.</span>
-    <div class="kicker">Tarifs</div>
-    <h2>Des formules <span class="hl">claires et accessibles</span></h2>
-    <p class="lead">Dès 3,75 €/h en primaire et moins de 8 €/h au collège-lycée — parmi les tarifs les plus accessibles, sans rien sacrifier de l'accompagnement.</p>
-
-    <div class="tarifs-grid">
-      <div class="tcard">
-        <span class="tag" style="background:#6b675e">LA PLUS ACCESSIBLE</span>
-        <h3>Formule essentielle</h3>
-        <div class="prix"><b>65 €</b><span>/ créneau / mois</span></div>
-        <p class="desc">Pour un élève déjà à l'aise qui veut maintenir son niveau et approfondir : 1 séance de 2 h par semaine en petit groupe.</p>
-        <ul>
-          <li>2 h / semaine en petit groupe</li>
-          <li>Suivi individualisé</li>
-          <li>Accès visio + replay si absence</li>
-          <li>Assistance WhatsApp 24/7</li>
-        </ul>
-        <a class="btn" href="inscriptions.html">S'inscrire</a>
-      </div>
-      <div class="tcard feat">
-        <span class="tag">★ LE PLUS CHOISI</span>
-        <h3>Formule 2 créneaux</h3>
-        <div class="prix"><b>120 €</b><span>/ mois</span></div>
-        <div class="eco">💸 Soit 60 €/créneau — vous économisez 10 € (au lieu de 130 €)</div>
-        <p class="desc">Le vrai rythme de progression : 2 séances (4 h) par semaine pour un suivi complet et régulier — et le coût de l'heure baisse.</p>
-        <ul>
-          <li>2 créneaux / semaine en petit groupe</li>
-          <li>Suivi individualisé</li>
-          <li>Assistance WhatsApp 24/7</li>
-          <li>Aide aux devoirs</li>
-        </ul>
-        <a class="btn" href="inscriptions.html">S'inscrire</a>
-      </div>
-      <div class="tcard feat">
-        <span class="tag" style="background:var(--rouge)">LE + MALIN</span>
-        <h3>Parrainage</h3>
-        <div class="prix"><b>−20 €</b><span>réduction immédiate</span></div>
-        <p class="desc">Un élève s'inscrit grâce à vous ? Vous bénéficiez de 20 € de réduction immédiate — cumulable, sans limite.</p>
-        <ul>
-          <li>20 € de réduction immédiate</li>
-          <li>Cumulable à chaque parrainage</li>
-          <li>Aucune condition</li>
-        </ul>
-        <a class="btn btn-o" href="#contact">En parler avec nous</a>
-      </div>
-      <div class="tcard">
-        <h3>Cours particuliers</h3>
-        <div class="prix"><b>25 €</b><span>/ heure</span></div>
-        <p class="desc">Un accompagnement individuel sur mesure, au rythme et sur les besoins précis de l'élève.</p>
-        <ul>
-          <li>100 % personnalisé</li>
-          <li>Horaires flexibles</li>
-          <li>Tous niveaux</li>
-        </ul>
-        <a class="btn btn-o" href="#contact">Demander un créneau</a>
-      </div>
-    </div>
-
-    <div class="tables">
-      <div class="tbl">
-        <div class="th">Tarif dégressif — créneaux / semaine</div>
-        <div class="tr"><span>1 créneau / sem.</span><b>65 €</b></div>
-        <div class="tr"><span>2 créneaux</span><b>120 €</b></div>
-        <div class="tr"><span>3 créneaux</span><b>165 €</b></div>
-        <div class="tr"><span>4 créneaux</span><b>210 €</b></div>
-        <div class="tr"><span>5 créneaux</span><b>245 €</b></div>
-        <div class="tr"><span>6 créneaux</span><b>290 €</b></div>
-        <div class="tr"><span>7 créneaux</span><b>335 €</b></div>
-        <div class="tr"><span>8 créneaux</span><b>380 €</b></div>
-        <div class="tr"><span>9 créneaux</span><b>425 €</b></div>
-      </div>
-      <div class="tbl">
-        <div class="th">Tarifs par discipline</div>
-        <div class="tr"><span>Anglais seul</span><b>30 € / mois</b></div>
-        <div class="tr"><span>Maths expertes</span><b>30 € / mois</b></div>
-        <div class="tr"><span>Arabe</span><b>25 € / mois</b></div>
-        <div class="tr"><span>Orthophonie</span><b>20 € / h</b></div>
-        <div class="tr"><span>Cours particuliers</span><b>25 € / h</b></div>
-        <div class="tr"><span>Primaire — 4×1h30/sem</span><b>90 € / mois</b></div>
-      </div>
-    </div>
-    <p class="tnote" id="v-tarifnote">Tarifs appliqués dès la rentrée de septembre 2026. Plus vous cumulez de créneaux (matières ou enfants d'une même famille), plus le tarif baisse.</p>
-    <span class="parrain">+ parrainage cumulable en plus !</span>
-  </div>
-</section>
-
-<!-- ═══════════ INFOS PRATIQUES ═══════════ -->
-<section class="infos" id="infos">
-  <div class="in reveal">
-    <span class="num" aria-hidden="true">5.</span>
-    <div class="kicker">Accès &amp; horaires</div>
-    <h2>Venir nous voir</h2>
-    <div class="infos-grid">
-      <div>
-        <p class="adresse">📍 <b>75, rue Rateau — 93120 La Courneuve</b></p>
-        <div class="icard">
-          <div class="th">Horaires d'ouverture</div>
-          <div class="row"><span>Lundi – Vendredi</span><span>17h – 21h15</span></div>
-          <div class="row"><span>Samedi &amp; Dimanche</span><span>9h – 20h</span></div>
-        </div>
-        <div class="icard">
-          <div class="th">Dates clés 2026</div>
-          <div class="row"><span>Fin des cours</span><span>Dim. 28 juin</span></div>
-          <div class="row"><span>Fermeture estivale</span><span>29 juin → 24 août</span></div>
-          <div class="row"><span>Petites vacances</span><span>cours maintenus (stages)</span></div>
-          <div class="row"><span>Reprise administrative</span><span>24–30 août, 15h–19h</span></div>
-          <div class="row"><span>Rentrée pédagogique</span><span>Mar. 1er septembre</span></div>
-        </div>
-      </div>
-      <div>
-        <div class="map">
-          <iframe title="Plan d'accès — 75 rue Rateau, 93120 La Courneuve" src="https://www.google.com/maps?q=75%20rue%20Rateau%2C%2093120%20La%20Courneuve&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-        </div>
-        <p style="font-size:12px;margin-top:10px"><a href="https://www.google.com/maps/dir/?api=1&amp;destination=75%20rue%20Rateau%2C%2093120%20La%20Courneuve" target="_blank" rel="noopener">Itinéraire Google Maps →</a></p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════ FAQ ═══════════ -->
-<section class="faq" id="faq">
-  <div class="in reveal">
-    <span class="num" aria-hidden="true">6.</span>
-    <div class="kicker">FAQ</div>
-    <h2>Les questions que tout le monde pose</h2>
-    <details>
-      <summary>Quels niveaux et matières proposez-vous ?</summary>
-      <div class="rep">Nous accompagnons du primaire au lycée, et jusqu'au post-bac avec notre prépa scientifique du dimanche. Côté matières : mathématiques (dont maths expertes), physique-chimie, SVT, français, histoire-géo, philosophie et orientation, ainsi que les langues — anglais (avec préparation à l'examen Cambridge), arabe et tamoul. Nous proposons aussi de l'orthophonie en accompagnement.</div>
-    </details>
-    <details>
-      <summary>En quoi vos cours diffèrent-ils du simple rattrapage ?</summary>
-      <div class="rep">Nous ne faisons pas que combler des lacunes : nous suivons notre propre progression, calée sur le programme mais menée légèrement en amont. Votre enfant découvre la notion avec nous avant de la voir en classe — le cours de l'établissement devient alors une consolidation, pas une découverte. Résultat : plus de confiance, une meilleure participation et des acquis qui durent. Pour les élèves déjà à l'aise, nous approfondissons et ouvrons sur des notions plus avancées.</div>
-    </details>
-    <details>
-      <summary>Comment se déroulent les cours ?</summary>
-      <div class="rep">En petits groupes de niveau à effectifs maîtrisés : chaque élève est réellement vu, entendu et accompagné. Nos enseignants se coordonnent et échangent régulièrement leurs observations pour construire une vision globale et cohérente de la progression de votre enfant. Un accompagnement 100 % individuel en cours particuliers (25 €/h) est aussi possible.</div>
-    </details>
-    <details>
-      <summary>Quel suivi proposez-vous en dehors des cours ?</summary>
-      <div class="rep">L'accompagnement ne s'arrête pas à la fin de la séance. Une assistance WhatsApp est disponible 24h/24 et 7j/7 : votre enfant peut poser une question, envoyer un exercice ou signaler une difficulté à tout moment. Nous proposons aussi des créneaux d'aide aux devoirs, calés exactement sur ce qui est traité dans son établissement.</div>
-    </details>
-    <details>
-      <summary>Que se passe-t-il si le créneau souhaité est complet ?</summary>
-      <div class="rep">Aucune famille ne reste sans solution. Selon votre situation, nous proposons : une place prioritaire sur liste d'attente (vous êtes prévenus dès qu'une place se libère, par ordre d'inscription), un créneau alternatif (le week-end offre de belles disponibilités), ou l'ouverture d'un nouveau groupe si plusieurs familles souhaitent le même horaire. Chaque cas est étudié individuellement.</div>
-    </details>
-    <details>
-      <summary>Proposez-vous l'examen Cambridge ?</summary>
-      <div class="rep">Oui. Nous sommes centre d'examen Cambridge depuis 4 ans — une certification reconnue dans le milieu académique et professionnel à l'international. L'examen d'anglais est organisé dans nos locaux en fin d'année scolaire, dans un cadre rassurant, et reste ouvert à tous, y compris aux personnes non inscrites chez nous.</div>
-    </details>
-    <details>
-      <summary>Combien ça coûte ?</summary>
-      <div class="rep">L'abonnement est de 65 €/mois pour un créneau hebdomadaire (2 h en groupe), soit moins de 8 €/h, avec un tarif dégressif dès le 2e créneau. Tarifs spécifiques : anglais seul ou maths expertes 30 €/mois, arabe 25 €/mois, orthophonie 20 €/h, cours particuliers 25 €/h, primaire 90 €/mois (4×1h30, soit 3,75 €/h). Le parrainage offre 20 € de réduction immédiate, cumulable. La grille complète est juste au-dessus.</div>
-    </details>
-    <details>
-      <summary>Quand a lieu la rentrée 2026 / 2027 ?</summary>
-      <div class="rep">Les cours de l'année en cours se terminent le dimanche 28 juin 2026, avec un moment convivial (collège 10h-12h, lycée 13h-15h). La reprise administrative a lieu du 24 au 30 août 2026 (15h-19h), puis la rentrée pédagogique le mardi 1er septembre 2026 (planning provisoire).</div>
-    </details>
-    <details>
-      <summary>Que disent les familles ?</summary>
-      <div class="rep">La confiance des familles depuis plus de dix ans est notre plus belle récompense. Retrouvez les témoignages des parents et des élèves directement sur notre fiche Google : <a href="https://www.google.com/maps/search/?api=1&amp;query=PlusdeBonnesNotes%20La%20Courneuve" target="_blank" rel="noopener">Lire les avis Google →</a></div>
-    </details>
-    <details>
-      <summary>Comment inscrire mon enfant ?</summary>
-      <div class="rep">Remplissez le <a href="inscriptions.html">formulaire d'inscription en ligne</a> (un par enfant, même pour un élève déjà inscrit). Nous vous recontactons rapidement pour confirmer le créneau et la formule adaptée. Vous pouvez aussi nous joindre par téléphone — privilégiez le SMS pour un retour rapide.</div>
-    </details>
-  </div>
-</section>
-
-<!-- ═══════════ CONTACT ═══════════ -->
-<section class="contact" id="contact" style="padding-top:30px">
-  <div class="in reveal">
-    <span class="num" aria-hidden="true">7.</span>
-    <div class="kicker">Contact</div>
-    <h2>On vous répond <span class="hl">à tout moment</span></h2>
-    <p class="lead">Une question sur les formules, un créneau à trouver, une situation particulière ? Écrivez-nous sur WhatsApp — c'est le plus rapide.</p>
-    <div class="ctas">
-      <a class="wa" href="https://wa.me/33751623162?text=Bonjour%2C%20je%20souhaite%20des%20informations%20sur%20vos%20cours." target="_blank" rel="noopener">💬 WhatsApp — Sipi</a>
-      <a class="wa" href="https://wa.me/33664094881?text=Bonjour%2C%20je%20souhaite%20des%20informations%20sur%20vos%20cours." target="_blank" rel="noopener">💬 WhatsApp — Raja</a>
-      <a class="wa" href="https://wa.me/33637238850?text=Bonjour%2C%20je%20souhaite%20des%20informations%20sur%20vos%20cours." target="_blank" rel="noopener">💬 WhatsApp — Youssef</a>
-      <a class="wa" href="https://wa.me/33760465586?text=Bonjour%2C%20je%20souhaite%20des%20informations%20sur%20vos%20cours." target="_blank" rel="noopener">💬 WhatsApp — Maître Pandy</a>
-    </div>
-    <div class="tels">
-      <a class="tel" href="tel:+33157144504"><b>Standard</b> · 01 57 14 45 04</a>
-      <a class="tel" href="tel:+33751623162"><b>Sipi</b> · 07 60 46 55 86/a>
-      <a class="tel" href="tel:+33664094881"><b>Raja</b> · 06 64 09 48 81</a>
-      <a class="tel" href="tel:+33637238850"><b>Youssef</b> · 06 37 23 88 50</a>
-      <a class="tel" href="tel:+33760465586"><b>Maître Pandy</b> · 06 51 62 31 62/a>
-    </div>
-    <span class="sms">Privilégiez le SMS ou WhatsApp pour un retour rapide ✓</span>
-  </div>
-</section>
-
-</main>
-
-<footer>
-  <div class="in">
-    <div>
-      <div class="fbrand">PlusdeBonnesNotes</div>
-      <div>75, rue Rateau, 93120 La Courneuve · <a href="mailto:contact@plusdebonnesnotes.com">contact@plusdebonnesnotes.com</a></div>
-    </div>
-    <nav aria-label="Liens de pied de page">
-      <a href="inscriptions.html">Inscription</a>
-      <a href="membre.html">Espace membre</a>
-      <a href="https://www.google.com/maps/search/?api=1&amp;query=PlusdeBonnesNotes%20La%20Courneuve" target="_blank" rel="noopener">Avis Google</a>
-      <a href="#haut">Haut de page ↑</a>
-    </nav>
-  </div>
-</footer>
-
-<script>
-(function(){
-  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('vu');});
-    return;
-  }
-  if(!('IntersectionObserver' in window)){
-    document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('vu');});
-    return;
-  }
-  var io=new IntersectionObserver(function(entries){
-    entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('vu'); io.unobserve(e.target);} });
-  },{threshold:.08});
-  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
-})();
-</script>
-<script>
-(function(){
-  var b=document.getElementById('burger'),d=document.getElementById('drawer'),bg=document.getElementById('drawerBg'),x=document.getElementById('drawerClose');
-  function open(){d&&d.classList.add('open');bg&&bg.classList.add('open');b&&b.setAttribute('aria-expanded','true');}
-  function close(){d&&d.classList.remove('open');bg&&bg.classList.remove('open');b&&b.setAttribute('aria-expanded','false');}
-  b&&b.addEventListener('click',open); bg&&bg.addEventListener('click',close); x&&x.addEventListener('click',close);
-  d&&Array.prototype.forEach.call(d.querySelectorAll('a'),function(a){a.addEventListener('click',close);});
-})();
-</script>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
-(function(){
-  var URL_='https://gwmdurhncotftuxfgwkg.supabase.co';
-  var KEY_='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3bWR1cmhuY290ZnR1eGZnd2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NzYyMTAsImV4cCI6MjA5MTU1MjIxMH0.WDcPFpYyJIF8QcNsjUzckb0EUtbxw_iQ0hmN6OPCn08';
-  function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-  function hl(s){return esc(s).replace(/\*([^*]+)\*/g,'<span class="hl">$1</span>');}
-  function bd(s){return esc(s).replace(/\*([^*]+)\*/g,'<b>$1</b>');}
-  try{
-    if(!window.supabase) return;
-    var sb=window.supabase.createClient(URL_,KEY_);
-    sb.from('site_content').select('data').eq('id','vitrine').maybeSingle().then(function(r){
-      var d=(r&&r.data&&r.data.data)||{};
-      var b=document.getElementById('v-bandeau');
-      if(b&&d.bandeau){ if(d.bandeau.actif===false){b.style.display='none';} else if(d.bandeau.texte){b.innerHTML='🎓 '+bd(d.bandeau.texte);} }
-      if(d.heroTitre){var h=document.getElementById('v-hero-titre'); if(h)h.innerHTML=hl(d.heroTitre);}
-      if(d.heroSub){var s=document.getElementById('v-hero-sub'); if(s)s.innerHTML=esc(d.heroSub).replace(/\n/g,'<br>');}
-      if(d.essai){var e=document.getElementById('v-essai'); if(e)e.textContent=d.essai;}
-      if(d.tarifNote){var tn=document.getElementById('v-tarifnote'); if(tn)tn.textContent=d.tarifNote;}
-    }).catch(function(){});
-    sb.from('site_content').select('data').eq('id','annonces').maybeSingle().then(function(r){
-      var items=(r&&r.data&&r.data.data&&r.data.data.items)||[];
-      var act=items.filter(function(x){return x&&x.actif!==false&&(x.titre||x.corps);});
-      if(!act.length)return;
-      var board=document.getElementById('postit-board'); if(!board)return;
-      board.innerHTML=act.map(function(a){
-        var tag=a.tag?'<span class="pi-tag">'+esc(a.tag)+'</span>':'';
-        var ti=a.titre?'<div class="pi-titre">'+esc(a.titre)+'</div>':'';
-        var co=a.corps?'<div class="pi-corps">'+esc(a.corps)+'</div>':'';
-        var cta=(a.cta_label&&a.cta_url)?'<a class="pi-cta" href="'+esc(a.cta_url)+'">'+esc(a.cta_label)+' →</a>':'';
-        var col=({jaune:1,bleu:1,vert:1,rose:1}[a.couleur])?a.couleur:'jaune';
-        return '<div class="postit pi-'+col+'">'+tag+ti+co+cta+'</div>';
-      }).join('');
-      var sec=document.getElementById('annonces'); if(sec)sec.style.display='block';
-    }).catch(function(){});
-    
-  }catch(_){}
-})();
+const SUPABASE_URL  = 'https://gwmdurhncotftuxfgwkg.supabase.co';
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3bWR1cmhuY290ZnR1eGZnd2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NzYyMTAsImV4cCI6MjA5MTU1MjIxMH0.WDcPFpYyJIF8QcNsjUzckb0EUtbxw_iQ0hmN6OPCn08';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+</script>
+<script>
+const {
+  useState,
+  useEffect,
+  useMemo
+} = React;
+function Inscription({
+  onBack,
+  onLogin
+}) {
+  const NIV = ['CP', 'CE1', 'CE2', 'CM1', 'CM2', '6ème', '5ème', '4ème', '3ème', 'Seconde', 'Première', 'Terminale', 'Supérieur / Post-bac', 'Supérieur (prépa / CPGE)'];
+  const MAT = ['Mathématiques', 'Maths expertes', 'Physique-Chimie', 'Français', 'Histoire-Géo', 'SVT', 'Philosophie', 'Anglais', 'Anglais Cambridge', 'Arabe', 'Tamoul', 'Orthophonie', 'Aide aux devoirs', 'Supérieur', 'Spécial Prépa / CPGE'];
+  const OBJ = ['Remise à niveau', 'Perfectionnement / approfondissement', 'Préparation examen (Brevet, Bac…)', 'Aide aux devoirs', 'Cours particuliers', 'Autre'];
+  const SRC = ['Bouche à oreille', 'Recherche Google', 'Réseaux sociaux', 'Élève / ancien élève', 'Flyer / affiche', 'Autre'];
+  const LIEN = ['Mère', 'Père', 'Frère', 'Sœur', 'Tuteur légal', 'Autre'];
+  const [f, setF] = useState({
+    prenom: '',
+    nom: '',
+    date_naissance: '',
+    niveau: '3ème',
+    etablissement: '',
+    eleve_tel: '',
+    matieres: [],
+    parent_nom: '',
+    parent_prenom: '',
+    tuteur1_lien: '',
+    parent_tel: '',
+    parent_email: '',
+    t2_nom: '',
+    t2_prenom: '',
+    t2_lien: '',
+    t2_tel: '',
+    t2_email: '',
+    adresse: '',
+    ville: '',
+    code_postal: '',
+    objectif: '',
+    projet: '',
+    source: '',
+    creneau_souhaite: '',
+    message: '',
+    hp: ''
+  });
+  const [sent, setSent] = useState(false);
+  const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [fileDom, setFileDom] = useState(null);
+  const [fileBul, setFileBul] = useState(null);
+  const upd = (k, v) => setF(p => ({
+    ...p,
+    [k]: v
+  }));
+  const toggleM = m => setF(p => ({
+    ...p,
+    matieres: p.matieres.includes(m) ? p.matieres.filter(x => x !== m) : [...p.matieres, m]
+  }));
+  const submit = async () => {
+    setErr('');
+    if (f.hp) {
+      setSent(true);
+      return;
+    } // anti-spam (honeypot)
+    const fail = (msg) => { setErr(msg); setBusy(false); setTimeout(function(){ try { var el = document.querySelector('.lp-err'); if (el && el.scrollIntoView) { el.scrollIntoView({behavior:'smooth', block:'center'}); } else { window.scrollTo({top:0, behavior:'smooth'}); } } catch (_) { try { window.scrollTo(0,0); } catch (e) {} } }, 40); };
+    const miss = [
+      [f.prenom.trim(), "le prénom de l'élève"],
+      [f.nom.trim(), "le nom de l'élève"],
+      [f.date_naissance, "la date de naissance"],
+      [f.etablissement.trim(), "l'établissement"],
+      [f.matieres.length, "au moins une matière"],
+      [f.parent_prenom.trim(), "le prénom du responsable"],
+      [f.parent_nom.trim(), "le nom du responsable"],
+      [f.tuteur1_lien, "le lien de parenté"],
+      [f.parent_tel.trim(), "le téléphone du responsable"],
+      [f.parent_email.trim(), "l'email du responsable"],
+      [f.adresse.trim(), "l'adresse"],
+      [f.ville.trim(), "la ville"],
+      [f.code_postal.trim(), "le code postal"]
+    ].filter(function (x) { return !x[0]; }).map(function (x) { return x[1]; });
+    if (miss.length) { fail("Dossier incomplet \u2014 merci de renseigner : " + miss.join(", ") + "."); return; }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.parent_email.trim())) { fail("L'adresse email du responsable ne semble pas valide."); return; }
+    setBusy(true);
+    const rec = {
+      id: 'web' + Date.now(),
+      prenom: f.prenom.trim(),
+      nom: f.nom.trim(),
+      niveau: f.niveau,
+      matieres: f.matieres,
+      parent_nom: f.parent_nom.trim(),
+      parent_tel: f.parent_tel.trim(),
+      parent_email: f.parent_email.trim(),
+      creneau_souhaite: f.creneau_souhaite.trim(),
+      message: f.message.trim(),
+      statut: 'nouveau',
+      details: {
+        date_naissance: f.date_naissance,
+        etablissement: f.etablissement.trim(),
+        eleve_tel: f.eleve_tel.trim(),
+        parent_prenom: f.parent_prenom.trim(),
+        tuteur1_lien: f.tuteur1_lien,
+        t2_nom: f.t2_nom.trim(),
+        t2_prenom: f.t2_prenom.trim(),
+        t2_lien: f.t2_lien,
+        t2_tel: f.t2_tel.trim(),
+        t2_email: f.t2_email.trim(),
+        adresse: f.adresse.trim(),
+        ville: f.ville.trim(),
+        code_postal: f.code_postal.trim(),
+        objectif: f.objectif,
+        projet: f.projet.trim(),
+        source: f.source
+      }
+    };
+    try {
+      const upOne = async (fl, key) => {
+        if (!fl) return;
+        try {
+          const safe = fl.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+          const path = rec.id + '_' + key + '_' + safe;
+          const up = await sb.storage.from('justificatifs').upload(path, fl, {
+            upsert: true
+          });
+          if (!(up && up.error)) {
+            rec.details[key + '_path'] = path;
+            rec.details[key + '_nom'] = fl.name;
+          }
+        } catch (_) {}
+      };
+      await upOne(fileDom, 'domicile');
+      await upOne(fileBul, 'bulletin');
+      const {
+        error
+      } = await sb.from('inscriptions_web').insert([rec]);
+      if (error) {
+        console.error("[inscription] Supabase:", error);
+        fail("L'envoi a échoué : " + (error.message || "erreur inconnue") + ". Réessayez ou contactez-nous par téléphone.");
+        return;
+      }
+      try {
+        await fetch(SUPABASE_URL + "/functions/v1/notify-inscription", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SUPABASE_KEY, "apikey": SUPABASE_KEY },
+          body: JSON.stringify({ record: rec })
+        });
+      } catch (_) {}
+      setSent(true);
+      try {
+        window.scrollTo(0, 0);
+      } catch (_) {}
+    } catch (e) {
+      console.error("[inscription] exception:", e);
+      fail("Connexion impossible : " + (e && e.message || "") + ". Vérifiez votre connexion.");
+    }
+    setBusy(false);
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "lp"
+  }, /*#__PURE__*/React.createElement("nav", {
+    className: "lp-nav"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lp-nav-brand"
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "22",
+    height: "22",
+    viewBox: "0 0 52 52",
+    fill: "none"
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "26",
+    cy: "26",
+    r: "24",
+    fill: "var(--gold2)",
+    opacity: "0.2"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M26 8 L38 18 L38 34 L26 42 L14 34 L14 18 Z",
+    fill: "var(--gold)",
+    opacity: "0.9"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M20 24 L26 18 L32 24 L26 30 Z",
+    fill: "white"
+  })), "PlusdeBonnesNotes"), /*#__PURE__*/React.createElement("button", {
+    className: "lp-btn lp-btn-o",
+    onClick: onBack
+  }, "\u2190 Accueil")), sent ? /*#__PURE__*/React.createElement("div", {
+    className: "lp-ok"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lp-ok-ic"
+  }, "\u2713"), /*#__PURE__*/React.createElement("h2", null, "Demande envoy\xE9e !"), /*#__PURE__*/React.createElement("p", null, "Merci, votre demande a bien \xE9t\xE9 enregistr\xE9e. Vous serez prochainement contact\xE9 par nos services de secr\xE9tariat et de comptabilit\xE9, et vos identifiants de connexion (identifiant et mot de passe) vous seront transmis."), /*#__PURE__*/React.createElement("p", {
+    style: {
+      marginTop: 12
+    }
+  }, "S'il s'agit d'une premi\xE8re inscription chez nous, nous vous contacterons pour convenir d'un premier rendez-vous obligatoire de pr\xE9sentation de l'\xE9tablissement, afin de finaliser et s\xE9curiser le paiement."), /*#__PURE__*/React.createElement("p", {
+    style: {
+      marginTop: 12
+    }
+  }, "Pour un retour plus rapide, privil\xE9giez le SMS \xE0 l'un de nos contacts :"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      marginTop: 4,
+      fontFamily: 'var(--ff-mono)',
+      fontSize: 13,
+      lineHeight: 1.9
+    }
+  }, "Raja\xA0: 06 64 09 48 81", /*#__PURE__*/React.createElement("br", null), "Sipi\xA0: 07 51 62 31 62", /*#__PURE__*/React.createElement("br", null), "Youssef\xA0: 06 37 23 88 50"), /*#__PURE__*/React.createElement("button", {
+    className: "lp-btn",
+    onClick: onBack
+  }, "\u2190 Retour \xE0 l'accueil")) : /*#__PURE__*/React.createElement("section", {
+    className: "lp-sec"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lp-kicker"
+  }, "Inscription 2026 / 2027"), /*#__PURE__*/React.createElement("h2", {
+    className: "lp-h2"
+  }, "Inscrire votre enfant"), /*#__PURE__*/React.createElement("p", {
+    className: "lp-lead"
+  }, "Un formulaire par enfant \u2014 m\xEAme pour les \xE9l\xE8ves d\xE9j\xE0 inscrits. Plus vous nous en dites, mieux nous pr\xE9parons un cr\xE9neau adapt\xE9. Nous vous recontactons rapidement. Champs marqu\xE9s d'un * obligatoires."), /*#__PURE__*/React.createElement("div", {
+    className: "lp-form"
+  }, err ? /*#__PURE__*/React.createElement("div", {
+    className: "lp-err"
+  }, err) : null, /*#__PURE__*/React.createElement("div", {
+    className: "lp-form-sec"
+  }, "1 \xB7 L'\xE9l\xE8ve"), /*#__PURE__*/React.createElement("div", {
+    className: "lp-form-grid"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg"
+  }, /*#__PURE__*/React.createElement("label", null, "Pr\xE9nom *"), /*#__PURE__*/React.createElement("input", {
+    className: "lp-in",
+    value: f.prenom,
+    onChange: e => upd('prenom', e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg"
+  }, /*#__PURE__*/React.createElement("label", null, "Nom *"), /*#__PURE__*/React.createElement("input", {
+    className: "lp-in",
+    value: f.nom,
+    onChange: e => upd('nom', e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg"
+  }, /*#__PURE__*/React.createElement("label", null, "Date de naissance"), /*#__PURE__*/React.createElement("input", {
+    className: "lp-in",
+    type: "date",
+    value: f.date_naissance,
+    onChange: e => upd('date_naissance', e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg"
+  }, /*#__PURE__*/React.createElement("label", null, "Niveau (rentr\xE9e 2026)"), /*#__PURE__*/React.createElement("select", {
+    className: "lp-in",
+    value: f.niveau,
+    onChange: e => upd('niveau', e.target.value)
+  }, NIV.map(n => /*#__PURE__*/React.createElement("option", {
+    key: n,
+    value: n
+  }, n)))), /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg full"
+  }, /*#__PURE__*/React.createElement("label", null, "\xC9tablissement scolaire actuel"), /*#__PURE__*/React.createElement("input", {
+    className: "lp-in",
+    value: f.etablissement,
+    onChange: e => upd('etablissement', e.target.value),
+    placeholder: "Nom du coll\xE8ge / lyc\xE9e"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg"
+  }, /*#__PURE__*/React.createElement("label", null, "Num\xE9ro de t\xE9l\xE9phone de l'\xE9l\xE8ve"), /*#__PURE__*/React.createElement("input", {
+    className: "lp-in",
+    type: "tel",
+    value: f.eleve_tel,
+    onChange: e => upd('eleve_tel', e.target.value),
+    placeholder: "Portable de l'\xE9l\xE8ve, s'il en a un"
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg full"
+  }, /*#__PURE__*/React.createElement("label", null, "Mati\xE8res souhait\xE9es"), /*#__PURE__*/React.createElement("div", {
+    className: "lp-chips",
+    style: {
+      marginTop: 4
+    }
+  }, MAT.map(m => /*#__PURE__*/React.createElement("span", {
+    key: m,
+    className: "lp-chip" + (f.matieres.includes(m) ? " lp-chip-sel" : ""),
+    style: {
+      cursor: 'pointer'
+    },
+    onClick: () => toggleM(m)
+  }, m)))), /*#__PURE__*/React.createElement("div", {
+    className: "lp-form-sec"
+  }, "2 \xB7 Tuteur l\xE9gal 1 *"), /*#__PURE__*/React.createElement("div", {
+    className: "lp-form-grid"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg"
+  }, /*#__PURE__*/React.createElement("label", null, "Nom *"), /*#__PURE__*/React.createElement("input", {
+    className: "lp-in",
+    value: f.parent_nom,
+    onChange: e => upd('parent_nom', e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg"
+  }, /*#__PURE__*/React.createElement("label", null, "Pr\xE9nom"), /*#__PURE__*/React.createElement("input", {
+    className: "lp-in",
+    value: f.parent_prenom,
+    onChange: e => upd('parent_prenom', e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg"
+  }, /*#__PURE__*/React.createElement("label", null, "Lien avec l'\xE9l\xE8ve"), /*#__PURE__*/React.createElement("select", {
+    className: "lp-in",
+    value: f.tuteur1_lien,
+    onChange: e => upd('tuteur1_lien', e.target.value)
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "\u2014 Choisir \u2014"), LIEN.map(o => /*#__PURE__*/React.createElement("option", {
+    key: o,
+    value: o
+  }, o)))), /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg"
+  }, /*#__PURE__*/React.createElement("label", null, "T\xE9l\xE9phone *"), /*#__PURE__*/React.createElement("input", {
+    className: "lp-in",
+    type: "tel",
+    value: f.parent_tel,
+    onChange: e => upd('parent_tel', e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg full"
+  }, /*#__PURE__*/React.createElement("label", null, "Email"), /*#__PURE__*/React.createElement("input", {
+    className: "lp-in",
+    type: "email",
+    value: f.parent_email,
+    onChange: e => upd('parent_email', e.target.value)
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "lp-form-sec"
+  }, "3 \xB7 Tuteur l\xE9gal 2 (facultatif)"), /*#__PURE__*/React.createElement("div", {
+    className: "lp-form-grid"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg"
+  }, /*#__PURE__*/React.createElement("label", null, "Nom"), /*#__PURE__*/React.createElement("input", {
+    className: "lp-in",
+    value: f.t2_nom,
+    onChange: e => upd('t2_nom', e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg"
+  }, /*#__PURE__*/React.createElement("label", null, "Pr\xE9nom"), /*#__PURE__*/React.createElement("input", {
+    className: "lp-in",
+    value: f.t2_prenom,
+    onChange: e => upd('t2_prenom', e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg"
+  }, /*#__PURE__*/React.createElement("label", null, "Lien avec l'\xE9l\xE8ve"), /*#__PURE__*/React.createElement("select", {
+    className: "lp-in",
+    value: f.t2_lien,
+    onChange: e => upd('t2_lien', e.target.value)
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "\u2014 Choisir \u2014"), LIEN.map(o => /*#__PURE__*/React.createElement("option", {
+    key: o,
+    value: o
+  }, o)))), /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg"
+  }, /*#__PURE__*/React.createElement("label", null, "T\xE9l\xE9phone"), /*#__PURE__*/React.createElement("input", {
+    className: "lp-in",
+    type: "tel",
+    value: f.t2_tel,
+    onChange: e => upd('t2_tel', e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg full"
+  }, /*#__PURE__*/React.createElement("label", null, "Email"), /*#__PURE__*/React.createElement("input", {
+    className: "lp-in",
+    type: "email",
+    value: f.t2_email,
+    onChange: e => upd('t2_email', e.target.value)
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "lp-form-sec"
+  }, "4 \xB7 Adresse du foyer"), /*#__PURE__*/React.createElement("div", {
+    className: "lp-form-grid"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg full"
+  }, /*#__PURE__*/React.createElement("label", null, "Adresse compl\xE8te"), /*#__PURE__*/React.createElement("input", {
+    className: "lp-in",
+    value: f.adresse,
+    onChange: e => upd('adresse', e.target.value),
+    placeholder: "N\xB0 et nom de rue, compl\xE9ment\u2026"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg"
+  }, /*#__PURE__*/React.createElement("label", null, "Code postal"), /*#__PURE__*/React.createElement("input", {
+    className: "lp-in",
+    value: f.code_postal,
+    onChange: e => upd('code_postal', e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg"
+  }, /*#__PURE__*/React.createElement("label", null, "Ville"), /*#__PURE__*/React.createElement("input", {
+    className: "lp-in",
+    value: f.ville,
+    onChange: e => upd('ville', e.target.value)
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "lp-form-sec"
+  }, "5 \xB7 Besoin"), /*#__PURE__*/React.createElement("div", {
+    className: "lp-form-grid"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg"
+  }, /*#__PURE__*/React.createElement("label", null, "Objectif principal"), /*#__PURE__*/React.createElement("select", {
+    className: "lp-in",
+    value: f.objectif,
+    onChange: e => upd('objectif', e.target.value)
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "\u2014 Choisir \u2014"), OBJ.map(o => /*#__PURE__*/React.createElement("option", {
+    key: o,
+    value: o
+  }, o)))), /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg"
+  }, /*#__PURE__*/React.createElement("label", null, "Comment nous avez-vous connus ?"), /*#__PURE__*/React.createElement("select", {
+    className: "lp-in",
+    value: f.source,
+    onChange: e => upd('source', e.target.value)
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "\u2014 Choisir \u2014"), SRC.map(o => /*#__PURE__*/React.createElement("option", {
+    key: o,
+    value: o
+  }, o)))), /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg full"
+  }, /*#__PURE__*/React.createElement("label", null, "Message (facultatif)"), /*#__PURE__*/React.createElement("textarea", {
+    className: "lp-in",
+    rows: 3,
+    value: f.message,
+    onChange: e => upd('message', e.target.value),
+    placeholder: "Objectifs, difficult\xE9s, questions\u2026"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg full"
+  }, /*#__PURE__*/React.createElement("label", null, "Projets professionnels ou d'\xE9tudes (facultatif)"), /*#__PURE__*/React.createElement("textarea", {
+    className: "lp-in",
+    rows: 3,
+    value: f.projet,
+    onChange: e => upd('projet', e.target.value),
+    placeholder: "M\xE9tier vis\xE9, orientation, \xE9cole ou fili\xE8re envisag\xE9e\u2026"
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "lp-form-sec"
+  }, "6 \xB7 Pi\xE8ces justificatives (facultatif)"), /*#__PURE__*/React.createElement("div", {
+    className: "lp-form-grid"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg full"
+  }, /*#__PURE__*/React.createElement("label", null, "Justificatif de domicile (PDF ou image)"), /*#__PURE__*/React.createElement("input", {
+    className: "lp-in",
+    type: "file",
+    accept: ".pdf,image/*",
+    onChange: e => {
+      const x = e.target.files && e.target.files[0];
+      if (x && x.size > 8 * 1024 * 1024) {
+        setErr('Fichier trop volumineux (8 Mo maximum).');
+        e.target.value = '';
+        setFileDom(null);
+        return;
+      }
+      setErr('');
+      setFileDom(x || null);
+    }
+  }), fileDom ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'var(--ff-mono)',
+      fontSize: 11.5,
+      color: 'var(--muted)',
+      marginTop: 6
+    }
+  }, "\uD83D\uDCCE ", fileDom.name) : null), /*#__PURE__*/React.createElement("div", {
+    className: "lp-fg full"
+  }, /*#__PURE__*/React.createElement("label", null, "Dernier bulletin scolaire (PDF ou image)"), /*#__PURE__*/React.createElement("input", {
+    className: "lp-in",
+    type: "file",
+    accept: ".pdf,image/*",
+    onChange: e => {
+      const x = e.target.files && e.target.files[0];
+      if (x && x.size > 8 * 1024 * 1024) {
+        setErr('Fichier trop volumineux (8 Mo maximum).');
+        e.target.value = '';
+        setFileBul(null);
+        return;
+      }
+      setErr('');
+      setFileBul(x || null);
+    }
+  }), fileBul ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'var(--ff-mono)',
+      fontSize: 11.5,
+      color: 'var(--muted)',
+      marginTop: 6
+    }
+  }, "\uD83D\uDCCE ", fileBul.name) : null)), /*#__PURE__*/React.createElement("input", {
+    value: f.hp,
+    onChange: e => upd('hp', e.target.value),
+    tabIndex: -1,
+    autoComplete: "off",
+    style: {
+      position: 'absolute',
+      left: '-9999px',
+      width: 1,
+      height: 1,
+      opacity: 0
+    },
+    "aria-hidden": "true"
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "lp-btn",
+    style: {
+      width: '100%',
+      marginTop: 8,
+      opacity: busy ? .6 : 1
+    },
+    disabled: busy,
+    onClick: submit
+  }, busy ? 'Envoi…' : 'Envoyer ma demande d\u2019inscription'), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'var(--ff-mono)',
+      fontSize: 12,
+      color: 'var(--muted)',
+      textAlign: 'center',
+      marginTop: 14
+    }
+  }, "D\xE9j\xE0 inscrit ? ", /*#__PURE__*/React.createElement("a", {
+    onClick: onLogin,
+    style: {
+      color: 'var(--gold)',
+      cursor: 'pointer'
+    }
+  }, "Acc\xE9der \xE0 l'espace membre")))), /*#__PURE__*/React.createElement("footer", {
+    className: "lp-footer"
+  }, "\xA9 ", new Date().getFullYear(), " PlusdeBonnesNotes \u2014 Soutien scolaire \xE0 La Courneuve"));
+}
+
+// ═══════════════════ GESTION DES DEMANDES WEB (admin) ═══════════════════
+
+const goHome = () => {
+  try {
+    window.location.href = './';
+  } catch (_) {}
+};
+ReactDOM.createRoot(document.getElementById('root')).render(/*#__PURE__*/React.createElement(Inscription, {
+  onBack: goHome,
+  onLogin: goHome
+}));
 </script>
 </body>
 </html>
