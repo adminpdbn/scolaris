@@ -3,188 +3,83 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tarifs & paiement en ligne — PlusdeBonnesNotes</title>
-<meta name="description" content="Tarifs du soutien scolaire PlusdeBonnesNotes (La Courneuve) et paiement de l'abonnement en ligne par carte (Stripe).">
+<title>Paiement en ligne — PlusdeBonnesNotes</title>
+<meta name="description" content="Réglez votre abonnement PlusdeBonnesNotes en ligne par carte bancaire (paiement sécurisé Stripe).">
+<meta name="robots" content="noindex">
 <link rel="canonical" href="https://www.plusdebonnesnotes.com/paiement.html">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,900&family=Courier+Prime:wght@400;700&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,900&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root{--paper:#fbf8f1;--ink:#1c1c20;--bleu:#1a4fc4;--bleu2:#143a8f;--regle:#e6dfcf;--muted:#6b675e;--blanc:#fffdf8;--surl:#ffe66b;--rouge:#c8362e}
+  :root{--paper:#fbf8f1;--ink:#1c1c20;--bleu:#1a4fc4;--bleu2:#143a8f;--regle:#e6dfcf;--muted:#6b675e;--blanc:#fffdf8;--surl:#ffe66b}
   *{margin:0;padding:0;box-sizing:border-box}
-  html{scroll-behavior:smooth}
-  body{font-family:'Courier Prime',monospace;background:var(--paper);color:var(--ink);line-height:1.7;font-size:15.5px;-webkit-font-smoothing:antialiased}
+  html,body{height:100%}
+  body{font-family:'Courier Prime',monospace;background:var(--paper);color:var(--ink);line-height:1.6;font-size:15.5px;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;min-height:100%}
   ::selection{background:var(--surl)}
   a{color:var(--bleu)}
-  .nav{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 22px;background:rgba(251,248,241,.94);backdrop-filter:blur(6px);border-bottom:1.5px solid var(--regle)}
-  .brand{display:flex;align-items:center;gap:9px;font-family:'Fraunces',serif;font-weight:900;font-size:17px;color:var(--ink);text-decoration:none}
+  .nav{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 22px;border-bottom:1.5px solid var(--regle)}
+  .brand{display:flex;align-items:center;gap:9px;font-family:'Fraunces',serif;font-weight:900;font-size:16px;color:var(--ink);text-decoration:none}
   .back{font-size:12.5px;text-decoration:none;color:var(--ink);border:1.5px solid var(--ink);border-radius:8px;padding:8px 14px;white-space:nowrap}
   .back:hover{color:var(--bleu);border-color:var(--bleu)}
-  .wrap{max-width:980px;margin:0 auto;padding:46px 22px 80px}
-  .head{text-align:center;max-width:680px;margin:0 auto 36px}
-  .kicker{font-size:12px;letter-spacing:2.5px;text-transform:uppercase;color:var(--bleu);font-weight:700;margin-bottom:12px}
-  h1{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(28px,5vw,42px);line-height:1.12;letter-spacing:-.4px;margin-bottom:12px}
-  .head p{color:var(--muted)}
-  .hl{background:linear-gradient(transparent 52%,var(--surl) 52%,var(--surl) 94%,transparent 94%);padding:0 2px}
-  /* grille tarifaire (reprise vitrine) */
-  .tarifs-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:10px}
-  .tcard{background:var(--blanc);border:1.5px solid var(--regle);border-radius:14px;padding:26px 22px;display:flex;flex-direction:column;position:relative}
-  .tcard.feat{border:2px solid var(--bleu);box-shadow:0 5px 0 rgba(26,79,196,.14)}
-  .tcard .tag{position:absolute;top:-13px;left:16px;background:var(--bleu);color:#fff;font-size:10.5px;font-weight:700;letter-spacing:.8px;padding:4px 11px;border-radius:999px}
-  .tcard h3{font-family:'Fraunces',serif;font-weight:700;font-size:17px;margin-bottom:10px}
-  .prix{display:flex;align-items:baseline;gap:7px;margin-bottom:8px}
-  .prix b{font-family:'Fraunces',serif;font-weight:900;font-size:34px;letter-spacing:-1px}
-  .prix span{font-size:11.5px;color:var(--muted)}
-  .eco{font-size:11.5px;background:#eef3ff;border:1px solid #c9d8ff;color:var(--bleu2);border-radius:8px;padding:6px 10px;margin-bottom:12px;line-height:1.5}
-  .tcard .desc{font-size:12.5px;color:var(--muted);line-height:1.65;margin-bottom:14px}
-  .tcard ul{list-style:none;margin-bottom:18px}
-  .tcard li{font-size:12.5px;padding:5px 0 5px 22px;position:relative}
-  .tcard li::before{content:'✓';position:absolute;left:2px;color:var(--bleu);font-weight:700}
-  .btn{display:inline-block;font-weight:700;font-size:13px;background:var(--bleu);color:#fff;text-decoration:none;padding:12px 16px;border-radius:10px;box-shadow:0 3px 0 var(--bleu2);text-align:center}
-  .btn:hover{background:var(--bleu2)}
-  .btn-o{background:transparent;color:var(--ink);box-shadow:none;border:2px solid var(--ink)}
-  .btn-o:hover{color:var(--bleu);border-color:var(--bleu)}
-  .tcard .btn{margin-top:auto}
-  .tables{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:26px}
-  .tbl{background:var(--blanc);border:1.5px solid var(--regle);border-radius:12px;overflow:hidden}
-  .tbl .th{font-size:11.5px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;background:var(--paper);padding:12px 18px}
-  .tbl .tr{display:flex;justify-content:space-between;gap:14px;align-items:baseline;padding:10px 18px;font-size:13px;border-top:1px solid var(--regle)}
-  .tbl .tr b{font-size:14px;white-space:nowrap}
-  .tnote{font-size:12.5px;color:var(--muted);margin-top:18px;max-width:640px}
-  @media (max-width:1000px){.tarifs-grid{grid-template-columns:1fr 1fr}}
-  @media (max-width:760px){.tarifs-grid{grid-template-columns:1fr}.tables{grid-template-columns:1fr}}
-  /* paiement Stripe */
-  .pay{margin-top:48px;border-top:1.5px solid var(--regle);padding-top:40px}
-  .pay h2{font-family:'Fraunces',serif;font-weight:700;font-size:26px;margin-bottom:6px}
-  .pay .intro{color:var(--muted);margin-bottom:24px;max-width:640px}
-  .offres{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
-  .offre{background:var(--blanc);border:1.5px solid var(--regle);border-radius:14px;padding:24px 22px;text-align:center}
-  .offre .ol{font-weight:700;font-size:15px;margin-bottom:4px}
-  .offre .op{font-family:'Fraunces',serif;font-weight:900;font-size:24px;color:var(--bleu);margin-bottom:14px}
-  .secure{font-size:12px;color:var(--muted);text-align:center;margin-top:20px}
-  .state{color:var(--muted);font-size:14px}
-  footer{border-top:1.5px solid var(--regle);background:var(--blanc);color:var(--muted);font-size:12.5px;text-align:center;padding:26px 22px}
+  main{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:38px 22px 30px}
+  .head{text-align:center;max-width:560px;margin-bottom:30px}
+  .kicker{font-size:11.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--bleu);font-weight:700;margin-bottom:11px}
+  h1{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(26px,5vw,38px);line-height:1.1;letter-spacing:-.4px;margin-bottom:10px}
+  .head p{color:var(--muted);font-size:14.5px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;width:100%;max-width:760px}
+  .card{background:var(--blanc);border:1.5px solid var(--regle);border-radius:16px;padding:26px 22px;display:flex;flex-direction:column;align-items:center;text-align:center;transition:transform .12s ease,box-shadow .12s ease,border-color .12s}
+  .card:hover{transform:translateY(-3px);box-shadow:0 8px 22px rgba(26,79,196,.10);border-color:#c9d8ff}
+  .card .lab{font-weight:700;font-size:15px;margin-bottom:3px}
+  .card .sub{font-size:12px;color:var(--muted);margin-bottom:14px;min-height:1px}
+  .card .prix{font-family:'Fraunces',serif;font-weight:900;font-size:30px;color:var(--bleu);line-height:1;letter-spacing:-1px;margin-bottom:18px}
+  .pay{display:block;width:100%;margin-top:auto;font-weight:700;font-size:14px;background:var(--bleu);color:#fff;text-decoration:none;padding:13px 14px;border-radius:11px;box-shadow:0 3px 0 var(--bleu2)}
+  .pay:hover{background:var(--bleu2)}
+  .secure{display:flex;align-items:center;gap:7px;justify-content:center;font-size:12.5px;color:var(--muted);margin-top:26px;text-align:center}
+  .state{text-align:center;color:var(--muted);font-size:14.5px;max-width:460px;background:var(--blanc);border:1.5px dashed var(--regle);border-radius:14px;padding:26px 24px}
+  .state a{color:var(--bleu)}
+  footer{border-top:1.5px solid var(--regle);background:var(--blanc);color:var(--muted);font-size:12px;text-align:center;padding:18px 22px}
   footer a{color:var(--bleu);text-decoration:none}
+  @media (max-width:520px){ .grid{grid-template-columns:1fr;max-width:340px} main{justify-content:flex-start;padding-top:30px} }
 </style>
 </head>
 <body>
 <nav class="nav">
-  <a class="brand" href="./"><svg width="22" height="22" viewBox="0 0 52 52" fill="none" aria-hidden="true"><circle cx="26" cy="26" r="24" fill="#4a7fd4" opacity="0.25"/><path d="M26 8 L38 18 L38 34 L26 42 L14 34 L14 18 Z" fill="#1a4fc4" opacity="0.92"/></svg> PlusdeBonnesNotes</a>
+  <a class="brand" href="./"><svg width="20" height="20" viewBox="0 0 52 52" fill="none" aria-hidden="true"><circle cx="26" cy="26" r="24" fill="#4a7fd4" opacity="0.25"/><path d="M26 8 L38 18 L38 34 L26 42 L14 34 L14 18 Z" fill="#1a4fc4" opacity="0.92"/></svg> PlusdeBonnesNotes</a>
   <a class="back" href="./">← Accueil</a>
 </nav>
-<div class="wrap">
+<main>
   <div class="head">
-    <div class="kicker">Tarifs & paiement</div>
-    <h1>Régler l'abonnement <span class="hl">en ligne</span></h1>
-    <p id="pay-intro">Retrouvez les formules ci-dessous, puis réglez votre abonnement mensuel par carte en toute sécurité.</p>
+    <div class="kicker">Paiement sécurisé</div>
+    <h1>Régler mon abonnement</h1>
+    <p id="intro">Choisissez votre formule selon le nombre de créneaux, puis payez en quelques secondes par carte.</p>
   </div>
-<div class="tarifs-grid">
-      <div class="tcard">
-        <span class="tag" style="background:#6b675e">LA PLUS ACCESSIBLE</span>
-        <h3>Formule essentielle</h3>
-        <div class="prix"><b>65 €</b><span>/ créneau / mois</span></div>
-        <p class="desc">Pour un élève déjà à l'aise qui veut maintenir son niveau et approfondir : 1 séance de 2 h par semaine en petit groupe.</p>
-        <ul>
-          <li>2 h / semaine en petit groupe</li>
-          <li>Suivi individualisé</li>
-          <li>Accès visio + replay si absence</li>
-          <li>Assistance WhatsApp 24/7</li>
-        </ul>
-        <a class="btn" href="inscriptions.html">S'inscrire</a>
-      </div>
-      <div class="tcard feat">
-        <span class="tag">★ LE PLUS CHOISI</span>
-        <h3>Formule 2 créneaux</h3>
-        <div class="prix"><b>120 €</b><span>/ mois</span></div>
-        <div class="eco">💸 Soit 60 €/créneau — vous économisez 10 € (au lieu de 130 €)</div>
-        <p class="desc">Le vrai rythme de progression : 2 séances (4 h) par semaine pour un suivi complet et régulier — et le coût de l'heure baisse.</p>
-        <ul>
-          <li>2 créneaux / semaine en petit groupe</li>
-          <li>Suivi individualisé</li>
-          <li>Assistance WhatsApp 24/7</li>
-          <li>Aide aux devoirs</li>
-        </ul>
-        <a class="btn" href="inscriptions.html">S'inscrire</a>
-      </div>
-      <div class="tcard feat">
-        <span class="tag" style="background:var(--rouge)">LE + MALIN</span>
-        <h3>Parrainage</h3>
-        <div class="prix"><b>−20 €</b><span>réduction immédiate</span></div>
-        <p class="desc">Un élève s'inscrit grâce à vous ? Vous bénéficiez de 20 € de réduction immédiate — cumulable, sans limite.</p>
-        <ul>
-          <li>20 € de réduction immédiate</li>
-          <li>Cumulable à chaque parrainage</li>
-          <li>Aucune condition</li>
-        </ul>
-        <a class="btn btn-o" href="#contact">En parler avec nous</a>
-      </div>
-      <div class="tcard">
-        <h3>Cours particuliers</h3>
-        <div class="prix"><b>25 €</b><span>/ heure</span></div>
-        <p class="desc">Un accompagnement individuel sur mesure, au rythme et sur les besoins précis de l'élève.</p>
-        <ul>
-          <li>100 % personnalisé</li>
-          <li>Horaires flexibles</li>
-          <li>Tous niveaux</li>
-        </ul>
-        <a class="btn btn-o" href="#contact">Demander un créneau</a>
-      </div>
-    </div>
-
-    <div class="tables">
-      <div class="tbl">
-        <div class="th">Tarif dégressif — créneaux / semaine</div>
-        <div class="tr"><span>1 créneau / sem.</span><b>65 €</b></div>
-        <div class="tr"><span>2 créneaux</span><b>120 €</b></div>
-        <div class="tr"><span>3 créneaux</span><b>165 €</b></div>
-        <div class="tr"><span>4 créneaux</span><b>210 €</b></div>
-        <div class="tr"><span>5 créneaux</span><b>245 €</b></div>
-        <div class="tr"><span>6 créneaux</span><b>290 €</b></div>
-        <div class="tr"><span>7 créneaux</span><b>335 €</b></div>
-        <div class="tr"><span>8 créneaux</span><b>380 €</b></div>
-        <div class="tr"><span>9 créneaux</span><b>425 €</b></div>
-      </div>
-      <div class="tbl">
-        <div class="th">Tarifs par discipline</div>
-        <div class="tr"><span>Anglais seul</span><b>30 € / mois</b></div>
-        <div class="tr"><span>Maths expertes</span><b>30 € / mois</b></div>
-        <div class="tr"><span>Arabe</span><b>25 € / mois</b></div>
-        <div class="tr"><span>Orthophonie</span><b>20 € / h</b></div>
-        <div class="tr"><span>Cours particuliers</span><b>25 € / h</b></div>
-        <div class="tr"><span>Primaire — 4×1h30/sem</span><b>90 € / mois</b></div>
-      </div>
-    </div>
-    <p class="tnote" id="v-tarifnote">Tarifs appliqués dès la rentrée de septembre 2026. Plus vous cumulez de créneaux (matières ou enfants d'une même famille), plus le tarif baisse.</p>
-    
-  <section class="pay" id="pay">
-    <h2>Régler en ligne</h2>
-    <p class="intro">Paiement sécurisé par Stripe. Vous serez redirigé vers une page de paiement protégée.</p>
-    <div id="offres"><div class="state">Chargement des offres…</div></div>
-    <p class="secure">🔒 Paiement sécurisé — aucune donnée bancaire ne transite par ce site.</p>
-  </section>
-</div>
-<footer>PlusdeBonnesNotes — Soutien scolaire à La Courneuve · <a href="./">retour à l'accueil</a></footer>
+  <div class="grid" id="grid"><div class="state">Chargement…</div></div>
+  <div class="secure" id="secure" style="display:none">🔒 Paiement 100&nbsp;% sécurisé par Stripe — aucune donnée bancaire ne transite par ce site.</div>
+</main>
+<footer>PlusdeBonnesNotes · La Courneuve · <a href="./">retour à l'accueil</a></footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 (function(){
-  var URL_='https://gwmdurhncotftuxfgwkg.supabase.co';
-  var KEY_='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3bWR1cmhuY290ZnR1eGZnd2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NzYyMTAsImV4cCI6MjA5MTU1MjIxMH0.WDcPFpYyJIF8QcNsjUzckb0EUtbxw_iQ0hmN6OPCn08';
-  function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  var URL_='https://gwmdurhncotftuxfgwkg.supabase.co', KEY_='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3bWR1cmhuY290ZnR1eGZnd2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NzYyMTAsImV4cCI6MjA5MTU1MjIxMH0.WDcPFpYyJIF8QcNsjUzckb0EUtbxw_iQ0hmN6OPCn08';
+  var grid=document.getElementById('grid'), secure=document.getElementById('secure');
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
   function safe(u){u=String(u||'').trim();if(!u)return '';if(!/^https?:\/\//i.test(u))u='https://'+u;return u;}
-  var box=document.getElementById('offres');
+  function wait(){ grid.innerHTML='<div class="state">Le paiement en ligne sera disponible très bientôt.<br>En attendant, <a href="./#contact">contactez-nous</a> pour régler votre abonnement.</div>'; }
   try{
-    if(!window.supabase){box.innerHTML='<div class="state">Le paiement en ligne sera bientôt disponible.</div>';return;}
+    if(!window.supabase){ wait(); return; }
     var sb=window.supabase.createClient(URL_,KEY_);
     sb.from('site_content').select('data').eq('id','paiement').maybeSingle().then(function(r){
       var d=(r&&r.data&&r.data.data)||{};
-      if(d.intro){var pi=document.getElementById('pay-intro');if(pi)pi.textContent=d.intro;}
+      if(d.intro){ var pi=document.getElementById('intro'); if(pi) pi.textContent=d.intro; }
       var offres=(d.offres||[]).filter(function(o){return o&&o.lien;});
-      if(d.actif===false||!offres.length){ box.innerHTML='<div class="state">Le paiement en ligne sera disponible très bientôt. En attendant, contactez-nous pour régler votre abonnement.</div>'; return; }
-      box.innerHTML=offres.map(function(o){
-        return '<div class="offre"><div class="ol">'+esc(o.label||'Abonnement')+'</div>'+(o.prix?'<div class="op">'+esc(o.prix)+'</div>':'')+'<a class="btn" href="'+esc(safe(o.lien))+'" target="_blank" rel="noopener">S\'abonner →</a></div>';
+      if(d.actif===false || !offres.length){ wait(); return; }
+      grid.innerHTML=offres.map(function(o){
+        var lab=esc(o.label||'Abonnement'), prix=o.prix?'<div class="prix">'+esc(o.prix)+'</div>':'';
+        return '<div class="card"><div class="lab">'+lab+'</div><div class="sub"></div>'+prix+'<a class="pay" href="'+esc(safe(o.lien))+'" target="_blank" rel="noopener">Payer →</a></div>';
       }).join('');
-    }).catch(function(){ box.innerHTML='<div class="state">Le paiement en ligne sera bientôt disponible.</div>'; });
-  }catch(_){ box.innerHTML='<div class="state">Le paiement en ligne sera bientôt disponible.</div>'; }
+      secure.style.display='flex';
+    }).catch(wait);
+  }catch(_){ wait(); }
 })();
 </script>
 </body>
