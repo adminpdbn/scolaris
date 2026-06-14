@@ -151,17 +151,25 @@ a{color:var(--bleu)}
 .annonces-sec{padding:42px 22px 6px}
 .annonces-sec .in{max-width:980px;margin:0 auto;position:relative}
 .annonces-sec .pi-kicker{font-size:12px;letter-spacing:2.5px;text-transform:uppercase;color:var(--bleu);font-weight:700;margin-bottom:18px}
-.postits{display:flex;flex-wrap:wrap;gap:26px}
-.postit{position:relative;width:250px;min-height:148px;padding:26px 22px 20px;background:#fff3a8;color:#3a3320;
+.postits{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+@media (max-width:980px){.postits{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.postits{grid-template-columns:1fr}}
+.postit{position:relative;width:auto;min-height:148px;padding:26px 22px 20px;background:#fff3a8;color:#3a3320;
   box-shadow:0 10px 20px rgba(0,0,0,.13);transform:rotate(-2deg);transition:transform .15s ease}
-.postit:nth-child(3n+2){background:#cfe6ff;transform:rotate(1.6deg)}
-.postit:nth-child(3n+3){background:#ffd9c2;transform:rotate(-1deg)}
+.postit:nth-child(3n+2){transform:rotate(1.6deg)}
+.postit:nth-child(3n+3){transform:rotate(-1deg)}
+.postit.pi-jaune{background:#fff3a8}
+.postit.pi-bleu{background:#cfe6ff}
+.postit.pi-vert{background:#cfead0}
+.postit.pi-rose{background:#ffd6e6}
 .postit:hover{transform:rotate(0) scale(1.025)}
 .postit::before{content:'';position:absolute;top:-11px;left:50%;width:84px;height:23px;
   transform:translateX(-50%) rotate(-3deg);background:rgba(255,255,255,.55);border:1px solid rgba(0,0,0,.05)}
 .postit .pi-tag{font-family:var(--ff-m);font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:#9a6a00;font-weight:700;margin-bottom:5px;display:inline-block}
-.postit:nth-child(3n+2) .pi-tag{color:#1a4fc4}
-.postit:nth-child(3n+3) .pi-tag{color:#b5531e}
+.postit.pi-jaune .pi-tag{color:#9a6a00}
+.postit.pi-bleu .pi-tag{color:#1a4fc4}
+.postit.pi-vert .pi-tag{color:#2e7d32}
+.postit.pi-rose .pi-tag{color:#c2185b}
 .postit .pi-titre{font-family:var(--ff-h);font-size:25px;font-weight:700;line-height:1.08;margin-bottom:4px}
 .postit .pi-corps{font-family:var(--ff-h);font-size:19px;line-height:1.22}
 .postit .pi-cta{display:inline-block;margin-top:10px;font-family:var(--ff-m);font-size:12px;font-weight:700;color:var(--bleu);text-decoration:underline;text-underline-offset:3px}
@@ -894,7 +902,8 @@ footer nav{display:flex;gap:18px;flex-wrap:wrap}
         var ti=a.titre?'<div class="pi-titre">'+esc(a.titre)+'</div>':'';
         var co=a.corps?'<div class="pi-corps">'+esc(a.corps)+'</div>':'';
         var cta=(a.cta_label&&a.cta_url)?'<a class="pi-cta" href="'+esc(a.cta_url)+'">'+esc(a.cta_label)+' →</a>':'';
-        return '<div class="postit">'+tag+ti+co+cta+'</div>';
+        var col=({jaune:1,bleu:1,vert:1,rose:1}[a.couleur])?a.couleur:'jaune';
+        return '<div class="postit pi-'+col+'">'+tag+ti+co+cta+'</div>';
       }).join('');
       var sec=document.getElementById('annonces'); if(sec)sec.style.display='block';
     }).catch(function(){});
