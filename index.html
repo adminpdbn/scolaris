@@ -118,17 +118,33 @@ a{color:var(--bleu)}
   box-shadow:0 2px 0 var(--bleu-fonce);
 }
 .nav-cta:hover{background:var(--bleu-fonce)}
+.burger{display:none;flex-direction:column;justify-content:center;gap:5px;width:44px;height:40px;background:#fff;border:1.5px solid var(--ink);border-radius:9px;cursor:pointer;padding:0 9px}
+.burger span{display:block;height:2.5px;width:100%;background:var(--ink);border-radius:2px}
+.drawer-bg{position:fixed;inset:0;background:rgba(20,20,20,.42);opacity:0;visibility:hidden;transition:opacity .25s ease;z-index:99}
+.drawer-bg.open{opacity:1;visibility:visible}
+.drawer{position:fixed;top:0;right:0;height:100%;width:min(82vw,300px);background:var(--paper);box-shadow:-10px 0 34px rgba(0,0,0,.18);transform:translateX(100%);transition:transform .26s ease;z-index:100;display:flex;flex-direction:column;padding:22px 20px;gap:3px;overflow:auto}
+.drawer.open{transform:none}
+.drawer-close{align-self:flex-end;background:transparent;border:none;font-size:24px;line-height:1;color:var(--muted);cursor:pointer;margin-bottom:8px}
+.drawer a{font-size:16px;color:var(--ink);text-decoration:none;padding:12px 8px;border-bottom:1px solid var(--regle)}
+.drawer a:hover{color:var(--bleu)}
+.drawer .d-pay{color:var(--bleu);font-weight:700}
+.drawer .d-login{margin-top:10px;border:1.5px solid var(--ink);border-radius:9px;text-align:center;border-bottom:1.5px solid var(--ink)}
+.drawer .d-cta{margin-top:10px;background:var(--bleu);color:#fff;border-radius:9px;text-align:center;font-weight:700;border-bottom:none}
 .nav-login{
   font-size:12.5px;color:var(--ink);text-decoration:none;white-space:nowrap;
   padding:8px 13px;border:1.5px solid var(--ink);border-radius:8px;
 }
 .nav-login:hover{border-color:var(--bleu);color:var(--bleu)}
 
-@media (max-width:760px){
+@media (max-width:820px){
+  .navlinks{display:none}
   .nav-login{display:none}
+  .nav-cta{display:none}
+  .burger{display:flex}
   .topnav{gap:10px}
   .topnav .brand{font-size:15px}
 }
+@media (min-width:821px){ .drawer,.drawer-bg{display:none} }
 
 /* ——— Post-it annonces ——— */
 .annonces-sec{padding:42px 22px 6px}
@@ -438,13 +454,28 @@ footer nav{display:flex;gap:18px;flex-wrap:wrap}
     <a href="#methode">La méthode</a>
     <a href="#atouts">Nos atouts</a>
     <a href="#tarifs">Tarifs</a>
+    <a href="paiement.html">Paiement</a>
     <a href="#infos">Accès &amp; horaires</a>
     <a href="#faq">FAQ</a>
     <a href="#contact">Contact</a>
   </div>
-  <a class="nav-login" href="https://adminpdbn.github.io/scolaris/membre.html">Espace membre</a>
-  <a class="nav-cta" href="https://adminpdbn.github.io/scolaris/inscriptions.html">S'inscrire</a>
+  <a class="nav-login" href="membre.html">Espace membre</a>
+  <a class="nav-cta" href="inscriptions.html">S'inscrire</a>
+  <button class="burger" id="burger" aria-label="Ouvrir le menu" aria-expanded="false"><span></span><span></span><span></span></button>
 </nav>
+<div class="drawer-bg" id="drawerBg"></div>
+<aside class="drawer" id="drawer" aria-label="Menu">
+  <button class="drawer-close" id="drawerClose" aria-label="Fermer le menu">✕</button>
+  <a href="#methode">La méthode</a>
+  <a href="#atouts">Nos atouts</a>
+  <a href="#tarifs">Tarifs</a>
+  <a class="d-pay" href="paiement.html">Paiement en ligne</a>
+  <a href="#infos">Accès &amp; horaires</a>
+  <a href="#faq">FAQ</a>
+  <a href="#contact">Contact</a>
+  <a class="d-login" href="membre.html">Espace membre</a>
+  <a class="d-cta" href="inscriptions.html">S'inscrire</a>
+</aside>
 
 <main id="haut">
 
@@ -455,7 +486,7 @@ footer nav{display:flex;gap:18px;flex-wrap:wrap}
     <h1 id="v-hero-titre">Se perfectionner, remonter la moyenne, reprendre confiance, viser <span class="hl">la mention</span>.</h1>
     <p class="sub" id="v-hero-sub">Le soutien scolaire connecté, du primaire au post-bac : des cours en petits groupes menés <b>en amont du programme</b>, un suivi individualisé et une assistance disponible à tout moment.</p>
     <div class="hero-ctas">
-      <a class="btn" href="https://adminpdbn.github.io/scolaris/inscriptions.html">Inscrire mon enfant</a>
+      <a class="btn" href="inscriptions.html">Inscrire mon enfant</a>
       <a class="btn btn-o" href="#tarifs">Voir les tarifs</a>
       <span class="essai" id="v-essai">→ 1er cours d'essai offert !</span>
     </div>
@@ -615,7 +646,7 @@ footer nav{display:flex;gap:18px;flex-wrap:wrap}
           <li>Accès visio + replay si absence</li>
           <li>Assistance WhatsApp 24/7</li>
         </ul>
-        <a class="btn" href="https://adminpdbn.github.io/scolaris/inscriptions.html">S'inscrire</a>
+        <a class="btn" href="inscriptions.html">S'inscrire</a>
       </div>
       <div class="tcard feat">
         <span class="tag">★ LE PLUS CHOISI</span>
@@ -629,7 +660,7 @@ footer nav{display:flex;gap:18px;flex-wrap:wrap}
           <li>Assistance WhatsApp 24/7</li>
           <li>Aide aux devoirs</li>
         </ul>
-        <a class="btn" href="https://adminpdbn.github.io/scolaris/inscriptions.html">S'inscrire</a>
+        <a class="btn" href="inscriptions.html">S'inscrire</a>
       </div>
       <div class="tcard feat">
         <span class="tag" style="background:var(--rouge)">LE + MALIN</span>
@@ -761,7 +792,7 @@ footer nav{display:flex;gap:18px;flex-wrap:wrap}
     </details>
     <details>
       <summary>Comment inscrire mon enfant ?</summary>
-      <div class="rep">Remplissez le <a href="https://adminpdbn.github.io/scolaris/inscriptions.html">formulaire d'inscription en ligne</a> (un par enfant, même pour un élève déjà inscrit). Nous vous recontactons rapidement pour confirmer le créneau et la formule adaptée. Vous pouvez aussi nous joindre par téléphone — privilégiez le SMS pour un retour rapide.</div>
+      <div class="rep">Remplissez le <a href="inscriptions.html">formulaire d'inscription en ligne</a> (un par enfant, même pour un élève déjà inscrit). Nous vous recontactons rapidement pour confirmer le créneau et la formule adaptée. Vous pouvez aussi nous joindre par téléphone — privilégiez le SMS pour un retour rapide.</div>
     </details>
   </div>
 </section>
@@ -799,8 +830,8 @@ footer nav{display:flex;gap:18px;flex-wrap:wrap}
       <div>75, rue Rateau, 93120 La Courneuve · <a href="mailto:contact@plusdebonnesnotes.com">contact@plusdebonnesnotes.com</a></div>
     </div>
     <nav aria-label="Liens de pied de page">
-      <a href="https://adminpdbn.github.io/scolaris/inscriptions.html">Inscription</a>
-      <a href="https://adminpdbn.github.io/scolaris/membre.html">Espace membre</a>
+      <a href="inscriptions.html">Inscription</a>
+      <a href="membre.html">Espace membre</a>
       <a href="https://www.google.com/maps/search/?api=1&amp;query=PlusdeBonnesNotes%20La%20Courneuve" target="_blank" rel="noopener">Avis Google</a>
       <a href="#haut">Haut de page ↑</a>
     </nav>
@@ -821,6 +852,15 @@ footer nav{display:flex;gap:18px;flex-wrap:wrap}
     entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('vu'); io.unobserve(e.target);} });
   },{threshold:.08});
   document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+})();
+</script>
+<script>
+(function(){
+  var b=document.getElementById('burger'),d=document.getElementById('drawer'),bg=document.getElementById('drawerBg'),x=document.getElementById('drawerClose');
+  function open(){d&&d.classList.add('open');bg&&bg.classList.add('open');b&&b.setAttribute('aria-expanded','true');}
+  function close(){d&&d.classList.remove('open');bg&&bg.classList.remove('open');b&&b.setAttribute('aria-expanded','false');}
+  b&&b.addEventListener('click',open); bg&&bg.addEventListener('click',close); x&&x.addEventListener('click',close);
+  d&&Array.prototype.forEach.call(d.querySelectorAll('a'),function(a){a.addEventListener('click',close);});
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
