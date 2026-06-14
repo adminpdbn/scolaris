@@ -39,16 +39,64 @@
   @keyframes spin{to{transform:rotate(360deg)}}
   footer{border-top:1.5px solid var(--regle);background:var(--blanc);color:var(--muted);font-size:12.5px;text-align:center;padding:26px 22px}
   footer a{color:var(--bleu);text-decoration:none}
+
+/* ===== Barre de menu (style vitrine) ===== */
+.topnav{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:18px;padding:10px 22px;background:rgba(251,248,241,.94);backdrop-filter:blur(6px);border-bottom:1.5px solid #e6dfcf}
+.topnav .brand{display:flex;align-items:center;gap:9px;font-family:'Fraunces',serif;font-weight:900;font-size:17px;color:#1c1c20;text-decoration:none;white-space:nowrap}
+.navlinks{display:flex;gap:18px;flex:1;flex-wrap:wrap}
+.navlinks a{font-size:13px;color:#1c1c20;text-decoration:none;white-space:nowrap}
+.navlinks a:hover{color:#1a4fc4}
+.nav-login{font-size:13px;text-decoration:none;color:#1c1c20;border:1.5px solid #1c1c20;border-radius:9px;padding:8px 14px;white-space:nowrap}
+.nav-login:hover{color:#1a4fc4;border-color:#1a4fc4}
+.nav-cta{font-size:13px;font-weight:700;text-decoration:none;color:#fff;background:#1a4fc4;border-radius:9px;padding:9px 16px;white-space:nowrap}
+.nav-cta:hover{background:#143a8f}
+.burger{display:none;flex-direction:column;justify-content:center;gap:5px;width:30px;height:38px;background:transparent;border:none;cursor:pointer;padding:0;margin-left:auto}
+.burger span{display:block;height:2px;width:23px;background:#6b675e;border-radius:2px;transition:background .15s}
+.burger:active span{background:#1c1c20}
+.drawer-bg{position:fixed;inset:0;background:rgba(20,20,20,.42);opacity:0;visibility:hidden;transition:opacity .25s ease;z-index:99}
+.drawer-bg.open{opacity:1;visibility:visible}
+.drawer{position:fixed;top:0;right:0;height:100%;width:min(82vw,300px);background:#fbf8f1;box-shadow:-10px 0 34px rgba(0,0,0,.18);transform:translateX(100%);transition:transform .26s ease;z-index:100;display:flex;flex-direction:column;padding:22px 20px;gap:3px;overflow:auto}
+.drawer.open{transform:none}
+.drawer-close{align-self:flex-end;background:transparent;border:none;font-size:24px;line-height:1;color:#6b675e;cursor:pointer;margin-bottom:8px}
+.drawer a{font-size:16px;color:#1c1c20;text-decoration:none;padding:12px 8px;border-bottom:1px solid #e6dfcf}
+.drawer a:hover{color:#1a4fc4}
+.drawer .d-pay{color:#1a4fc4;font-weight:700}
+.drawer .d-login{margin-top:10px;border:1.5px solid #1c1c20;border-radius:9px;text-align:center;border-bottom:1.5px solid #1c1c20}
+.drawer .d-cta{margin-top:10px;background:#1a4fc4;color:#fff;border-radius:9px;text-align:center;font-weight:700;border-bottom:none}
+@media (max-width:820px){.navlinks{display:none}.nav-login{display:none}.nav-cta{display:none}.burger{display:flex}}
+@media (min-width:821px){.drawer,.drawer-bg{display:none}}
+
 </style>
 </head>
 <body>
-<nav class="nav">
-  <a class="brand" href="./">
-    <svg width="22" height="22" viewBox="0 0 52 52" fill="none" aria-hidden="true"><circle cx="26" cy="26" r="24" fill="#4a7fd4" opacity="0.25"/><path d="M26 8 L38 18 L38 34 L26 42 L14 34 L14 18 Z" fill="#1a4fc4" opacity="0.92"/></svg>
-    PlusdeBonnesNotes
-  </a>
-  <a class="back" href="./">← Accueil</a>
+<nav class="topnav" aria-label="Navigation principale">
+  <a class="brand" href="./"><svg width="22" height="22" viewBox="0 0 52 52" fill="none" aria-hidden="true"><circle cx="26" cy="26" r="24" fill="#4a7fd4" opacity="0.25"/><path d="M26 8 L38 18 L38 34 L26 42 L14 34 L14 18 Z" fill="#1a4fc4" opacity="0.92"/></svg> PlusdeBonnesNotes</a>
+  <div class="navlinks">
+    <a href="./#methode">La méthode</a>
+    <a href="./#atouts">Nos atouts</a>
+    <a href="./#tarifs">Tarifs</a>
+    <a href="paiement.html">Paiement</a>
+    <a href="./#infos">Accès &amp; horaires</a>
+    <a href="./#faq">FAQ</a>
+    <a href="./#contact">Contact</a>
+  </div>
+  <a class="nav-login" href="membre.html">Espace membre</a>
+  <a class="nav-cta" href="inscriptions.html">S'inscrire</a>
+  <button class="burger" id="burger" aria-label="Ouvrir le menu" aria-expanded="false"><span></span><span></span><span></span></button>
 </nav>
+<div class="drawer-bg" id="drawerBg"></div>
+<aside class="drawer" id="drawer" aria-label="Menu">
+  <button class="drawer-close" id="drawerClose" aria-label="Fermer le menu">✕</button>
+  <a href="./#methode">La méthode</a>
+  <a href="./#atouts">Nos atouts</a>
+  <a href="./#tarifs">Tarifs</a>
+  <a class="d-pay" href="paiement.html">Paiement en ligne</a>
+  <a href="./#infos">Accès &amp; horaires</a>
+  <a href="./#faq">FAQ</a>
+  <a href="./#contact">Contact</a>
+  <a class="d-login" href="membre.html">Espace membre</a>
+  <a class="d-cta" href="inscriptions.html">S'inscrire</a>
+</aside>
 
 <div id="content"><div class="state"><div class="spin"></div>Chargement de la page…</div></div>
 
@@ -78,5 +126,15 @@
   }catch(_){state('Erreur de chargement.');}
 })();
 </script>
+<script>
+(function(){
+  var b=document.getElementById('burger'),d=document.getElementById('drawer'),bg=document.getElementById('drawerBg'),x=document.getElementById('drawerClose');
+  function op(){d&&d.classList.add('open');bg&&bg.classList.add('open');b&&b.setAttribute('aria-expanded','true');}
+  function cl(){d&&d.classList.remove('open');bg&&bg.classList.remove('open');b&&b.setAttribute('aria-expanded','false');}
+  b&&b.addEventListener('click',op); bg&&bg.addEventListener('click',cl); x&&x.addEventListener('click',cl);
+  d&&Array.prototype.forEach.call(d.querySelectorAll('a'),function(a){a.addEventListener('click',cl);});
+})();
+</script>
+
 </body>
 </html>
