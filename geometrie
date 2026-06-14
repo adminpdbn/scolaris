@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Géométrie dans l'espace — Terminale</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d121c; --bg2:#111827; --panel:#151d2c; --panel2:#1b2436;
+    --line:#26314a; --line2:#33415f;
+    --ink:#e7ecf5; --muted:#8a98b3; --faint:#5b6884;
+    --x:#ff6b6b; --y:#54d68a; --z:#5b9bff;
+    --accent:#f6c451; --accent2:#d98cff;
+    --display:'Space Grotesk',sans-serif;
+    --body:'Inter',system-ui,sans-serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(91,155,255,.08), transparent 60%),
+      var(--bg);
+    color:var(--ink); font-family:var(--body); line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    background-attachment:fixed;
+  }
+  body::before{
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.5;
+    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:44px 44px; mask-image:radial-gradient(circle at 50% 0,#000,transparent 75%);
+    opacity:.18;
+  }
+  .wrap{position:relative; z-index:1; max-width:1280px; margin:0 auto; padding:0 20px 80px}
+
+  /* Header */
+  header{padding:34px 0 22px; border-bottom:1px solid var(--line); margin-bottom:26px}
+  .eyebrow{font-family:var(--mono); font-size:12px; letter-spacing:.28em; text-transform:uppercase; color:var(--accent); display:flex; align-items:center; gap:12px}
+  .eyebrow::before{content:""; width:26px; height:1px; background:var(--accent)}
+  h1{font-family:var(--display); font-weight:700; font-size:clamp(30px,5.4vw,52px); line-height:1.02; margin:14px 0 6px; letter-spacing:-.02em}
+  h1 .es{color:var(--accent)}
+  .sub{color:var(--muted); max-width:60ch; font-size:15px}
+
+  /* Nav chapters */
+  nav.chapters{display:flex; gap:8px; flex-wrap:wrap; margin:24px 0 8px}
+  .chip{
+    font-family:var(--mono); font-size:12.5px; color:var(--muted);
+    border:1px solid var(--line2); background:var(--panel); padding:9px 13px; border-radius:10px;
+    cursor:pointer; transition:.18s; display:flex; align-items:center; gap:9px; white-space:nowrap;
+  }
+  .chip .n{color:var(--faint); font-weight:700}
+  .chip:hover{border-color:var(--accent); color:var(--ink)}
+  .chip.on{background:linear-gradient(180deg,#222d44,#19223499); border-color:var(--accent); color:var(--ink)}
+  .chip.on .n{color:var(--accent)}
+
+  /* Layout */
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:26px; align-items:start; margin-top:18px}
+  @media(max-width:960px){ .grid{grid-template-columns:1fr} }
+
+  /* Stage (3D) */
+  .stage{position:sticky; top:14px}
+  @media(max-width:960px){ .stage{position:relative; top:0; order:-1} }
+  .viewport{
+    position:relative; border:1px solid var(--line2); border-radius:16px; overflow:hidden;
+    background:radial-gradient(120% 90% at 50% 0,#16203400,#0a0f18); aspect-ratio:1/1; min-height:340px;
+    box-shadow:0 24px 60px -30px #000;
+  }
+  @media(max-width:520px){ .viewport{aspect-ratio:4/3} }
+  #cv{display:block; width:100%; height:100%; cursor:grab}
+  #cv:active{cursor:grabbing}
+  .hud{
+    position:absolute; left:12px; top:12px; font-family:var(--mono); font-size:11.5px;
+    background:#0b101bcc; border:1px solid var(--line2); border-radius:9px; padding:9px 11px;
+    color:var(--muted); backdrop-filter:blur(4px); max-width:62%; line-height:1.65; pointer-events:none;
+  }
+  .hud b{color:var(--ink); font-weight:700}
+  .hud .k{color:var(--accent)}
+  .hud .vx{color:var(--x)} .hud .vy{color:var(--y)} .hud .vz{color:var(--z)}
+  .badge{
+    position:absolute; right:12px; top:12px; font-family:var(--mono); font-size:11px; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--faint); background:#0b101bcc; border:1px solid var(--line); padding:6px 9px; border-radius:8px;
+  }
+  .controls{display:flex; gap:9px; align-items:center; flex-wrap:wrap; margin-top:12px}
+  .btn{
+    font-family:var(--mono); font-size:12px; color:var(--ink); background:var(--panel2);
+    border:1px solid var(--line2); border-radius:9px; padding:8px 12px; cursor:pointer; transition:.15s;
+    display:inline-flex; align-items:center; gap:7px;
+  }
+  .btn:hover{border-color:var(--accent)}
+  .btn.act{border-color:var(--accent); color:var(--accent)}
+  .slider{flex:1; min-width:150px; display:flex; align-items:center; gap:10px; font-family:var(--mono); font-size:12px; color:var(--muted)}
+  .slider input{flex:1; accent-color:var(--accent); height:4px}
+  .slider .val{color:var(--accent); min-width:54px; text-align:right}
+  .hint{font-family:var(--mono); font-size:11px; color:var(--faint); margin-top:9px}
+
+  /* Lessons */
+  .lesson{display:none}
+  .lesson.on{display:block; animation:fade .35s ease}
+  @keyframes fade{from{opacity:0; transform:translateY(8px)}to{opacity:1; transform:none}}
+  .tag{font-family:var(--mono); font-size:12px; color:var(--accent); letter-spacing:.16em; text-transform:uppercase}
+  h2{font-family:var(--display); font-weight:600; font-size:26px; margin:6px 0 14px; letter-spacing:-.01em}
+  p{color:#cdd6e6; font-size:15px}
+  .lead{color:var(--ink); font-size:15.5px}
+
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:13px; padding:16px 18px; margin:16px 0}
+  .card.def{border-left:3px solid var(--accent)}
+  .card.prop{border-left:3px solid var(--z)}
+  .card.ex{border-left:3px solid var(--y); background:var(--bg2)}
+  .card .ttl{font-family:var(--mono); font-size:11.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin-bottom:8px}
+  .card.def .ttl{color:var(--accent)} .card.prop .ttl{color:var(--z)} .card.ex .ttl{color:var(--y)}
+  .fml{background:#0c1220; border:1px solid var(--line); border-radius:9px; padding:11px 14px; margin:12px 0; overflow-x:auto}
+  ul.clean{margin:10px 0; padding-left:0; list-style:none}
+  ul.clean li{position:relative; padding-left:22px; margin:7px 0; color:#cdd6e6; font-size:14.5px}
+  ul.clean li::before{content:"›"; position:absolute; left:4px; color:var(--accent); font-weight:700}
+  .key{color:var(--accent); font-weight:600}
+  .vx{color:var(--x)} .vy{color:var(--y)} .vz{color:var(--z)}
+  .ptip{font-size:13px; color:var(--muted); border-top:1px dashed var(--line2); padding-top:10px; margin-top:12px; font-style:italic}
+  .pager{display:flex; justify-content:space-between; gap:12px; margin-top:26px; border-top:1px solid var(--line); padding-top:18px}
+  .pager .btn{flex:1; justify-content:center}
+  .pager .btn[disabled]{opacity:.35; pointer-events:none}
+  footer{margin-top:40px; color:var(--faint); font-family:var(--mono); font-size:11.5px; text-align:center; border-top:1px solid var(--line); padding-top:22px}
+  .katex{font-size:1.04em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Cours animé · Terminale · Spécialité Mathématiques</div>
+    <h1>Géométrie dans l'<span class="es">espace</span></h1>
+    <p class="sub">Vecteurs, droites et plans en trois dimensions. Fais tourner la scène à la souris, joue les animations, et lis les coordonnées dans le bandeau comme sur un instrument de bord.</p>
+    <nav class="chapters" id="nav"></nav>
+  </header>
+
+  <div class="grid">
+    <!-- LESSONS COLUMN -->
+    <div id="lessons">
+
+      <!-- 1 -->
+      <section class="lesson on" data-id="1">
+        <div class="tag">Chapitre 01</div>
+        <h2>Repérage dans l'espace</h2>
+        <p class="lead">On munit l'espace d'un <span class="key">repère</span> \((O\,;\vec\imath,\vec\jmath,\vec k)\). Tout point \(M\) est alors décrit par un triplet de nombres : ses coordonnées.</p>
+        <div class="card def">
+          <div class="ttl">Définition — Coordonnées</div>
+          <p>Le repère est <b>orthonormé</b> si les vecteurs \(\vec\imath,\vec\jmath,\vec k\) sont deux à deux orthogonaux et de norme 1. Un point \(M\) a pour coordonnées \((x\,;y\,;z)\) lorsque :</p>
+          <div class="fml">\[\vec{OM}=x\,\vec\imath+y\,\vec\jmath+z\,\vec k\]</div>
+          <p>\(x\) est l'abscisse, \(y\) l'ordonnée, \(z\) la cote.</p>
+        </div>
+        <div class="card prop">
+          <div class="ttl">Formules de base (repère orthonormé)</div>
+          <ul class="clean">
+            <li>Coordonnées du vecteur : \(\vec{AB}\;(x_B-x_A\,;\,y_B-y_A\,;\,z_B-z_A)\)</li>
+            <li>Milieu de \([AB]\) : \(\left(\dfrac{x_A+x_B}{2}\,;\dfrac{y_A+y_B}{2}\,;\dfrac{z_A+z_B}{2}\right)\)</li>
+            <li>Distance : \(AB=\sqrt{(x_B-x_A)^2+(y_B-y_A)^2+(z_B-z_A)^2}\)</li>
+          </ul>
+        </div>
+        <p class="ptip">Sur la scène : le point \(M\) et ses trois « ombres » sur les plans de base. Déplace-le avec le curseur pour voir bouger ses coordonnées.</p>
+      </section>
+
+      <!-- 2 -->
+      <section class="lesson" data-id="2">
+        <div class="tag">Chapitre 02</div>
+        <h2>Vecteurs de l'espace</h2>
+        <p class="lead">Tout ce qu'on connaît du plan se prolonge : addition, multiplication par un réel, relation de Chasles. On gagne simplement une troisième coordonnée.</p>
+        <div class="card def">
+          <div class="ttl">Opérations</div>
+          <ul class="clean">
+            <li>Somme : si \(\vec u\,(x\,;y\,;z)\) et \(\vec v\,(x'\,;y'\,;z')\) alors \(\vec u+\vec v\,(x+x'\,;y+y'\,;z+z')\)</li>
+            <li>Produit par \(k\in\mathbb{R}\) : \(k\vec u\,(kx\,;ky\,;kz)\)</li>
+          </ul>
+        </div>
+        <div class="card prop">
+          <div class="ttl">Relation de Chasles</div>
+          <div class="fml">\[\vec{AB}+\vec{BC}=\vec{AC}\]</div>
+          <p>Elle reste vraie quels que soient les points \(A,B,C\) de l'espace : on suit le chemin \(A\to B\to C\).</p>
+        </div>
+        <div class="card ex">
+          <div class="ttl">Exemple</div>
+          <p>\(A(1\,;0\,;1)\), \(B(3\,;2\,;1)\) donnent \(\vec{AB}\,(2\,;2\,;0)\). Avec \(C(3\,;2\,;3)\) : \(\vec{BC}\,(0\,;0\,;2)\) et \(\vec{AC}\,(2\,;2\,;2)=\vec{AB}+\vec{BC}\). ✓</p>
+        </div>
+        <p class="ptip">Animation : le vecteur <span class="vx">AB</span> puis <span class="vy">BC</span> se construisent, et leur somme <span class="key">AC</span> ferme le triangle.</p>
+      </section>
+
+      <!-- 3 -->
+      <section class="lesson" data-id="3">
+        <div class="tag">Chapitre 03</div>
+        <h2>Colinéarité · Coplanarité · Bases</h2>
+        <p class="lead">Deux notions clés pour décider si des points sont alignés, ou s'ils appartiennent à un même plan.</p>
+        <div class="card def">
+          <div class="ttl">Colinéaires</div>
+          <p>\(\vec u\) et \(\vec v\) sont <b>colinéaires</b> s'il existe \(k\in\mathbb{R}\) tel que \(\vec v=k\,\vec u\). Trois points \(A,B,C\) sont <b>alignés</b> \(\iff\vec{AB}\) et \(\vec{AC}\) sont colinéaires.</p>
+        </div>
+        <div class="card prop">
+          <div class="ttl">Coplanaires</div>
+          <p>\(\vec u,\vec v,\vec w\) sont <b>coplanaires</b> si l'un est combinaison linéaire des deux autres :</p>
+          <div class="fml">\[\vec w=a\,\vec u+b\,\vec v\quad(a,b\in\mathbb{R})\]</div>
+          <p>Quatre points sont coplanaires \(\iff\) les trois vecteurs issus de l'un d'eux le sont.</p>
+        </div>
+        <div class="card def">
+          <div class="ttl">Base de l'espace</div>
+          <p>Trois vecteurs <b>non coplanaires</b> forment une <span class="key">base</span> : tout vecteur de l'espace s'écrit de façon unique \(\vec w=x\vec\imath+y\vec\jmath+z\vec k\).</p>
+        </div>
+        <p class="ptip">Bascule entre les deux cas : vecteurs portés par une <b>droite</b> (colinéaires) puis par un <b>plan</b> (coplanaires).</p>
+      </section>
+
+      <!-- 4 -->
+      <section class="lesson" data-id="4">
+        <div class="tag">Chapitre 04</div>
+        <h2>Représentation paramétrique d'une droite</h2>
+        <p class="lead">Une droite est entièrement définie par un point \(A\) et un <span class="key">vecteur directeur</span> \(\vec u\). Le paramètre \(t\) « parcourt » la droite.</p>
+        <div class="card def">
+          <div class="ttl">Définition</div>
+          <p>\(M\) appartient à la droite \((d)\) passant par \(A\) de vecteur directeur \(\vec u\,(a\,;b\,;c)\) si et seulement si \(\vec{AM}=t\,\vec u\) pour un réel \(t\). En coordonnées :</p>
+          <div class="fml">\[\begin{cases}x=x_A+t\,a\\[2pt] y=y_A+t\,b\\[2pt] z=z_A+t\,c\end{cases}\quad t\in\mathbb{R}\]</div>
+        </div>
+        <div class="card prop">
+          <div class="ttl">À retenir</div>
+          <ul class="clean">
+            <li>\(t=0\) donne le point \(A\) ; chaque valeur de \(t\) donne un unique point de \((d)\).</li>
+            <li>Deux droites sont <b>parallèles</b> \(\iff\) leurs vecteurs directeurs sont colinéaires.</li>
+          </ul>
+        </div>
+        <p class="ptip">Bouge le curseur \(t\) : le point \(M\) glisse sur la droite, et le bandeau affiche \((x\,;y\,;z)\) en direct.</p>
+      </section>
+
+      <!-- 5 -->
+      <section class="lesson" data-id="5">
+        <div class="tag">Chapitre 05</div>
+        <h2>Produit scalaire dans l'espace</h2>
+        <p class="lead">Le produit scalaire mesure « combien » deux vecteurs pointent dans la même direction. Il détecte l'orthogonalité et calcule des angles.</p>
+        <div class="card def">
+          <div class="ttl">Trois expressions équivalentes</div>
+          <div class="fml">\[\vec u\cdot\vec v=\|\vec u\|\,\|\vec v\|\cos\theta\]</div>
+          <p>En base orthonormée, avec \(\vec u(x\,;y\,;z)\) et \(\vec v(x'\,;y'\,;z')\) :</p>
+          <div class="fml">\[\vec u\cdot\vec v=xx'+yy'+zz'\]</div>
+          <p>Et la forme polarisée :</p>
+          <div class="fml">\[\vec u\cdot\vec v=\tfrac12\big(\|\vec u+\vec v\|^2-\|\vec u\|^2-\|\vec v\|^2\big)\]</div>
+        </div>
+        <div class="card prop">
+          <div class="ttl">Propriété fondamentale</div>
+          <div class="fml">\[\vec u\cdot\vec v=0\iff \vec u\perp\vec v\]</div>
+          <p>Le produit scalaire est symétrique et bilinéaire, et \(\vec u\cdot\vec u=\|\vec u\|^2\).</p>
+        </div>
+        <p class="ptip">Fais varier l'angle \(\theta\) : observe le signe de \(\vec u\cdot\vec v\) et le projeté de \(\vec v\) sur \(\vec u\).</p>
+      </section>
+
+      <!-- 6 -->
+      <section class="lesson" data-id="6">
+        <div class="tag">Chapitre 06</div>
+        <h2>Vecteur normal &amp; équation d'un plan</h2>
+        <p class="lead">Un plan est caractérisé par une direction perpendiculaire : son <span class="key">vecteur normal</span>. C'est la clé pour en écrire l'équation.</p>
+        <div class="card def">
+          <div class="ttl">Vecteur normal</div>
+          <p>\(\vec n\) est <b>normal</b> au plan \(\mathcal P\) s'il est orthogonal à deux vecteurs non colinéaires de \(\mathcal P\). Alors pour tout point \(A\in\mathcal P\) :</p>
+          <div class="fml">\[M\in\mathcal P\iff \vec n\cdot\vec{AM}=0\]</div>
+        </div>
+        <div class="card prop">
+          <div class="ttl">Équation cartésienne</div>
+          <p>Si \(\vec n\,(a\,;b\,;c)\), en développant on obtient :</p>
+          <div class="fml">\[ax+by+cz+d=0\]</div>
+          <p><b>Réciproquement</b>, toute équation \(ax+by+cz+d=0\) (avec \((a,b,c)\neq(0,0,0)\)) est celle d'un plan de vecteur normal \(\vec n\,(a\,;b\,;c)\).</p>
+        </div>
+        <div class="card ex">
+          <div class="ttl">Exemple</div>
+          <p>Plan passant par \(A(1\,;0\,;2)\) de normal \(\vec n(2\,;1\,;-1)\) : \(2(x-1)+1(y-0)-1(z-2)=0\), soit \(2x+y-z=0\).</p>
+        </div>
+        <p class="ptip">La flèche dressée hors du plan est \(\vec n\). Fais tourner pour voir qu'elle est bien perpendiculaire à toute la surface.</p>
+      </section>
+
+      <!-- 7 -->
+      <section class="lesson" data-id="7">
+        <div class="tag">Chapitre 07</div>
+        <h2>Projeté orthogonal &amp; distance</h2>
+        <p class="lead">Le point du plan le plus proche de \(M\) est son projeté orthogonal \(H\). La distance \(MH\) se lit directement sur l'équation.</p>
+        <div class="card def">
+          <div class="ttl">Projeté orthogonal</div>
+          <p>\(H\) est l'intersection du plan \(\mathcal P\) et de la droite passant par \(M\) de vecteur directeur \(\vec n\). C'est le point de \(\mathcal P\) qui minimise la distance à \(M\).</p>
+        </div>
+        <div class="card prop">
+          <div class="ttl">Distance d'un point à un plan</div>
+          <p>Si \(\mathcal P:ax+by+cz+d=0\) et \(M(x_0\,;y_0\,;z_0)\) :</p>
+          <div class="fml">\[d(M,\mathcal P)=\dfrac{|a x_0+b y_0+c z_0+d|}{\sqrt{a^2+b^2+c^2}}\]</div>
+        </div>
+        <p class="ptip">Déplace \(M\) en hauteur : le segment perpendiculaire \([MH]\) et la valeur de la distance se mettent à jour.</p>
+      </section>
+
+      <!-- 8 -->
+      <section class="lesson" data-id="8">
+        <div class="tag">Chapitre 08</div>
+        <h2>Positions relatives &amp; intersections</h2>
+        <p class="lead">Comment se rencontrent droites et plans ? La méthode : injecter la représentation paramétrique dans l'équation du plan.</p>
+        <div class="card prop">
+          <div class="ttl">Droite et plan</div>
+          <ul class="clean">
+            <li>\(\vec u\cdot\vec n\neq 0\) : la droite est <b>sécante</b> au plan en un point unique.</li>
+            <li>\(\vec u\cdot\vec n= 0\) : la droite est <b>parallèle</b> au plan — incluse ou strictement disjointe.</li>
+          </ul>
+        </div>
+        <div class="card def">
+          <div class="ttl">Méthode (intersection)</div>
+          <p>On remplace \(x,y,z\) de la droite par \(x_A+ta,\;y_A+tb,\;z_A+tc\) dans \(ax+by+cz+d=0\). On résout en \(t\) :</p>
+          <ul class="clean">
+            <li>une solution \(t_0\) → un point d'intersection,</li>
+            <li>aucune solution → parallèle stricte,</li>
+            <li>une infinité → droite incluse dans le plan.</li>
+          </ul>
+        </div>
+        <p class="ptip">Bascule entre une droite <span class="key">sécante</span> (point rouge d'intersection) et une droite <b>parallèle</b> au plan.</p>
+      </section>
+
+      <div class="pager">
+        <button class="btn" id="prev">‹ Précédent</button>
+        <button class="btn" id="next">Suivant ›</button>
+      </div>
+      <footer>Construit pour PlusdeBonnesNotes · Glisser pour pivoter · Molette pour zoomer · 8 chapitres</footer>
+    </div>
+
+    <!-- STAGE COLUMN -->
+    <div class="stage">
+      <div class="viewport">
+        <canvas id="cv"></canvas>
+        <div class="hud" id="hud"></div>
+        <div class="badge" id="badge">CH·01</div>
+      </div>
+      <div class="controls">
+        <button class="btn act" id="playBtn">⏸ Animation</button>
+        <button class="btn" id="resetBtn">↺ Vue</button>
+        <div class="slider" id="sliderWrap" style="display:none">
+          <span id="sliderLabel">t</span>
+          <input type="range" id="slider" min="0" max="100" value="50">
+          <span class="val" id="sliderVal">0</span>
+        </div>
+      </div>
+      <div class="hint" id="caseToggle" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script>
+/* ===== KaTeX render ===== */
+window.addEventListener('load',()=>{
+  if(window.renderMathInElement){
+    renderMathInElement(document.body,{delimiters:[
+      {left:'\\[',right:'\\]',display:true},
+      {left:'\\(',right:'\\)',display:false}
+    ]});
+  }
+});
+
+/* ===== Colors ===== */
+const COL={x:0xff6b6b,y:0x54d68a,z:0x5b9bff,accent:0xf6c451,accent2:0xd98cff,
+  white:0xe7ecf5,muted:0x6b7794,red:0xff5470,line:0x33415f};
+
+/* math (x,y,z) -> three (x, z, y)  [z is up for students] */
+const P=(x,y,z)=>new THREE.Vector3(x,z,y);
+const D=(x,y,z)=>new THREE.Vector3(x,z,y);
+
+/* ===== Three setup ===== */
+const cv=document.getElementById('cv');
+const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(42,1,0.1,200);
+scene.add(new THREE.AmbientLight(0xffffff,0.85));
+const dl=new THREE.DirectionalLight(0xffffff,0.6); dl.position.set(6,10,8); scene.add(dl);
+
+function resize(){
+  const r=cv.getBoundingClientRect();
+  renderer.setSize(r.width,r.height,false);
+  camera.aspect=r.width/r.height; camera.updateProjectionMatrix();
+}
+window.addEventListener('resize',resize);
+
+/* ===== Custom orbit ===== */
+const orbit={target:new THREE.Vector3(2,1.6,2),r:13,theta:0.86,phi:1.05,drag:false,lx:0,ly:0,
+  apply(){const s=Math.sin(this.phi);
+    camera.position.set(this.target.x+this.r*s*Math.sin(this.theta),
+      this.target.y+this.r*Math.cos(this.phi),
+      this.target.z+this.r*s*Math.cos(this.theta));
+    camera.lookAt(this.target);},
+  reset(){this.r=13;this.theta=0.86;this.phi=1.05;this.apply();}
+};
+orbit.apply();
+cv.addEventListener('pointerdown',e=>{orbit.drag=true;orbit.lx=e.clientX;orbit.ly=e.clientY;cv.setPointerCapture(e.pointerId);});
+cv.addEventListener('pointerup',()=>orbit.drag=false);
+cv.addEventListener('pointermove',e=>{if(!orbit.drag)return;
+  orbit.theta-=(e.clientX-orbit.lx)*0.009; orbit.phi-=(e.clientY-orbit.ly)*0.009;
+  orbit.phi=Math.max(0.18,Math.min(Math.PI-0.18,orbit.phi));
+  orbit.lx=e.clientX;orbit.ly=e.clientY;orbit.apply();});
+cv.addEventListener('wheel',e=>{e.preventDefault();orbit.r*=(1+Math.sign(e.deltaY)*0.09);
+  orbit.r=Math.max(5,Math.min(34,orbit.r));orbit.apply();},{passive:false});
+
+/* ===== Helpers ===== */
+const root=new THREE.Group(); scene.add(root);
+function clearRoot(){while(root.children.length)root.remove(root.children[0]);}
+
+function makeLabel(txt,color){
+  const c=document.createElement('canvas');const s=128;c.width=s;c.height=s;
+  const g=c.getContext('2d');g.font='bold 70px JetBrains Mono, monospace';
+  g.textAlign='center';g.textBaseline='middle';
+  g.fillStyle='#0d121c';g.lineWidth=10;g.strokeStyle='#0d121c';g.strokeText(txt,s/2,s/2);
+  g.fillStyle='#'+color.toString(16).padStart(6,'0');g.fillText(txt,s/2,s/2);
+  const tex=new THREE.CanvasTexture(c);tex.anisotropy=4;
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false,transparent:true}));
+  sp.scale.set(0.9,0.9,1);return sp;
+}
+function vec(origin,dirVec,len,color,label){
+  const g=new THREE.Group();
+  const dir=dirVec.clone().normalize();
+  const ah=new THREE.ArrowHelper(dir,origin,len,color,0.42,0.26);
+  ah.line.material.linewidth=2; g.add(ah);
+  if(label){const lb=makeLabel(label,color);
+    lb.position.copy(origin.clone().add(dir.clone().multiplyScalar(len+0.45)));g.add(lb);}
+  return g;
+}
+function point(pos,color,label,size){
+  const g=new THREE.Group();
+  const m=new THREE.Mesh(new THREE.SphereGeometry(size||0.16,20,20),
+    new THREE.MeshStandardMaterial({color,emissive:color,emissiveIntensity:.4,roughness:.4}));
+  m.position.copy(pos);g.add(m);
+  if(label){const lb=makeLabel(label,color);lb.position.copy(pos.clone().add(new THREE.Vector3(0,.45,0)));g.add(lb);}
+  return g;
+}
+function seg(a,b,color,dashed){
+  const geo=new THREE.BufferGeometry().setFromPoints([a,b]);
+  let mat;
+  if(dashed){mat=new THREE.LineDashedMaterial({color,dashSize:0.22,gapSize:0.16,transparent:true,opacity:.7});
+    const l=new THREE.Line(geo,mat);l.computeLineDistances();return l;}
+  mat=new THREE.LineBasicMaterial({color});return new THREE.Line(geo,mat);
+}
+function planeMesh(normal,pointOn,size,color){
+  const g=new THREE.Group();
+  const n=normal.clone().normalize();
+  const geo=new THREE.PlaneGeometry(size,size,1,1);
+  const mat=new THREE.MeshStandardMaterial({color,transparent:true,opacity:.18,side:THREE.DoubleSide,
+    emissive:color,emissiveIntensity:.12,roughness:.9});
+  const m=new THREE.Mesh(geo,mat);
+  const q=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,0,1),n);
+  m.quaternion.copy(q);m.position.copy(pointOn);g.add(m);
+  // grid lines on plane
+  const grid=new THREE.GridHelper(size,Math.round(size),color,color);
+  grid.material.opacity=.25;grid.material.transparent=true;
+  grid.quaternion.copy(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),n));
+  grid.position.copy(pointOn);g.add(grid);
+  const edge=new THREE.LineSegments(new THREE.EdgesGeometry(geo),new THREE.LineBasicMaterial({color,transparent:true,opacity:.5}));
+  edge.quaternion.copy(q);edge.position.copy(pointOn);g.add(edge);
+  return g;
+}
+function baseAxes(L){
+  const g=new THREE.Group();
+  // floor grid on math z=0 plane (three y=0)
+  const grid=new THREE.GridHelper(12,12,0x2a3650,0x1c2740);
+  grid.material.transparent=true;grid.material.opacity=.5;grid.position.set(0,0,0);g.add(grid);
+  g.add(vec(P(0,0,0),D(1,0,0),L,COL.x,'x'));
+  g.add(vec(P(0,0,0),D(0,1,0),L,COL.y,'y'));
+  g.add(vec(P(0,0,0),D(0,0,1),L,COL.z,'z'));
+  g.add(point(P(0,0,0),COL.white,'O',0.11));
+  return g;
+}
+
+/* ===== Scene state ===== */
+let current=1, playing=true, t0=performance.now();
+let updateFn=null, sliderConf=null, caseState=0;
+const hud=document.getElementById('hud');
+const badge=document.getElementById('badge');
+const sliderWrap=document.getElementById('sliderWrap');
+const slider=document.getElementById('slider');
+const sliderVal=document.getElementById('sliderVal');
+const sliderLabel=document.getElementById('sliderLabel');
+const caseToggle=document.getElementById('caseToggle');
+
+function setHUD(html){hud.innerHTML=html;}
+function fmt(n){return (Math.round(n*100)/100).toFixed(2);}
+
+/* ====== SCENE BUILDERS ====== */
+const scenes={
+  1(){ // Repérage
+    clearRoot();root.add(baseAxes(6));
+    let mx=3,my=2,mz=4;
+    const dyn=new THREE.Group();root.add(dyn);
+    function draw(){
+      while(dyn.children.length)dyn.remove(dyn.children[0]);
+      const M=P(mx,my,mz);
+      dyn.add(point(M,COL.accent,'M',0.18));
+      dyn.add(vec(P(0,0,0),M.clone(),M.length(),COL.accent2,null));
+      // projections
+      const Pxy=P(mx,my,0),Px=P(mx,0,0),Py=P(0,my,0),Pz=P(0,0,mz);
+      dyn.add(seg(M,Pxy,COL.muted,true));
+      dyn.add(seg(Pxy,Px,COL.x,true));
+      dyn.add(seg(Pxy,Py,COL.y,true));
+      dyn.add(seg(M,Pz,COL.z,true));
+      dyn.add(point(Pxy,COL.muted,null,0.08));
+      dyn.add(point(Px,COL.x,null,0.08));
+      dyn.add(point(Py,COL.y,null,0.08));
+      dyn.add(point(Pz,COL.z,null,0.08));
+      setHUD(`<b>M</b>  (<span class="vx">${mx.toFixed(1)}</span> ; <span class="vy">${my.toFixed(1)}</span> ; <span class="vz">${mz.toFixed(1)}</span>)<br>`+
+        `<span class="k">OM</span> = ${fmt(M.length())}`);
+    }
+    draw();
+    sliderConf={label:'z',min:0,max:5,init:mz,onInput:v=>{mz=v;draw();},disp:v=>v.toFixed(1)};
+    updateFn=null;
+  },
+  2(){ // Vecteurs / Chasles
+    clearRoot();root.add(baseAxes(6));
+    const A=P(1,0,1),B=P(4,2,1),C=P(4,2,4);
+    root.add(point(A,COL.white,'A',0.14));
+    root.add(point(B,COL.white,'B',0.14));
+    root.add(point(C,COL.white,'C',0.14));
+    const dyn=new THREE.Group();root.add(dyn);
+    updateFn=(el)=>{
+      while(dyn.children.length)dyn.remove(dyn.children[0]);
+      const ph=(el*0.45)%3; // 0..3 looping
+      // AB
+      const ab=B.clone().sub(A);
+      dyn.add(vec(A,ab.clone(),ab.length()*Math.min(1,ph),COL.x, ph>0.9?'AB':null));
+      if(ph>1){const bc=C.clone().sub(B);
+        dyn.add(vec(B,bc.clone(),bc.length()*Math.min(1,ph-1),COL.y, ph>1.9?'BC':null));}
+      if(ph>2){const ac=C.clone().sub(A);
+        dyn.add(vec(A,ac.clone(),ac.length()*Math.min(1,ph-2),COL.accent, ph>2.8?'AC':null));}
+      setHUD(`<span class="vx">AB</span> (2 ; 2 ; 0)<br><span class="vy">BC</span> (0 ; 0 ; 2)<br><span class="k">AC = AB + BC</span> (2 ; 2 ; 2)`);
+    };
+    sliderConf=null;
+  },
+  3(){ // colinéaire / coplanaire
+    clearRoot();root.add(baseAxes(6));
+    const dyn=new THREE.Group();root.add(dyn);
+    function draw(){
+      while(dyn.children.length)dyn.remove(dyn.children[0]);
+      const O=P(1,1,1);
+      if(caseState===0){ // colinear on a line
+        const u=D(2,1,1);
+        const line=seg(O.clone().add(u.clone().multiplyScalar(-1.5)),O.clone().add(u.clone().multiplyScalar(3.5)),COL.line,false);
+        dyn.add(line);
+        dyn.add(vec(O,u.clone(),2.45,COL.accent,'u'));
+        dyn.add(vec(O,u.clone(),3.67,COL.accent2,'v=ku'));
+        setHUD(`<b>Colinéaires</b><br><span class="k">v = k·u</span> (ici k = 1,5)<br>même direction → alignés`);
+      } else { // coplanar in a plane
+        const u=D(2,0,1),v=D(0,2,1);
+        dyn.add(planeMesh(D(0,0,1).clone(),P(1,1,1),7,COL.z));
+        dyn.add(vec(O,u.clone(),2.2,COL.x,'u'));
+        dyn.add(vec(O,v.clone(),2.2,COL.y,'v'));
+        const w=u.clone().multiplyScalar(0.8).add(v.clone().multiplyScalar(0.7));
+        dyn.add(vec(O,w.clone(),w.length(),COL.accent,'w'));
+        setHUD(`<b>Coplanaires</b><br><span class="k">w = a·u + b·v</span><br>même plan`);
+      }
+    }
+    draw();
+    setCaseToggle(['Colinéaires (droite)','Coplanaires (plan)'],draw);
+    updateFn=null;sliderConf=null;
+  },
+  4(){ // parametric line
+    clearRoot();root.add(baseAxes(6));
+    const A=P(1,1,1);const u=D(1,2,1);const un=u.clone().normalize();const L=u.length();
+    root.add(seg(A.clone().add(un.clone().multiplyScalar(-2)),A.clone().add(un.clone().multiplyScalar(6.5)),COL.line,false));
+    root.add(point(A,COL.white,'A',0.15));
+    root.add(vec(A,u.clone(),L,COL.accent2,'u'));
+    const dyn=new THREE.Group();root.add(dyn);
+    let t=1;
+    function draw(){
+      while(dyn.children.length)dyn.remove(dyn.children[0]);
+      const M=A.clone().add(u.clone().multiplyScalar(t));
+      dyn.add(point(M,COL.accent,'M',0.17));
+      const x=1+t*1,y=1+t*2,z=1+t*1;
+      setHUD(`<span class="k">t</span> = ${t.toFixed(2)}<br>x = 1 + t·1 = <span class="vx">${x.toFixed(2)}</span><br>y = 1 + t·2 = <span class="vy">${y.toFixed(2)}</span><br>z = 1 + t·1 = <span class="vz">${z.toFixed(2)}</span>`);
+    }
+    draw();
+    sliderConf={label:'t',min:-1.5,max:2.5,init:t,onInput:v=>{t=v;draw();},disp:v=>v.toFixed(2)};
+    updateFn=null;
+  },
+  5(){ // dot product
+    clearRoot();root.add(baseAxes(5));
+    const O=P(1,1,0.5);
+    const dyn=new THREE.Group();root.add(dyn);
+    let ang=55*Math.PI/180;
+    function draw(){
+      while(dyn.children.length)dyn.remove(dyn.children[0]);
+      const u=D(2.4,0,0); // along math-x
+      // v in the x-y math plane at angle ang
+      const v=new THREE.Vector3(2.2*Math.cos(ang),0,2.2*Math.sin(ang)); // three coords: x, y(up)=0, z=...
+      dyn.add(vec(O,u.clone(),u.length(),COL.x,'u'));
+      dyn.add(vec(O,v.clone(),v.length(),COL.y,'v'));
+      // projection of v on u
+      const uu=u.clone().normalize();
+      const projLen=v.dot(uu);
+      const H=O.clone().add(uu.clone().multiplyScalar(projLen));
+      const Vend=O.clone().add(v);
+      dyn.add(seg(Vend,H,COL.muted,true));
+      dyn.add(seg(O,H,COL.accent,false));
+      dyn.add(point(H,COL.accent,null,0.08));
+      const dot=v.length()*u.length()*Math.cos(ang);
+      const sign=dot>0.05?'> 0  (aigu)':(dot<-0.05?'< 0  (obtus)':'= 0  ⟂');
+      setHUD(`θ = ${Math.round(ang*180/Math.PI)}°<br><span class="k">u·v</span> = ‖u‖‖v‖cosθ<br><span class="k">u·v</span> = ${fmt(dot)}  ${sign}`);
+    }
+    draw();
+    sliderConf={label:'θ',min:5,max:175,init:55,onInput:v=>{ang=v*Math.PI/180;draw();},disp:v=>Math.round(v)+'°'};
+    updateFn=null;
+  },
+  6(){ // normal vector & plane eq
+    clearRoot();root.add(baseAxes(5));
+    const A=P(2,2,1);
+    const n=D(1,1,2);
+    root.add(planeMesh(n.clone(),A,7,COL.z));
+    root.add(point(A,COL.white,'A',0.15));
+    root.add(vec(A,n.clone(),2.4,COL.accent,'n'));
+    // a couple of in-plane vectors
+    const nn=n.clone().normalize();
+    let e1=new THREE.Vector3(1,0,0).cross(nn);if(e1.length()<0.1)e1=new THREE.Vector3(0,1,0).cross(nn);
+    e1.normalize();const e2=nn.clone().cross(e1).normalize();
+    root.add(vec(A,e1.clone(),1.8,COL.x,null));
+    root.add(vec(A,e2.clone(),1.8,COL.y,null));
+    setHUD(`<b>𝒫</b> : <span class="k">n·AM = 0</span><br>n ( <span class="vx">a</span> ; <span class="vy">b</span> ; <span class="vz">c</span> )<br>ax + by + cz + d = 0`);
+    updateFn=(el)=>{};sliderConf=null;
+  },
+  7(){ // projection & distance
+    clearRoot();root.add(baseAxes(5));
+    // plane: z = 1 (math)  -> normal (0,0,1), passes (0,0,1)
+    const A=P(2.5,2.5,1);
+    root.add(planeMesh(D(0,0,1).clone(),A,7,COL.z));
+    const dyn=new THREE.Group();root.add(dyn);
+    let h=3;
+    function draw(){
+      while(dyn.children.length)dyn.remove(dyn.children[0]);
+      const M=P(2.5,2.5,h);
+      const H=P(2.5,2.5,1);
+      dyn.add(point(M,COL.accent,'M',0.17));
+      dyn.add(point(H,COL.z,'H',0.13));
+      dyn.add(seg(M,H,COL.accent,true));
+      // little right-angle square at H
+      const sq=seg(P(2.5,2.2,1),P(2.5,2.2,1.0),0);
+      const dist=Math.abs(h-1);
+      setHUD(`𝒫 : z − 1 = 0<br><span class="k">d(M,𝒫)</span> = |z₀ − 1| / √1<br><span class="k">d(M,𝒫)</span> = ${dist.toFixed(2)}`);
+    }
+    draw();
+    sliderConf={label:'z(M)',min:1,max:5,init:3,onInput:v=>{h=v;draw();},disp:v=>v.toFixed(2)};
+    updateFn=null;
+  },
+  8(){ // line-plane intersection
+    clearRoot();root.add(baseAxes(5));
+    // plane z = 1.5
+    const A=P(2.5,2.5,1.5);
+    root.add(planeMesh(D(0,0,1).clone(),A,7,COL.z));
+    const dyn=new THREE.Group();root.add(dyn);
+    function draw(){
+      while(dyn.children.length)dyn.remove(dyn.children[0]);
+      const Apt=P(1,1,3);
+      if(caseState===0){ // secant
+        const u=D(0.6,0.7,-1);
+        const un=u.clone().normalize();
+        dyn.add(seg(Apt.clone().add(un.clone().multiplyScalar(-1)),Apt.clone().add(un.clone().multiplyScalar(5)),COL.accent2,false));
+        dyn.add(vec(Apt,u.clone(),u.length(),COL.accent2,'u'));
+        // intersection with z=1.5 (math z = three y). Param: point = Apt + t*u(three). three y of Apt=3, u three y = u.z math? careful:
+        // u math (0.6,0.7,-1) -> three (0.6,-1,0.7). Apt three (1,3,1). solve y: 3 + t*(-1) =1.5 -> t=1.5
+        const t=1.5;const I=Apt.clone().add(D(0.6,0.7,-1).clone().multiplyScalar(t));
+        dyn.add(point(I,COL.red,'I',0.16));
+        setHUD(`<b>Sécante</b><br><span class="k">u·n ≠ 0</span><br>un point d'intersection I`);
+      } else { // parallel
+        const u=D(1,0.6,0); // no z component -> parallel to z=const plane
+        const un=u.clone().normalize();
+        dyn.add(seg(Apt.clone().add(un.clone().multiplyScalar(-3)),Apt.clone().add(un.clone().multiplyScalar(3)),COL.accent2,false));
+        dyn.add(vec(Apt,u.clone(),u.length(),COL.accent2,'u'));
+        setHUD(`<b>Parallèle</b><br><span class="k">u·n = 0</span><br>aucun point commun`);
+      }
+    }
+    draw();
+    setCaseToggle(['Sécante (1 point)','Parallèle'],draw);
+    updateFn=null;sliderConf=null;
+  }
+};
+
+/* ===== case toggle (sec 3 & 8) ===== */
+function setCaseToggle(labels,drawFn){
+  caseState=0;
+  caseToggle.style.display='block';
+  caseToggle.innerHTML=`<button class="btn" id="caseBtn">↔ ${labels[1]}</button>`;
+  const b=document.getElementById('caseBtn');
+  let idx=0;
+  b.onclick=()=>{idx=1-idx;caseState=idx;b.textContent='↔ '+labels[1-idx];drawFn();};
+}
+
+/* ===== load a scene ===== */
+function load(id){
+  current=id;
+  document.querySelectorAll('.lesson').forEach(l=>l.classList.toggle('on',+l.dataset.id===id));
+  document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',+c.dataset.id===id));
+  badge.textContent='CH·'+String(id).padStart(2,'0');
+  caseToggle.style.display='none';
+  updateFn=null;sliderConf=null;
+  scenes[id]();
+  // slider UI
+  if(sliderConf){
+    sliderWrap.style.display='flex';
+    sliderLabel.textContent=sliderConf.label;
+    slider.min=sliderConf.min;slider.max=sliderConf.max;slider.step=(sliderConf.max-sliderConf.min)/200;
+    slider.value=sliderConf.init;sliderVal.textContent=sliderConf.disp(sliderConf.init);
+  } else sliderWrap.style.display='none';
+  document.getElementById('prev').disabled=id===1;
+  document.getElementById('next').disabled=id===8;
+  // playing default
+  playing = !!updateFn ? true : playing;
+  document.getElementById('playBtn').style.display = updateFn ? 'inline-flex':'none';
+  resize();
+}
+slider.addEventListener('input',()=>{
+  if(!sliderConf)return;
+  const v=parseFloat(slider.value);
+  sliderVal.textContent=sliderConf.disp(v);
+  sliderConf.onInput(v);
+});
+
+/* ===== build nav ===== */
+const titles={1:'Repérage',2:'Vecteurs',3:'Colinéarité',4:'Droites',5:'Produit scalaire',6:'Plans',7:'Distance',8:'Intersections'};
+const nav=document.getElementById('nav');
+for(let i=1;i<=8;i++){
+  const b=document.createElement('button');b.className='chip';b.dataset.id=i;
+  b.innerHTML=`<span class="n">${String(i).padStart(2,'0')}</span> ${titles[i]}`;
+  b.onclick=()=>load(i);nav.appendChild(b);
+}
+document.getElementById('prev').onclick=()=>load(Math.max(1,current-1));
+document.getElementById('next').onclick=()=>load(Math.min(8,current+1));
+document.getElementById('resetBtn').onclick=()=>orbit.reset();
+document.getElementById('playBtn').onclick=function(){playing=!playing;
+  this.classList.toggle('act',playing);this.textContent=(playing?'⏸':'▶')+' Animation';};
+
+/* ===== loop ===== */
+function tick(){
+  requestAnimationFrame(tick);
+  if(playing && updateFn) updateFn((performance.now()-t0)/1000);
+  renderer.render(scene,camera);
+}
+resize();load(1);tick();
+</script>
+</body>
+</html>
