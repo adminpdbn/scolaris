@@ -1069,20 +1069,22 @@ function CreneauTimeline({
   const width = (H1 - H0) * COLW;
   const groups = {};
   (items || []).forEach(it => {
-    let key, label;
-    if (groupBy === 'salle') {
-      key = it.salle || '__none';
-      label = it.salle || 'Non attribuée';
-    } else {
-      key = it.prof_id || '__none';
-      const p = (profs || []).find(x => x.id === it.prof_id);
-      label = it.prof_nom || (p ? p.name : 'Professeur');
-    }
-    if (!groups[key]) groups[key] = {
-      label,
-      items: []
+    const push = (key, label) => {
+      if (!groups[key]) groups[key] = {
+        label,
+        items: []
+      };
+      groups[key].items.push(it);
     };
-    groups[key].items.push(it);
+    if (groupBy === 'salle') {
+      push(it.salle || '__none', it.salle || 'Non attribuée');
+    } else if (groupBy === 'matiere') {
+      const mm = (it.matiere || '').split(',').map(x => x.trim()).filter(Boolean);
+      (mm.length ? mm : ['Autre']).forEach(m => push(m, m));
+    } else {
+      const p = (profs || []).find(x => x.id === it.prof_id);
+      push(it.prof_id || '__none', it.prof_nom || (p ? p.name : 'Professeur'));
+    }
   });
   const rows = Object.entries(groups).sort((a, b) => a[1].label.localeCompare(b[1].label));
   const CST = {
@@ -1116,7 +1118,7 @@ function CreneauTimeline({
     className: "frise-row frise-hdr"
   }, /*#__PURE__*/React.createElement("div", {
     className: "frise-res"
-  }, groupBy === 'salle' ? 'Salle' : 'Professeur'), /*#__PURE__*/React.createElement("div", {
+  }, groupBy === 'salle' ? 'Salle' : groupBy === 'matiere' ? 'Matière' : 'Professeur'), /*#__PURE__*/React.createElement("div", {
     className: "frise-hours",
     style: {
       width
@@ -1169,12 +1171,16 @@ function CreneauTimeline({
         overflow: 'hidden',
         textOverflow: 'ellipsis'
       }
-    }, it.matiere), /*#__PURE__*/React.createElement("span", {
+    }, groupBy === 'matiere' ? hs(it.debut) + '→' + hs(it.fin) : it.matiere), /*#__PURE__*/React.createElement("span", {
       style: {
         opacity: .75,
-        fontSize: 9
+        fontSize: 9,
+        display: 'block',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis'
       }
-    }, hs(it.debut), "\u2192", hs(it.fin)));
+    }, groupBy === 'matiere' ? it.prof_nom || '' : hs(it.debut) + '→' + hs(it.fin)));
   })))))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
@@ -1244,7 +1250,9 @@ function CreneauxAdmin({
     salle: '',
     tarifHoraire: '40',
     fraisInfra: '0',
-    notes: ''
+    notes: '',
+    recurrence: 'none',
+    weeks: '6'
   });
   const toggleMat = m => setF(p => ({
     ...p,
@@ -1294,11 +1302,9 @@ function CreneauxAdmin({
     setSaving(true);
     try {
       const prof = profs.find(p => p.id === f.profId);
-      const row = {
-        id: R_genId('c_'),
+      const base = {
         prof_id: f.profId,
         prof_nom: prof ? prof.name : '',
-        date: f.date,
         debut: parseFloat(f.debut),
         fin: parseFloat(f.fin),
         mode: f.mode,
@@ -1310,9 +1316,20 @@ function CreneauxAdmin({
         tarif_horaire: parseFloat(f.tarifHoraire) || 40,
         frais_infra: parseFloat(f.fraisInfra) || 0
       };
+      let dates = [f.date];
+      if (f.recurrence === 'weekly') {
+        const n = Math.max(1, Math.min(52, parseInt(f.weeks) || 1));
+        dates = [];
+        for (let i = 0; i < n; i++) dates.push(R_shiftDay(f.date, 7 * i));
+      }
+      const toInsert = dates.map((d, i) => ({
+        ...base,
+        id: R_genId('c_') + i,
+        date: d
+      }));
       const {
         error
-      } = await sb.from('creneaux').insert(row);
+      } = await sb.from('creneaux').insert(toInsert);
       if (error) throw error;
       setDay(f.date);
       load();
@@ -1454,6 +1471,29 @@ function CreneauxAdmin({
     className: "fg"
   }, /*#__PURE__*/React.createElement("label", {
     className: "fl"
+  }, "R\xE9p\xE9ter"), /*#__PURE__*/React.createElement("select", {
+    className: "fi",
+    value: f.recurrence,
+    onChange: e => set('recurrence', e.target.value)
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "none"
+  }, "Non (une fois)"), /*#__PURE__*/React.createElement("option", {
+    value: "weekly"
+  }, "Chaque semaine"))), f.recurrence === 'weekly' && /*#__PURE__*/React.createElement("div", {
+    className: "fg"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "fl"
+  }, "Nombre de semaines"), /*#__PURE__*/React.createElement("input", {
+    className: "fi",
+    type: "number",
+    min: "1",
+    max: "52",
+    value: f.weeks,
+    onChange: e => set('weeks', e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "fg"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "fl"
   }, "Niveau (facultatif)"), /*#__PURE__*/React.createElement("select", {
     className: "fi",
     value: f.niveau,
@@ -1575,6 +1615,17 @@ function CreneauxAdmin({
       color: groupBy === 'prof' ? 'var(--cream)' : 'var(--navy)'
     }
   }, "\uD83D\uDC68\u200D\uD83C\uDFEB Par prof"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setGroupBy('matiere'),
+    style: {
+      padding: '6px 14px',
+      border: 'none',
+      cursor: 'pointer',
+      fontFamily: 'var(--ff-mono)',
+      fontSize: 12,
+      background: groupBy === 'matiere' ? 'var(--navy)' : 'transparent',
+      color: groupBy === 'matiere' ? 'var(--cream)' : 'var(--navy)'
+    }
+  }, "\uD83D\uDCDA Par mati\xE8re"), /*#__PURE__*/React.createElement("button", {
     onClick: () => setGroupBy('salle'),
     style: {
       padding: '6px 14px',
@@ -1974,6 +2025,17 @@ function EleveReservations({
       color: groupBy === 'prof' ? 'var(--cream)' : 'var(--navy)'
     }
   }, "\uD83D\uDC68\u200D\uD83C\uDFEB Par prof"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setGroupBy('matiere'),
+    style: {
+      padding: '6px 14px',
+      border: 'none',
+      cursor: 'pointer',
+      fontFamily: 'var(--ff-mono)',
+      fontSize: 12,
+      background: groupBy === 'matiere' ? 'var(--navy)' : 'transparent',
+      color: groupBy === 'matiere' ? 'var(--cream)' : 'var(--navy)'
+    }
+  }, "\uD83D\uDCDA Par mati\xE8re"), /*#__PURE__*/React.createElement("button", {
     onClick: () => setGroupBy('salle'),
     style: {
       padding: '6px 14px',
