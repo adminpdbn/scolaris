@@ -687,6 +687,9 @@ html{-webkit-text-size-adjust:100%;}
 .pw-b-mat{font-size:10.5px;font-weight:700;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .pw-b-meta{font-size:9px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .pw-b-count{font-size:9px;font-weight:700;margin-top:1px;}
+.pw-block.pw-on{box-shadow:0 0 0 2px currentColor inset;}
+.pw-badge{position:absolute;top:2px;right:3px;width:16px;height:16px;border-radius:50%;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.attrib-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;background:var(--cream2);border-radius:6px;padding:9px 12px;}
 </style>
 <link rel="icon" href="https://adminpdbn.github.io/scolaris/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="https://adminpdbn.github.io/scolaris/favicon-32.png">
@@ -2433,7 +2436,9 @@ const R_matColor = m => {
 };
 function PlanningGrid({
   cours,
-  onPick
+  onPick,
+  activeEleveId,
+  onToggleEleve
 }) {
   const DAYS7 = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
   const H0 = 8,
@@ -2513,20 +2518,32 @@ function PlanningGrid({
       const top = ((it.debut || H0) - H0) * ROWH;
       const hgt = Math.max(26, ((it.fin || it.debut) - (it.debut || 0)) * ROWH - 2);
       const w = 100 / totalCols;
+      const enrolled = activeEleveId ? (it.eleveIds || []).includes(activeEleveId) : false;
+      const bg = activeEleveId ? enrolled ? c0 + '40' : c0 + '10' : c0 + '22';
       return /*#__PURE__*/React.createElement("div", {
         key: it.id,
-        className: "pw-block",
-        onClick: () => onPick(it.id),
+        className: 'pw-block' + (activeEleveId && enrolled ? ' pw-on' : ''),
+        onClick: () => activeEleveId ? onToggleEleve(it.id) : onPick(it.id),
         title: (it.matiere || '') + ' ' + (it.niveau || '') + ' · ' + hs(it.debut) + '-' + hs(it.fin) + ' · ' + (it.eleveIds || []).length + ' élèves',
         style: {
           top,
           height: hgt,
           left: 'calc(' + col * w + '% + 1px)',
           width: 'calc(' + w + '% - 3px)',
-          background: c0 + '22',
-          borderLeftColor: c0
+          background: bg,
+          borderLeftColor: c0,
+          opacity: activeEleveId && !enrolled ? .75 : 1
         }
-      }, /*#__PURE__*/React.createElement("div", {
+      }, activeEleveId ? /*#__PURE__*/React.createElement("span", {
+        className: "pw-badge",
+        style: enrolled ? {
+          background: '#2d7a3c',
+          color: '#fff'
+        } : {
+          background: 'rgba(0,0,0,.12)',
+          color: '#555'
+        }
+      }, enrolled ? '✓' : '+') : null, /*#__PURE__*/React.createElement("div", {
         className: "pw-b-mat"
       }, it.matiere), /*#__PURE__*/React.createElement("div", {
         className: "pw-b-meta"
@@ -2553,19 +2570,23 @@ function AttribPanel({
   const [mode, setMode] = useState('groupe');
   const [modalG, setModalG] = useState(null);
   const [selE, setSelE] = useState(null);
+  const [activeEleve, setActiveEleve] = useState('');
   const [qA, setQA] = useState('');
   const [fNiv, setFNiv] = useState('');
   const [qE, setQE] = useState('');
   const norm = s => (s || '').toLowerCase();
   const gTime = c => `${c.jour || ''} ${hs(c.debut)}–${hs(c.fin)}`;
-  const toggle = (cid, eid) => setCours(prev => prev.map(c => {
-    if (c.id !== cid) return c;
-    const ids = c.eleveIds || [];
-    return {
-      ...c,
-      eleveIds: ids.includes(eid) ? ids.filter(x => x !== eid) : [...ids, eid]
-    };
-  }));
+  const toggle = (cid, eid) => {
+    if (!eid) return;
+    setCours(prev => prev.map(c => {
+      if (c.id !== cid) return c;
+      const ids = c.eleveIds || [];
+      return {
+        ...c,
+        eleveIds: ids.includes(eid) ? ids.filter(x => x !== eid) : [...ids, eid]
+      };
+    }));
+  };
   const tabBtn = on => ({
     padding: '6px 16px',
     border: 'none',
@@ -2575,6 +2596,11 @@ function AttribPanel({
     background: on ? 'var(--navy)' : 'transparent',
     color: on ? 'var(--cream)' : 'var(--navy)'
   });
+  const activeName = (() => {
+    const e = eleves.find(x => x.id === activeEleve);
+    return e ? e.name : '';
+  })();
+  const activeCount = activeEleve ? cours.filter(c => (c.eleveIds || []).includes(activeEleve)).length : 0;
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
@@ -2591,17 +2617,50 @@ function AttribPanel({
     onClick: () => setMode('eleve'),
     style: tabBtn(mode === 'eleve')
   }, "\uD83C\uDF93 Par \xE9l\xE8ve")), mode === 'groupe' ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "attrib-bar"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "fl",
+    style: {
+      margin: 0
+    }
+  }, "Attribution rapide"), /*#__PURE__*/React.createElement("select", {
+    className: "fi",
+    style: {
+      minWidth: 220,
+      flex: '0 1 320px'
+    },
+    value: activeEleve,
+    onChange: e => setActiveEleve(e.target.value)
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "\u2014 Choisir un \xE9l\xE8ve \xE0 placer \u2014"), eleves.slice().sort((a, b) => (a.name || '').localeCompare(b.name || '')).map(e => /*#__PURE__*/React.createElement("option", {
+    key: e.id,
+    value: e.id
+  }, e.name, e.niveau ? ' · ' + e.niveau : ''))), activeEleve && /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-p btn-sm",
+    onClick: () => setActiveEleve('')
+  }, "\u2713 Terminer")), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12.5,
       color: 'var(--muted)',
       marginBottom: 10
     }
-  }, "Clique sur un groupe pour g\xE9rer ses \xE9l\xE8ves."), /*#__PURE__*/React.createElement(PlanningGrid, {
+  }, activeEleve ? /*#__PURE__*/React.createElement("span", null, "Clique les cr\xE9neaux de ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: 'var(--navy)'
+    }
+  }, activeName), " pour l'ajouter ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: 'var(--ok)'
+    }
+  }, "\u2713"), " ou le retirer. Actuellement dans ", /*#__PURE__*/React.createElement("b", null, activeCount), " groupe", activeCount > 1 ? 's' : '', ".") : /*#__PURE__*/React.createElement("span", null, "Clique un groupe pour g\xE9rer ses \xE9l\xE8ves \u2014 ou choisis un \xE9l\xE8ve ci-dessus pour l'affecter \xE0 ", /*#__PURE__*/React.createElement("b", null, "plusieurs cr\xE9neaux"), " d'un coup.")), /*#__PURE__*/React.createElement(PlanningGrid, {
     cours: cours,
     onPick: id => {
       setModalG(id);
       setQA('');
-    }
+    },
+    activeEleveId: activeEleve,
+    onToggleEleve: id => toggle(id, activeEleve)
   })) : /*#__PURE__*/React.createElement("div", {
     className: "attrib-grid"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
