@@ -417,9 +417,10 @@ function PublicBooking({ onAdmin }){
                       ? <div className="day-empty">—</div>
                       : slots.map(s => (
                         <div key={s.id} className="slot" onClick={()=>!isPast && setBooking(s)}>
-                          <div className="slot-time">{hs(s.debut)} → {hs(s.fin)}</div>
+                          <div className="slot-time">{hs(s.debut)} → {hs(s.fin)} <span style={{fontWeight:400,fontSize:10,color:'var(--muted)'}}>· {dureeLabel(s)}</span></div>
                           <div className="slot-mat">{s.matiere}</div>
                           <div className="slot-prof">{s.prof_nom||'Professeur'}</div>
+                          {s.niveau && <div style={{fontSize:10,color:'var(--muted)',marginTop:1}}>Niveau : {s.niveau}</div>}
                           <div className="slot-foot">
                             <span className={'mode-tag '+(s.mode==='visio'?'mode-visio':'mode-presentiel')}>{s.mode==='visio'?'Visio':'Présentiel'}</span>
                             <span className="slot-price">{money(tarifH(s))}<span style={{fontWeight:400,fontSize:10,color:'var(--muted)'}}>/h</span></span>
@@ -534,7 +535,8 @@ function BookingModal({ slot, profName, onClose, onBooked }){
                 <div className="recap-row"><span className="k">Professeur</span><span className="v">{profName}</span></div>
                 <div className="recap-row"><span className="k">Format</span><span className="v">{slot.mode==='visio'?'Visio':'Présentiel'}</span></div>
                 <div className="recap-row"><span className="k">Durée</span><span className="v">{dureeLabel(slot)}</span></div>
-                <div className="recap-total"><span className="k">Tarif</span><span className="v">{money(tarifH(slot))}<span style={{fontSize:13,fontWeight:400,color:'var(--muted)'}}> / heure</span></span></div>
+                <div className="recap-total"><span className="k">Tarif horaire</span><span className="v">{money(tarifH(slot))}<span style={{fontSize:13,fontWeight:400,color:'var(--muted)'}}> /h</span></span></div>
+                <div style={{textAlign:'right',fontSize:12,color:'var(--muted)',marginTop:6}}>soit <b style={{color:'var(--ink)'}}>{money(montant)}</b> pour {dureeLabel(slot)} — réglé après confirmation</div>
               </div>
 
               {err && <div className="alert alert-err"><span>⚠️</span><span>{err}</span></div>}
