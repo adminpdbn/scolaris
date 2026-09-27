@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Réserver un cours particulier — PlusdeBonnesNotes</title>
+<meta name="description" content="Réservez un créneau de cours particulier à La Courneuve : choisissez le professeur, la matière et l'horaire qui vous conviennent. Réservation en ligne, validation après paiement.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Courier+Prime:wght@400;700&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+:root{
+  --paper:#fbf8f1; --paper2:#f4efe3; --ink:#1c1c20; --bleu:#1a4fc4; --bleu-fonce:#143a8f;
+  --rouge:#c8362e; --surligneur:#ffe66b; --regle:#e6dfcf; --muted:#6b675e; --blanc:#fffdf8;
+  --vert:#2d7a3c; --vert-bg:#e8f5ec; --orange:#9a5c00; --orange-bg:#fff4e0; --rouge-bg:#fdf0ef;
+  --ff-d:'Fraunces',Georgia,serif; --ff-m:'Courier Prime','Courier New',monospace; --ff-h:'Caveat',cursive;
+  --marge:74px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
+body{font-family:var(--ff-m);background:var(--paper);color:var(--ink);font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased;min-height:100vh;}
+::selection{background:var(--surligneur);color:var(--ink)}
+a{color:var(--bleu)}
+:focus-visible{outline:3px solid var(--bleu);outline-offset:2px;border-radius:2px}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:var(--paper2)}::-webkit-scrollbar-thumb{background:var(--regle);border-radius:4px}
+
+/* Red margin signature */
+@media (min-width:1020px){
+  body::before{content:'';position:fixed;top:0;bottom:0;left:var(--marge);width:2px;background:var(--rouge);opacity:.28;z-index:0;pointer-events:none;}
+  .topnav,main,footer{padding-left:calc(var(--marge) + 2px)}
+}
+
+/* Nav */
+.bandeau{background:var(--ink);color:var(--paper);font-size:12.5px;text-align:center;padding:8px 16px;letter-spacing:.3px;}
+.bandeau b{color:var(--surligneur);font-weight:700}
+.topnav{position:sticky;top:0;z-index:50;background:rgba(251,248,241,.94);backdrop-filter:blur(6px);border-bottom:1.5px solid var(--regle);display:flex;align-items:center;gap:16px;padding:10px 20px;}
+.brand{display:flex;align-items:center;gap:9px;font-family:var(--ff-d);font-weight:900;font-size:17px;color:var(--ink);text-decoration:none;white-space:nowrap;}
+.brand .logo{width:30px;height:30px;border-radius:8px;background:var(--bleu);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 0 var(--bleu-fonce);}
+.nav-spacer{flex:1}
+.nav-link{font-size:12.5px;color:var(--ink);text-decoration:none;padding:8px 13px;border:1.5px solid var(--ink);border-radius:8px;white-space:nowrap;background:transparent;cursor:pointer;font-family:var(--ff-m);}
+.nav-link:hover{border-color:var(--bleu);color:var(--bleu)}
+.nav-cta{font-size:12.5px;font-weight:700;text-decoration:none;white-space:nowrap;background:var(--bleu);color:#fff;padding:9px 16px;border-radius:8px;box-shadow:0 2px 0 var(--bleu-fonce);border:none;cursor:pointer;font-family:var(--ff-m);}
+.nav-cta:hover{background:var(--bleu-fonce)}
+
+main{max-width:1180px;margin:0 auto;padding:26px 20px 60px;position:relative;z-index:1;}
+
+/* Hero */
+.hero{margin-bottom:26px;}
+.kicker{font-size:11.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--bleu);font-weight:700;margin-bottom:10px;}
+.hero h1{font-family:var(--ff-d);font-weight:900;font-size:clamp(28px,5vw,44px);line-height:1.08;letter-spacing:-.5px;margin-bottom:12px;}
+.hero h1 em{font-style:italic;color:var(--bleu);}
+.hero p{color:var(--muted);font-size:15px;max-width:620px;}
+.hero .hand{font-family:var(--ff-h);font-size:22px;color:var(--rouge);transform:rotate(-2deg);display:inline-block;margin-top:6px;}
+
+/* Steps */
+.steps{display:flex;gap:14px;flex-wrap:wrap;margin:20px 0 8px;}
+.step{flex:1;min-width:180px;background:var(--blanc);border:1.5px solid var(--regle);border-radius:12px;padding:14px 16px;position:relative;}
+.step-n{position:absolute;top:-10px;left:14px;width:24px;height:24px;background:var(--ink);color:var(--paper);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:var(--ff-d);}
+.step h3{font-family:var(--ff-d);font-size:15px;margin:6px 0 3px;}
+.step p{font-size:12.5px;color:var(--muted);line-height:1.55;}
+
+/* Filters */
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:26px 0 16px;padding:14px 16px;background:var(--blanc);border:1.5px solid var(--regle);border-radius:12px;}
+.filter-group{display:flex;flex-direction:column;gap:3px;}
+.filter-group label{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700;}
+select,input,textarea{font-family:var(--ff-m);font-size:13.5px;color:var(--ink);}
+.sel,.inp{padding:8px 11px;border:1.5px solid var(--regle);border-radius:8px;background:var(--paper);min-width:140px;}
+.sel:focus,.inp:focus{outline:none;border-color:var(--bleu);}
+
+/* Week nav */
+.weeknav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+.weeknav .wlabel{font-family:var(--ff-d);font-size:18px;font-weight:700;}
+.wbtns{display:flex;gap:8px;}
+.wbtn{padding:7px 14px;border:1.5px solid var(--ink);border-radius:8px;background:var(--blanc);cursor:pointer;font-family:var(--ff-m);font-size:13px;}
+.wbtn:hover:not(:disabled){background:var(--ink);color:var(--paper);}
+.wbtn:disabled{opacity:.35;cursor:not-allowed;}
+.wbtn.today{background:var(--bleu);color:#fff;border-color:var(--bleu);}
+.wbtn.today:hover{background:var(--bleu-fonce);}
+
+/* Calendar (day columns) */
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;}
+.daycol{background:var(--blanc);border:1.5px solid var(--regle);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-height:120px;}
+.daycol.past{opacity:.5;}
+.day-hd{padding:9px 10px;text-align:center;border-bottom:1.5px solid var(--regle);background:var(--paper2);}
+.day-hd .dow{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:700;}
+.day-hd .dnum{font-family:var(--ff-d);font-size:20px;font-weight:900;line-height:1.1;}
+.day-hd.is-today .dnum{color:var(--bleu);}
+.day-hd.is-today{background:#eaf0ff;}
+.day-body{padding:8px;display:flex;flex-direction:column;gap:7px;flex:1;}
+.slot{border:1.5px solid var(--regle);border-left:4px solid var(--bleu);border-radius:8px;padding:8px 9px;cursor:pointer;transition:all .13s;background:var(--paper);}
+.slot:hover{border-color:var(--bleu);box-shadow:0 3px 10px rgba(26,79,196,.14);transform:translateY(-1px);}
+.slot-time{font-weight:700;font-size:13px;}
+.slot-mat{font-size:12px;color:var(--ink);margin-top:2px;}
+.slot-prof{font-size:11px;color:var(--muted);margin-top:1px;}
+.slot-foot{display:flex;align-items:center;justify-content:space-between;margin-top:6px;gap:6px;}
+.mode-tag{font-size:9.5px;text-transform:uppercase;letter-spacing:.4px;font-weight:700;padding:2px 6px;border-radius:5px;border:1px solid;}
+.mode-presentiel{background:#eaf0ff;color:var(--bleu);border-color:var(--bleu);}
+.mode-visio{background:#f0e8ff;color:#6b21a8;border-color:#6b21a8;}
+.slot-price{font-size:12px;font-weight:700;color:var(--vert);}
+.day-empty{font-size:11px;color:#b8b2a4;text-align:center;padding:16px 4px;font-style:italic;}
+
+/* Empty / loading */
+.empty{text-align:center;padding:60px 20px;color:var(--muted);}
+.empty .ico{font-size:44px;margin-bottom:14px;opacity:.4;}
+.empty h3{font-family:var(--ff-d);font-size:20px;color:var(--ink);margin-bottom:6px;}
+.empty p{max-width:380px;margin:0 auto;font-size:13.5px;}
+.spinner{width:34px;height:34px;border:3px solid var(--regle);border-top-color:var(--bleu);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 16px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(20,20,20,.5);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:200;padding:18px;}
+.modal{background:var(--paper);border:2px solid var(--ink);border-radius:14px;width:100%;max-width:460px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.3);}
+.modal-hd{padding:18px 22px;border-bottom:1.5px solid var(--regle);display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+.modal-hd h2{font-family:var(--ff-d);font-size:21px;font-weight:900;line-height:1.15;}
+.modal-x{background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted);line-height:1;}
+.modal-x:hover{color:var(--rouge);}
+.modal-bd{padding:20px 22px;}
+.recap{background:var(--blanc);border:1.5px solid var(--regle);border-radius:10px;padding:14px;margin-bottom:18px;}
+.recap-row{display:flex;justify-content:space-between;padding:4px 0;font-size:13px;}
+.recap-row .k{color:var(--muted);}
+.recap-row .v{font-weight:700;text-align:right;}
+.recap-total{border-top:1.5px dashed var(--regle);margin-top:8px;padding-top:10px;display:flex;justify-content:space-between;align-items:center;}
+.recap-total .k{font-family:var(--ff-d);font-size:15px;font-weight:700;}
+.recap-total .v{font-family:var(--ff-d);font-size:22px;font-weight:900;color:var(--vert);}
+.fld{margin-bottom:13px;}
+.fld label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;margin-bottom:4px;}
+.fld .inp,.fld .sel,.fld textarea{width:100%;}
+.fld textarea{padding:8px 11px;border:1.5px solid var(--regle);border-radius:8px;background:var(--paper);resize:vertical;min-height:60px;}
+.req{color:var(--rouge);}
+.btn-primary{width:100%;padding:13px;background:var(--bleu);color:#fff;border:none;border-radius:9px;font-family:var(--ff-m);font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 3px 0 var(--bleu-fonce);transition:all .13s;letter-spacing:.3px;}
+.btn-primary:hover:not(:disabled){background:var(--bleu-fonce);box-shadow:0 2px 0 var(--bleu-fonce);transform:translateY(1px);}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;}
+.alert{padding:11px 14px;border-radius:8px;font-size:12.5px;margin-bottom:14px;display:flex;gap:8px;align-items:flex-start;}
+.alert-err{background:var(--rouge-bg);border:1px solid #e0a8a3;color:#8b2018;}
+.alert-info{background:#eaf0ff;border:1px solid #a8bce8;color:var(--bleu-fonce);}
+.alert-ok{background:var(--vert-bg);border:1px solid #a3d0b0;color:#1a5c2e;}
+
+/* Confirmation */
+.confirm{text-align:center;padding:14px 6px;}
+.confirm .ico{width:64px;height:64px;border-radius:50%;background:var(--vert-bg);border:2px solid var(--vert);color:var(--vert);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 16px;}
+.confirm h2{font-family:var(--ff-d);font-size:24px;font-weight:900;margin-bottom:8px;}
+.confirm p{color:var(--muted);font-size:13.5px;margin-bottom:6px;}
+.next-steps{text-align:left;background:var(--blanc);border:1.5px solid var(--regle);border-radius:10px;padding:14px 16px;margin:16px 0;}
+.next-steps li{margin:6px 0 6px 20px;font-size:13px;}
+
+/* ADMIN */
+.admin-tabs{display:flex;gap:0;border-bottom:2px solid var(--ink);margin-bottom:22px;flex-wrap:wrap;}
+.atab{padding:10px 18px;cursor:pointer;font-family:var(--ff-m);font-size:13.5px;color:var(--muted);border:none;background:none;border-bottom:3px solid transparent;margin-bottom:-2px;}
+.atab.on{color:var(--ink);font-weight:700;border-bottom-color:var(--bleu);}
+.atab:hover{color:var(--ink);}
+.card{background:var(--blanc);border:1.5px solid var(--regle);border-radius:12px;padding:18px 20px;margin-bottom:16px;}
+.card h3{font-family:var(--ff-d);font-size:17px;margin-bottom:14px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.tbl th{text-align:left;padding:9px 10px;background:var(--paper2);font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1.5px solid var(--regle);}
+.tbl td{padding:9px 10px;border-bottom:1px solid var(--regle);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:var(--paper);}
+.badge{display:inline-block;padding:2px 9px;border-radius:12px;font-size:10.5px;font-weight:700;border:1px solid;letter-spacing:.2px;}
+.b-attente{background:var(--orange-bg);color:var(--orange);border-color:var(--orange);}
+.b-paye{background:#eaf0ff;color:var(--bleu);border-color:var(--bleu);}
+.b-valide{background:var(--vert-bg);color:var(--vert);border-color:var(--vert);}
+.b-refuse{background:var(--rouge-bg);color:var(--rouge);border-color:var(--rouge);}
+.b-libre{background:var(--vert-bg);color:var(--vert);border-color:var(--vert);}
+.b-reserve{background:var(--orange-bg);color:var(--orange);border-color:var(--orange);}
+.b-confirme{background:#eaf0ff;color:var(--bleu);border-color:var(--bleu);}
+.btn-mini{padding:5px 10px;border:1.5px solid var(--regle);border-radius:7px;background:var(--paper);cursor:pointer;font-family:var(--ff-m);font-size:11.5px;margin-right:5px;}
+.btn-mini:hover{border-color:var(--ink);}
+.btn-mini.ok{border-color:var(--vert);color:var(--vert);}
+.btn-mini.ok:hover{background:var(--vert);color:#fff;}
+.btn-mini.pay{border-color:var(--bleu);color:var(--bleu);}
+.btn-mini.pay:hover{background:var(--bleu);color:#fff;}
+.btn-mini.no{border-color:var(--rouge);color:var(--rouge);}
+.btn-mini.no:hover{background:var(--rouge);color:#fff;}
+.creds{background:var(--ink);color:var(--paper);border-radius:10px;padding:14px 16px;font-family:var(--ff-m);margin-top:12px;}
+.creds .cr-row{display:flex;justify-content:space-between;gap:10px;padding:3px 0;font-size:13px;}
+.creds .cr-row .lbl{color:#9a958a;}
+.creds .cr-row .val{font-weight:700;user-select:all;}
+.copy-btn{background:var(--surligneur);color:var(--ink);border:none;border-radius:6px;padding:2px 8px;font-size:10.5px;cursor:pointer;font-family:var(--ff-m);font-weight:700;}
+
+/* Login box */
+.login-wrap{max-width:400px;margin:40px auto;background:var(--blanc);border:1.5px solid var(--regle);border-radius:14px;padding:32px 30px;}
+.login-wrap h2{font-family:var(--ff-d);font-size:24px;font-weight:900;margin-bottom:6px;}
+.login-wrap .sub{color:var(--muted);font-size:13px;margin-bottom:22px;}
+
+footer{max-width:1180px;margin:0 auto;padding:24px 20px 40px;border-top:1.5px solid var(--regle);color:var(--muted);font-size:12.5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+footer a{color:var(--ink);text-decoration:none;}footer a:hover{color:var(--bleu);}
+
+@media (max-width:1100px){.cal{grid-template-columns:repeat(4,1fr);}}
+@media (max-width:820px){
+  .cal{grid-template-columns:repeat(2,1fr);}
+  .grid2,.grid3{grid-template-columns:1fr;}
+  .topnav{gap:8px;padding:10px 14px;}
+  main{padding:18px 14px 50px;}
+  .tbl{display:block;overflow-x:auto;white-space:nowrap;}
+}
+@media (max-width:520px){.cal{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div id="root"><div style="padding:60px;text-align:center;font-family:'Courier Prime',monospace;color:#6b675e">⟳ Chargement…</div></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useMemo, useCallback } = React;
+
+// ═══════════════ SUPABASE ═══════════════
+const SUPABASE_URL = 'https://gwmdurhncotftuxfgwkg.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3bWR1cmhuY290ZnR1eGZnd2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NzYyMTAsImV4cCI6MjA5MTU1MjIxMH0.WDcPFpYyJIF8QcNsjUzckb0EUtbxw_iQ0hmN6OPCn08';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ═══════════════ HELPERS ═══════════════
+const MATIERES = ['Mathématiques','Physique-Chimie','Français','Anglais','SVT','Histoire-Géo','Philosophie','Informatique'];
+const NIVEAUX = ['CP','CE1','CE2','CM1','CM2','6ème','5ème','4ème','3ème','Seconde','Première','Terminale','Supérieures'];
+const DAYS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+const DOW_SHORT = ['LUN','MAR','MER','JEU','VEN','SAM','DIM'];
+
+const hs = h => { const fl = Math.floor(h); const m = Math.round((h-fl)*60); return `${fl}h${String(m).padStart(2,'0')}`; };
+const todayISO = () => { const d = new Date(); d.setHours(0,0,0,0); return d.toISOString().split('T')[0]; };
+const money = n => (Math.round(n*100)/100).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2}) + ' €';
+const genId = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const calcMontant = d => {
+  const dur = (parseFloat(d.fin)||0) - (parseFloat(d.debut)||0);
+  const thRaw = d.tarif_horaire!=null ? d.tarif_horaire : (d.tarifHoraire!=null ? d.tarifHoraire : 40);
+  const fiRaw = d.frais_infra!=null ? d.frais_infra : (d.fraisInfra!=null ? d.fraisInfra : 0);
+  const th = parseFloat(thRaw)||0, fi = parseFloat(fiRaw)||0;
+  return Math.max(0, dur*th + fi);
+};
+
+function getMonday(offset=0){
+  const d = new Date(); d.setHours(0,0,0,0);
+  const day = d.getDay(); // 0=dim
+  const diff = (day === 0 ? -6 : 1 - day) + offset*7;
+  d.setDate(d.getDate()+diff);
+  return d;
+}
+const fmtDate = d => d.toISOString().split('T')[0];
+const fmtFR = iso => { const [y,m,dd] = iso.split('-'); return `${dd}/${m}/${y}`; };
+
+// ═══════════════ ROOT ═══════════════
+function App(){
+  const [view, setView] = useState('public'); // public | admin
+  return view === 'admin'
+    ? <AdminPortal onExit={()=>setView('public')} />
+    : <PublicBooking onAdmin={()=>setView('admin')} />;
+}
+
+// ═══════════════ NAV ═══════════════
+function TopNav({ onAdmin, onExit, adminName }){
+  return (
+    <React.Fragment>
+      <div className="bandeau">📅 Réservation de cours particuliers — <b>1er créneau d'essai offert</b> · La Courneuve</div>
+      <nav className="topnav">
+        <a className="brand" href="index.html">
+          <span className="logo">📚</span> PlusdeBonnesNotes
+        </a>
+        <div className="nav-spacer"></div>
+        {adminName
+          ? <React.Fragment>
+              <span style={{fontSize:12.5,color:'var(--muted)'}}>👑 {adminName}</span>
+              <button className="nav-link" onClick={onExit}>← Vue publique</button>
+            </React.Fragment>
+          : <React.Fragment>
+              <a className="nav-link" href="index.html">Site</a>
+              <a className="nav-cta" href="membre.html">Espace admin</a>
+            </React.Fragment>}
+      </nav>
+    </React.Fragment>
+  );
+}
+
+// ═══════════════ PUBLIC BOOKING ═══════════════
+function PublicBooking({ onAdmin }){
+  const [loading, setLoading] = useState(true);
+  const [loadErr, setLoadErr] = useState('');
+  const [dispos, setDispos] = useState([]);
+  const [profs, setProfs] = useState([]);
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [fMat, setFMat] = useState('');
+  const [fMode, setFMode] = useState('');
+  const [fProf, setFProf] = useState('');
+  const [booking, setBooking] = useState(null); // slot being booked
+
+  const load = useCallback(async () => {
+    setLoading(true); setLoadErr('');
+    try {
+      const dRes = await sb.from('creneaux').select('*').eq('statut','libre').gte('date', todayISO()).order('date');
+      if (dRes.error) throw dRes.error;
+      const rows = dRes.data || [];
+      setDispos(rows);
+      const seen = {}, plist = [];
+      rows.forEach(r => { if (r.prof_id && !seen[r.prof_id]) { seen[r.prof_id]=1; plist.push({ id:r.prof_id, name:r.prof_nom||'Professeur' }); } });
+      setProfs(plist);
+    } catch (e) {
+      setLoadErr(e.message || 'Erreur de chargement');
+      setDispos([]);
+    } finally { setLoading(false); }
+  }, []);
+  useEffect(() => { load(); }, [load]);
+
+  const profName = id => { const p = profs.find(x=>x.id===id); return p ? p.name : 'Professeur'; };
+
+  const monday = getMonday(weekOffset);
+  const weekDays = useMemo(() => Array.from({length:7},(_,i)=>{ const d=new Date(monday); d.setDate(monday.getDate()+i); return d; }), [monday]);
+  const weekLabel = `${monday.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})} – ${weekDays[6].toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'})}`;
+
+  const filtered = useMemo(() => dispos.filter(d => {
+    if (fMat && d.matiere !== fMat) return false;
+    if (fMode && d.mode !== fMode) return false;
+    if (fProf && d.prof_id !== fProf) return false;
+    return true;
+  }), [dispos, fMat, fMode, fProf]);
+
+  const byDay = useMemo(() => {
+    const map = {};
+    weekDays.forEach(d => { map[fmtDate(d)] = []; });
+    filtered.forEach(d => { if (map[d.date]) map[d.date].push(d); });
+    Object.values(map).forEach(arr => arr.sort((a,b)=>(a.debut||0)-(b.debut||0)));
+    return map;
+  }, [filtered, weekDays]);
+
+  const totalWeek = weekDays.reduce((n,d)=>n+(byDay[fmtDate(d)]||[]).length,0);
+  const tIso = todayISO();
+
+  return (
+    <React.Fragment>
+      <TopNav onAdmin={onAdmin} />
+      <main>
+        <div className="hero">
+          <div className="kicker">Cours particuliers</div>
+          <h1>Choisissez le créneau qui <em>vous convient</em>.</h1>
+          <p>Parcourez les disponibilités de nos professeurs, sélectionnez l'horaire idéal et réservez en quelques secondes. La place est bloquée pour vous — la confirmation se fait après le règlement.</p>
+          <span className="hand">simple, comme choisir une place au ciné ✦</span>
+        </div>
+
+        <div className="steps">
+          <div className="step"><div className="step-n">1</div><h3>Choisissez</h3><p>Filtrez par matière ou professeur, puis cliquez sur un créneau libre.</p></div>
+          <div className="step"><div className="step-n">2</div><h3>Réservez</h3><p>Renseignez le nom de l'élève et un contact. La place est mise de côté.</p></div>
+          <div className="step"><div className="step-n">3</div><h3>Réglez</h3><p>Vous recevez le lien de paiement (ou réglez sur place). Le cours est alors confirmé.</p></div>
+        </div>
+
+        <div className="filters">
+          <div className="filter-group">
+            <label>Matière</label>
+            <select className="sel" value={fMat} onChange={e=>setFMat(e.target.value)}>
+              <option value="">Toutes</option>
+              {MATIERES.map(m=><option key={m} value={m}>{m}</option>)}
+            </select>
+          </div>
+          <div className="filter-group">
+            <label>Format</label>
+            <select className="sel" value={fMode} onChange={e=>setFMode(e.target.value)}>
+              <option value="">Tous</option>
+              <option value="presentiel">Présentiel</option>
+              <option value="visio">Visio</option>
+            </select>
+          </div>
+          <div className="filter-group">
+            <label>Professeur</label>
+            <select className="sel" value={fProf} onChange={e=>setFProf(e.target.value)}>
+              <option value="">Tous</option>
+              {profs.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          </div>
+          <div style={{flex:1}}></div>
+          <button className="wbtn" onClick={load} title="Rafraîchir">↻ Actualiser</button>
+        </div>
+
+        <div className="weeknav">
+          <div className="wlabel">📅 {weekLabel}</div>
+          <div className="wbtns">
+            <button className="wbtn" onClick={()=>setWeekOffset(w=>w-1)} disabled={weekOffset<=0}>← Semaine préc.</button>
+            <button className="wbtn today" onClick={()=>setWeekOffset(0)}>Aujourd'hui</button>
+            <button className="wbtn" onClick={()=>setWeekOffset(w=>w+1)}>Semaine suiv. →</button>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="empty"><div className="spinner"></div><p>Chargement des créneaux…</p></div>
+        ) : loadErr ? (
+          <div className="empty">
+            <div className="ico">⚠️</div>
+            <h3>Impossible de charger les créneaux</h3>
+            <p>{loadErr}</p>
+            <p style={{marginTop:10,fontSize:12}}>Si le problème persiste, la configuration Supabase (accès public en lecture) n'est peut-être pas encore activée.</p>
+          </div>
+        ) : totalWeek === 0 ? (
+          <div className="empty">
+            <div className="ico">🗓️</div>
+            <h3>Aucun créneau cette semaine</h3>
+            <p>Aucune disponibilité ne correspond à vos filtres pour cette semaine. Essayez la semaine suivante ou élargissez les filtres.</p>
+          </div>
+        ) : (
+          <div className="cal">
+            {weekDays.map((d,i) => {
+              const iso = fmtDate(d);
+              const slots = byDay[iso] || [];
+              const isPast = iso < tIso;
+              const isToday = iso === tIso;
+              return (
+                <div key={iso} className={'daycol'+(isPast?' past':'')}>
+                  <div className={'day-hd'+(isToday?' is-today':'')}>
+                    <div className="dow">{DOW_SHORT[i]}</div>
+                    <div className="dnum">{d.getDate()}</div>
+                  </div>
+                  <div className="day-body">
+                    {slots.length === 0
+                      ? <div className="day-empty">—</div>
+                      : slots.map(s => (
+                        <div key={s.id} className="slot" onClick={()=>!isPast && setBooking(s)}>
+                          <div className="slot-time">{hs(s.debut)} → {hs(s.fin)}</div>
+                          <div className="slot-mat">{s.matiere}</div>
+                          <div className="slot-prof">{s.prof_nom||'Professeur'}</div>
+                          <div className="slot-foot">
+                            <span className={'mode-tag '+(s.mode==='visio'?'mode-visio':'mode-presentiel')}>{s.mode==='visio'?'Visio':'Présentiel'}</span>
+                            <span className="slot-price">{money(calcMontant(s))}</span>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </main>
+
+      {booking && <BookingModal slot={booking} profName={booking.prof_nom||'Professeur'} onClose={()=>setBooking(null)} onBooked={()=>{ setBooking(null); load(); }} />}
+
+      <footer>
+        <div>© {new Date().getFullYear()} PlusdeBonnesNotes · 75 rue Rateau, 93120 La Courneuve</div>
+        <div><a href="index.html">Accueil</a> · <a href="inscriptions.html">Inscription</a> · <a href="membre.html">Espace membre</a></div>
+      </footer>
+    </React.Fragment>
+  );
+}
+
+// ═══════════════ BOOKING MODAL ═══════════════
+function BookingModal({ slot, profName, onClose, onBooked }){
+  const [form, setForm] = useState({ eleveNom:'', eleveNiveau:'', parentNom:'', parentEmail:'', parentTel:'', notes:'' });
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  const [done, setDone] = useState(false);
+  const montant = calcMontant(slot);
+  const set = (k,v) => setForm(p=>({...p,[k]:v}));
+
+  const submit = async () => {
+    setErr('');
+    if (!form.eleveNom.trim()) { setErr("Indiquez le nom de l'élève."); return; }
+    if (!form.parentTel.trim() && !form.parentEmail.trim()) { setErr('Indiquez au moins un contact (téléphone ou email).'); return; }
+    setBusy(true);
+    try {
+      // 1) Re-check the slot is still free (avoid double booking)
+      const { data:fresh, error:cErr } = await sb.from('creneaux').select('statut').eq('id', slot.id).single();
+      if (cErr) throw cErr;
+      if (fresh && fresh.statut !== 'libre') { setErr('Désolé, ce créneau vient d\'être réservé. Choisissez-en un autre.'); setBusy(false); return; }
+
+      // 2) Create reservation
+      const resa = {
+        id: genId('resa_'),
+        creneau_id: slot.id,
+        prof_id: slot.prof_id,
+        matiere: slot.matiere,
+        date: slot.date,
+        debut: slot.debut,
+        fin: slot.fin,
+        mode: slot.mode,
+        eleve_nom: form.eleveNom.trim(),
+        eleve_niveau: form.eleveNiveau,
+        parent_nom: form.parentNom.trim(),
+        parent_email: form.parentEmail.trim().toLowerCase(),
+        parent_tel: form.parentTel.trim(),
+        notes: form.notes.trim(),
+        montant: montant,
+        statut: 'en_attente'
+      };
+      const { error:iErr } = await sb.from('reservations').insert(resa);
+      if (iErr) throw iErr;
+
+      // 3) Hold the slot (best effort — admin resolves if RLS blocks)
+      try { await sb.from('creneaux').update({ statut:'reserve' }).eq('id', slot.id); } catch(_){}
+
+      setDone(true);
+    } catch (e) {
+      const msg = e.message || String(e);
+      if (/relation .*reservations.* does not exist/i.test(msg) || /Could not find the table/i.test(msg))
+        setErr("La table des réservations n'est pas encore créée côté Supabase. Contactez l'administrateur (SQL à exécuter).");
+      else if (/row-level security|permission|policy/i.test(msg))
+        setErr("La réservation publique n'est pas encore autorisée (RLS Supabase). Contactez l'administrateur.");
+      else setErr(msg);
+    } finally { setBusy(false); }
+  };
+
+  return (
+    <div className="modal-bg" onClick={e=>e.target===e.currentTarget && onClose()}>
+      <div className="modal">
+        {done ? (
+          <div className="modal-bd">
+            <div className="confirm">
+              <div className="ico">✓</div>
+              <h2>Créneau réservé !</h2>
+              <p>La place est mise de côté au nom de <b>{form.eleveNom}</b>.</p>
+              <div className="next-steps">
+                <b style={{fontFamily:'var(--ff-d)',fontSize:15}}>Prochaines étapes</b>
+                <ul>
+                  <li>Nous vous contactons rapidement (téléphone / email) avec le <b>lien de paiement</b>, ou vous réglez sur place.</li>
+                  <li>Dès réception du règlement, le créneau est <b>confirmé</b> et vous recevez la confirmation.</li>
+                  <li>Le 1<sup>er</sup> cours d'essai est offert — mentionnez-le si c'est votre première séance.</li>
+                </ul>
+              </div>
+              <button className="btn-primary" onClick={onBooked}>Terminé</button>
+            </div>
+          </div>
+        ) : (
+          <React.Fragment>
+            <div className="modal-hd">
+              <h2>Réserver ce créneau</h2>
+              <button className="modal-x" onClick={onClose}>×</button>
+            </div>
+            <div className="modal-bd">
+              <div className="recap">
+                <div className="recap-row"><span className="k">Date</span><span className="v">{DAYS[(new Date(slot.date).getDay()+6)%7]} {fmtFR(slot.date)}</span></div>
+                <div className="recap-row"><span className="k">Horaire</span><span className="v">{hs(slot.debut)} → {hs(slot.fin)}</span></div>
+                <div className="recap-row"><span className="k">Matière</span><span className="v">{slot.matiere}</span></div>
+                <div className="recap-row"><span className="k">Professeur</span><span className="v">{profName}</span></div>
+                <div className="recap-row"><span className="k">Format</span><span className="v">{slot.mode==='visio'?'Visio':'Présentiel'}</span></div>
+                <div className="recap-total"><span className="k">À régler</span><span className="v">{money(montant)}</span></div>
+              </div>
+
+              {err && <div className="alert alert-err"><span>⚠️</span><span>{err}</span></div>}
+
+              <div className="fld"><label>Nom de l'élève <span className="req">*</span></label>
+                <input className="inp" value={form.eleveNom} onChange={e=>set('eleveNom',e.target.value)} placeholder="Prénom Nom" autoFocus/></div>
+              <div className="fld"><label>Niveau</label>
+                <select className="sel" value={form.eleveNiveau} onChange={e=>set('eleveNiveau',e.target.value)}>
+                  <option value="">— Sélectionner —</option>
+                  {NIVEAUX.map(n=><option key={n} value={n}>{n}</option>)}
+                </select></div>
+              <div className="fld"><label>Nom du parent / responsable</label>
+                <input className="inp" value={form.parentNom} onChange={e=>set('parentNom',e.target.value)} placeholder="Facultatif"/></div>
+              <div className="fld"><label>Téléphone <span className="req">*</span></label>
+                <input className="inp" type="tel" value={form.parentTel} onChange={e=>set('parentTel',e.target.value)} placeholder="06 12 34 56 78"/></div>
+              <div className="fld"><label>Email</label>
+                <input className="inp" type="email" value={form.parentEmail} onChange={e=>set('parentEmail',e.target.value)} placeholder="prenom@exemple.com"/></div>
+              <div className="fld"><label>Message (facultatif)</label>
+                <textarea value={form.notes} onChange={e=>set('notes',e.target.value)} placeholder="Objectifs, difficultés, 1er cours d'essai…"/></div>
+
+              <div className="alert alert-info"><span>ℹ️</span><span>La réservation bloque la place. Elle est <b>confirmée après règlement</b>. Aucun paiement n'est demandé sur cette page.</span></div>
+
+              <button className="btn-primary" onClick={submit} disabled={busy}>{busy ? 'Réservation…' : 'Réserver ce créneau →'}</button>
+            </div>
+          </React.Fragment>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════ ADMIN PORTAL ═══════════════
+function AdminPortal({ onExit }){
+  const [session, setSession] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    sb.auth.getSession().then(({data:{session}}) => {
+      if (session) { setSession(session); fetchProfile(session.user.id); }
+      else setChecking(false);
+    });
+  }, []);
+  const fetchProfile = async (authId) => {
+    try {
+      const { data } = await sb.from('users').select('*').eq('auth_id', authId).single();
+      setProfile(data || null);
+    } catch(_) { setProfile(null); }
+    setChecking(false);
+  };
+  const onLogin = (sess, prof) => { setSession(sess); setProfile(prof); };
+  const logout = async () => { try{ await sb.auth.signOut(); }catch(_){} setSession(null); setProfile(null); };
+
+  if (checking) return <React.Fragment><TopNav onExit={onExit}/><main><div className="empty"><div className="spinner"></div><p>Vérification…</p></div></main></React.Fragment>;
+  if (!session || !profile) return <AdminLogin onExit={onExit} onLogin={onLogin} />;
+  if (profile.role !== 'admin') return (
+    <React.Fragment>
+      <TopNav onExit={onExit} adminName={profile.name}/>
+      <main><div className="empty"><div className="ico">🔒</div><h3>Accès réservé aux administrateurs</h3><p>Votre compte ({profile.role}) n'a pas accès à cet espace.</p><button className="nav-cta" onClick={logout} style={{marginTop:14}}>Se déconnecter</button></div></main>
+    </React.Fragment>
+  );
+  return <AdminDash profile={profile} onExit={onExit} onLogout={logout} />;
+}
+
+function AdminLogin({ onExit, onLogin }){
+  const [email, setEmail] = useState('');
+  const [pwd, setPwd] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  const submit = async () => {
+    setErr(''); setBusy(true);
+    try {
+      const { data, error } = await sb.auth.signInWithPassword({ email:email.trim().toLowerCase(), password:pwd });
+      if (error) throw error;
+      const { data:prof, error:pErr } = await sb.from('users').select('*').eq('auth_id', data.user.id).single();
+      if (pErr || !prof) { setErr('Profil introuvable. Contactez le support.'); await sb.auth.signOut(); setBusy(false); return; }
+      onLogin(data.session, prof);
+    } catch(e) {
+      setErr(e.message === 'Invalid login credentials' ? 'Email ou mot de passe incorrect.' : (e.message||'Erreur'));
+    } finally { setBusy(false); }
+  };
+  return (
+    <React.Fragment>
+      <TopNav onExit={onExit}/>
+      <main>
+        <div className="login-wrap">
+          <h2>Espace administrateur</h2>
+          <div className="sub">Gérez les créneaux, les réservations et les comptes.</div>
+          {err && <div className="alert alert-err"><span>⚠️</span><span>{err}</span></div>}
+          <div className="fld"><label>Email</label><input className="inp" type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()} autoFocus/></div>
+          <div className="fld"><label>Mot de passe</label><input className="inp" type="password" value={pwd} onChange={e=>setPwd(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()}/></div>
+          <button className="btn-primary" onClick={submit} disabled={busy||!email||!pwd}>{busy?'Connexion…':'Se connecter'}</button>
+        </div>
+      </main>
+    </React.Fragment>
+  );
+}
+
+function AdminDash({ profile, onExit, onLogout }){
+  const [tab, setTab] = useState('reservations');
+  return (
+    <React.Fragment>
+      <TopNav onExit={onExit} adminName={profile.name}/>
+      <main>
+        <div className="admin-tabs">
+          <button className={'atab'+(tab==='reservations'?' on':'')} onClick={()=>setTab('reservations')}>📋 Réservations</button>
+          <button className={'atab'+(tab==='creneaux'?' on':'')} onClick={()=>setTab('creneaux')}>🗓️ Créneaux</button>
+          <button className={'atab'+(tab==='comptes'?' on':'')} onClick={()=>setTab('comptes')}>👥 Comptes</button>
+          <div style={{flex:1}}></div>
+          <button className="atab" onClick={onLogout}>Déconnexion ⏻</button>
+        </div>
+        {tab==='reservations' && <AdminReservations/>}
+        {tab==='creneaux' && <AdminCreneaux/>}
+        {tab==='comptes' && <AdminComptes/>}
+      </main>
+    </React.Fragment>
+  );
+}
+
+// ─── Admin: Réservations ───
+function AdminReservations(){
+  const [list, setList] = useState([]);
+  const [profs, setProfs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState('');
+  const [filter, setFilter] = useState('en_attente');
+
+  const load = useCallback(async () => {
+    setLoading(true); setErr('');
+    try {
+      const [r, p] = await Promise.all([
+        sb.from('reservations').select('*').order('created_at',{ascending:false}),
+        sb.from('users').select('id,name').eq('role','prof')
+      ]);
+      if (r.error) throw r.error;
+      setList(r.data||[]); setProfs(p.error?[]:(p.data||[]));
+    } catch(e){ setErr(e.message||'Erreur'); } finally { setLoading(false); }
+  }, []);
+  useEffect(()=>{ load(); },[load]);
+  const profName = id => { const p = profs.find(x=>x.id===id); return p?p.name:'—'; };
+
+  const setStatut = async (r, statut, dispoStatut) => {
+    try {
+      await sb.from('reservations').update({ statut }).eq('id', r.id);
+      if (dispoStatut && r.creneau_id) { try{ await sb.from('creneaux').update({ statut:dispoStatut }).eq('id', r.creneau_id); }catch(_){} }
+      load();
+    } catch(e){ alert('Erreur : '+(e.message||e)); }
+  };
+
+  const shown = list.filter(r => filter==='tous' ? true : r.statut===filter);
+  const counts = {
+    en_attente: list.filter(r=>r.statut==='en_attente').length,
+    paye: list.filter(r=>r.statut==='paye').length,
+    valide: list.filter(r=>r.statut==='valide').length,
+  };
+  const badge = s => <span className={'badge b-'+s}>{ {en_attente:'En attente',paye:'Payé',valide:'Validé',refuse:'Refusé',annule:'Annulé'}[s] || s }</span>;
+
+  return (
+    <div>
+      <div className="card">
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:10}}>
+          <h3 style={{margin:0}}>Réservations reçues</h3>
+          <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+            {[['en_attente',`À traiter (${counts.en_attente})`],['paye',`Payées (${counts.paye})`],['valide',`Validées (${counts.valide})`],['tous','Toutes']].map(([k,l])=>
+              <button key={k} className={'btn-mini'+(filter===k?' pay':'')} onClick={()=>setFilter(k)}>{l}</button>)}
+            <button className="btn-mini" onClick={load}>↻</button>
+          </div>
+        </div>
+      </div>
+      {loading ? <div className="empty"><div className="spinner"></div></div>
+       : err ? <div className="alert alert-err"><span>⚠️</span><span>{err}</span></div>
+       : shown.length===0 ? <div className="empty"><div className="ico">📭</div><h3>Aucune réservation</h3><p>Les réservations faites depuis la page publique apparaîtront ici.</p></div>
+       : (
+        <div className="card" style={{padding:0,overflow:'hidden'}}>
+          <table className="tbl">
+            <thead><tr><th>Élève</th><th>Créneau</th><th>Matière · Prof</th><th>Contact</th><th>Montant</th><th>Statut</th><th>Actions</th></tr></thead>
+            <tbody>
+              {shown.map(r => (
+                <tr key={r.id}>
+                  <td><b>{r.eleve_nom}</b>{r.eleve_niveau?<div style={{fontSize:11,color:'var(--muted)'}}>{r.eleve_niveau}</div>:null}</td>
+                  <td>{fmtFR(r.date)}<div style={{fontSize:11,color:'var(--muted)'}}>{hs(r.debut)}→{hs(r.fin)} · {r.mode==='visio'?'Visio':'Prés.'}</div></td>
+                  <td>{r.matiere}<div style={{fontSize:11,color:'var(--muted)'}}>{profName(r.prof_id)}</div></td>
+                  <td style={{fontSize:12}}>{r.parent_tel||'—'}{r.parent_email?<div style={{color:'var(--muted)'}}>{r.parent_email}</div>:null}</td>
+                  <td><b>{money(r.montant||0)}</b></td>
+                  <td>{badge(r.statut)}</td>
+                  <td style={{whiteSpace:'nowrap'}}>
+                    {r.statut==='en_attente' && <button className="btn-mini pay" onClick={()=>setStatut(r,'paye')}>Marquer payé</button>}
+                    {(r.statut==='en_attente'||r.statut==='paye') && <button className="btn-mini ok" onClick={()=>setStatut(r,'valide','confirme')}>Valider</button>}
+                    {r.statut!=='refuse' && r.statut!=='valide' && <button className="btn-mini no" onClick={()=>{ if(confirm('Refuser et libérer le créneau ?')) setStatut(r,'refuse','libre'); }}>Refuser</button>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Admin: Créneaux (dispos) ───
+function AdminCreneaux(){
+  const [dispos, setDispos] = useState([]);
+  const [profs, setProfs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState('');
+  const [f, setF] = useState({ profId:'', date:todayISO(), debut:'17', fin:'18', mode:'presentiel', matiere:'Mathématiques', tarifHoraire:'40', fraisInfra:'0', notes:'' });
+  const [saving, setSaving] = useState(false);
+  const set = (k,v)=>setF(p=>({...p,[k]:v}));
+
+  const load = useCallback(async () => {
+    setLoading(true); setErr('');
+    try {
+      const [d,p] = await Promise.all([
+        sb.from('creneaux').select('*').gte('date', todayISO()).order('date'),
+        sb.from('users').select('id,name,matiere').eq('role','prof')
+      ]);
+      if (d.error) throw d.error;
+      setDispos(d.data||[]); setProfs(p.error?[]:(p.data||[]));
+      if (p.data && p.data[0] && !f.profId) set('profId', p.data[0].id);
+    } catch(e){ setErr(e.message||'Erreur'); } finally { setLoading(false); }
+  }, []);
+  useEffect(()=>{ load(); },[load]);
+  const profName = id => { const p=profs.find(x=>x.id===id); return p?p.name:'—'; };
+
+  const add = async () => {
+    if (!f.profId){ alert('Choisissez un professeur.'); return; }
+    if (parseFloat(f.fin)<=parseFloat(f.debut)){ alert("L'heure de fin doit être après le début."); return; }
+    setSaving(true);
+    try {
+      const prof = profs.find(p=>p.id===f.profId);
+      const row = { id:genId('c_'), prof_id:f.profId, prof_nom:prof?prof.name:'', date:f.date, debut:parseFloat(f.debut), fin:parseFloat(f.fin),
+        mode:f.mode, matiere:f.matiere, notes:f.notes, statut:'libre',
+        tarif_horaire:parseFloat(f.tarifHoraire)||40, frais_infra:parseFloat(f.fraisInfra)||0 };
+      const { error } = await sb.from('creneaux').insert(row);
+      if (error) throw error;
+      load();
+    } catch(e){ alert('Erreur : '+(e.message||e)); } finally { setSaving(false); }
+  };
+  const del = async (d) => {
+    if (d.statut==='confirme'){ alert('Impossible de supprimer un créneau confirmé.'); return; }
+    if (!confirm('Supprimer ce créneau ?')) return;
+    try { await sb.from('creneaux').delete().eq('id', d.id); load(); } catch(e){ alert('Erreur : '+(e.message||e)); }
+  };
+
+  // Duration options 0.5..4h and times
+  const timeOpts = []; for (let h=8; h<=21.5; h+=0.5) timeOpts.push(h);
+
+  return (
+    <div>
+      <div className="card">
+        <h3>➕ Ajouter une disponibilité</h3>
+        <div className="grid3">
+          <div className="fld"><label>Professeur</label>
+            <select className="sel" value={f.profId} onChange={e=>set('profId',e.target.value)}>
+              <option value="">— Choisir —</option>
+              {profs.map(p=><option key={p.id} value={p.id}>{p.name}{p.matiere?' · '+p.matiere:''}</option>)}
+            </select></div>
+          <div className="fld"><label>Matière</label>
+            <select className="sel" value={f.matiere} onChange={e=>set('matiere',e.target.value)}>
+              {MATIERES.map(m=><option key={m} value={m}>{m}</option>)}
+            </select></div>
+          <div className="fld"><label>Format</label>
+            <select className="sel" value={f.mode} onChange={e=>set('mode',e.target.value)}>
+              <option value="presentiel">Présentiel</option><option value="visio">Visio</option>
+            </select></div>
+          <div className="fld"><label>Date</label><input className="inp" type="date" value={f.date} min={todayISO()} onChange={e=>set('date',e.target.value)}/></div>
+          <div className="fld"><label>Début</label>
+            <select className="sel" value={f.debut} onChange={e=>set('debut',e.target.value)}>{timeOpts.map(h=><option key={h} value={h}>{hs(h)}</option>)}</select></div>
+          <div className="fld"><label>Fin</label>
+            <select className="sel" value={f.fin} onChange={e=>set('fin',e.target.value)}>{timeOpts.map(h=><option key={h} value={h}>{hs(h)}</option>)}</select></div>
+          <div className="fld"><label>Tarif horaire (€)</label><input className="inp" type="number" value={f.tarifHoraire} onChange={e=>set('tarifHoraire',e.target.value)}/></div>
+          <div className="fld"><label>Frais fixes (€)</label><input className="inp" type="number" value={f.fraisInfra} onChange={e=>set('fraisInfra',e.target.value)}/></div>
+          <div className="fld"><label>Note (facultatif)</label><input className="inp" value={f.notes} onChange={e=>set('notes',e.target.value)} placeholder="Salle, précision…"/></div>
+        </div>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginTop:6,flexWrap:'wrap',gap:10}}>
+          <div style={{fontSize:13,color:'var(--muted)'}}>Prix affiché à l'élève : <b style={{color:'var(--vert)'}}>{money(calcMontant({debut:f.debut,fin:f.fin,tarifHoraire:f.tarifHoraire,fraisInfra:f.fraisInfra}))}</b></div>
+          <button className="btn-primary" style={{width:'auto',padding:'11px 22px'}} onClick={add} disabled={saving}>{saving?'Ajout…':'Ajouter le créneau'}</button>
+        </div>
+      </div>
+
+      <div className="card" style={{padding:0,overflow:'hidden'}}>
+        <div style={{padding:'14px 20px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <h3 style={{margin:0}}>Créneaux à venir</h3>
+          <button className="btn-mini" onClick={load}>↻ Actualiser</button>
+        </div>
+        {loading ? <div className="empty"><div className="spinner"></div></div>
+         : err ? <div className="alert alert-err" style={{margin:16}}><span>⚠️</span><span>{err}</span></div>
+         : dispos.length===0 ? <div className="empty"><div className="ico">🗓️</div><h3>Aucun créneau</h3><p>Ajoutez des disponibilités ci-dessus — elles apparaîtront sur la page publique.</p></div>
+         : (
+          <table className="tbl">
+            <thead><tr><th>Date</th><th>Horaire</th><th>Matière</th><th>Prof</th><th>Format</th><th>Prix</th><th>Statut</th><th></th></tr></thead>
+            <tbody>
+              {dispos.map(d=>(
+                <tr key={d.id}>
+                  <td>{fmtFR(d.date)}</td>
+                  <td>{hs(d.debut)}→{hs(d.fin)}</td>
+                  <td>{d.matiere}</td>
+                  <td>{d.prof_nom||profName(d.prof_id)}</td>
+                  <td>{d.mode==='visio'?'Visio':'Présentiel'}</td>
+                  <td>{money(calcMontant(d))}</td>
+                  <td><span className={'badge b-'+(d.statut||'libre')}>{ {libre:'Libre',reserve:'Réservé',confirme:'Confirmé'}[d.statut]||d.statut }</span></td>
+                  <td>{d.statut!=='confirme' && <button className="btn-mini no" onClick={()=>del(d)}>Suppr.</button>}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Admin: Comptes ───
+function AdminComptes(){
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState('');
+  const [f, setF] = useState({ name:'', role:'eleve', niveau:'3ème', matiere:'Mathématiques', email:'', pwd:'' });
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState('');
+  const [creds, setCreds] = useState(null);
+  const set = (k,v)=>setF(p=>({...p,[k]:v}));
+
+  const load = useCallback(async () => {
+    setLoading(true); setErr('');
+    try { const { data, error } = await sb.from('users').select('*'); if (error) throw error; setUsers(data||[]); }
+    catch(e){ setErr(e.message||'Erreur'); } finally { setLoading(false); }
+  }, []);
+  useEffect(()=>{ load(); },[load]);
+
+  const slugMail = s => (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'.').replace(/^\.+|\.+$/g,'');
+  const genPwd = () => { const c='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'; let s=''; for(let i=0;i<10;i++)s+=c[Math.floor(Math.random()*c.length)]; return s; };
+  const domByRole = r => r==='prof'?'prof.plusdebonnesnotes.com':r==='admin'?'plusdebonnesnotes.com':'eleve.plusdebonnesnotes.com';
+
+  useEffect(() => {
+    if (f.name && !f.email) set('email', slugMail(f.name).slice(0,24)+'@'+domByRole(f.role));
+  }, [f.name, f.role]);
+
+  const create = async () => {
+    setErr(''); setMsg(''); setCreds(null);
+    if (!f.name.trim()){ setErr('Indiquez un nom.'); return; }
+    const email = (f.email || (slugMail(f.name)+'@'+domByRole(f.role))).toLowerCase().trim();
+    const pwd = f.pwd || genPwd();
+    if (pwd.length<6){ setErr('Mot de passe : 6 caractères minimum.'); return; }
+    setBusy(true);
+    try {
+      let token = SUPABASE_KEY;
+      try { const { data:sess } = await sb.auth.getSession(); if (sess?.session?.access_token) token = sess.session.access_token; } catch(_){}
+      const resp = await fetch(SUPABASE_URL+'/functions/v1/create-user', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+token, 'apikey':SUPABASE_KEY },
+        body:JSON.stringify({ email, password:pwd, meta:{ role:f.role, name:f.name.trim() } })
+      });
+      let out={}; try{ out=await resp.json(); }catch(_){}
+      if (!resp.ok || out.error) { setErr('Échec création compte : '+(out.error||('erreur '+resp.status))); setBusy(false); return; }
+      const authId = out.id;
+      // Create / link the users row
+      const initials = f.name.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+      const row = { id:'u'+Date.now(), name:f.name.trim(), role:f.role, initials, auth_id:authId,
+        matiere: f.role==='prof'?f.matiere:null, niveau: f.role==='eleve'?f.niveau:null, email };
+      try { await sb.from('users').upsert(row, { onConflict:'id' }); } catch(_){}
+      setCreds({ email, pwd, name:f.name.trim(), role:f.role });
+      setMsg('Compte créé ✓ Transmettez ces identifiants à la personne.');
+      setF({ name:'', role:f.role, niveau:'3ème', matiere:'Mathématiques', email:'', pwd:'' });
+      load();
+    } catch(e){ setErr('Erreur : '+(e.message||e)); } finally { setBusy(false); }
+  };
+
+  const copy = txt => { try{ navigator.clipboard.writeText(txt); }catch(_){} };
+
+  const roleLabel = { admin:'👑 Admin', prof:'👨‍🏫 Professeur', eleve:'🎓 Élève', membre:'Membre' };
+  const grouped = { admin:[], prof:[], eleve:[], autre:[] };
+  users.forEach(u => (grouped[u.role]||grouped.autre).push(u));
+
+  return (
+    <div>
+      <div className="card">
+        <h3>➕ Créer un compte</h3>
+        <div className="grid3">
+          <div className="fld"><label>Nom complet</label><input className="inp" value={f.name} onChange={e=>set('name',e.target.value)} placeholder="Prénom Nom"/></div>
+          <div className="fld"><label>Rôle</label>
+            <select className="sel" value={f.role} onChange={e=>set('role',e.target.value)}>
+              <option value="eleve">🎓 Élève</option><option value="prof">👨‍🏫 Professeur</option><option value="admin">👑 Administrateur</option>
+            </select></div>
+          {f.role==='eleve' && <div className="fld"><label>Niveau</label>
+            <select className="sel" value={f.niveau} onChange={e=>set('niveau',e.target.value)}>{NIVEAUX.map(n=><option key={n} value={n}>{n}</option>)}</select></div>}
+          {f.role==='prof' && <div className="fld"><label>Matière</label>
+            <select className="sel" value={f.matiere} onChange={e=>set('matiere',e.target.value)}>{MATIERES.map(m=><option key={m} value={m}>{m}</option>)}</select></div>}
+          <div className="fld"><label>Email (identifiant)</label><input className="inp" type="email" value={f.email} onChange={e=>set('email',e.target.value)} placeholder="auto-généré"/></div>
+          <div className="fld"><label>Mot de passe</label>
+            <div style={{display:'flex',gap:6}}>
+              <input className="inp" value={f.pwd} onChange={e=>set('pwd',e.target.value)} placeholder="auto-généré" style={{flex:1}}/>
+              <button className="btn-mini" onClick={()=>set('pwd',genPwd())} title="Générer">🎲</button>
+            </div></div>
+        </div>
+        {err && <div className="alert alert-err"><span>⚠️</span><span>{err}</span></div>}
+        {msg && <div className="alert alert-ok"><span>✓</span><span>{msg}</span></div>}
+        {creds && (
+          <div className="creds">
+            <div style={{fontSize:11,textTransform:'uppercase',letterSpacing:1,color:'#9a958a',marginBottom:8}}>Identifiants — {roleLabel[creds.role]} · {creds.name}</div>
+            <div className="cr-row"><span className="lbl">Email</span><span className="val">{creds.email} <button className="copy-btn" onClick={()=>copy(creds.email)}>copier</button></span></div>
+            <div className="cr-row"><span className="lbl">Mot de passe</span><span className="val">{creds.pwd} <button className="copy-btn" onClick={()=>copy(creds.pwd)}>copier</button></span></div>
+            <div className="cr-row"><span className="lbl">Connexion</span><span className="val" style={{fontSize:11}}>membre.html</span></div>
+          </div>
+        )}
+        <div style={{textAlign:'right',marginTop:14}}>
+          <button className="btn-primary" style={{width:'auto',padding:'11px 24px'}} onClick={create} disabled={busy}>{busy?'Création…':'Créer le compte'}</button>
+        </div>
+      </div>
+
+      {loading ? <div className="empty"><div className="spinner"></div></div>
+       : err && !users.length ? <div className="alert alert-err"><span>⚠️</span><span>{err}</span></div>
+       : ['admin','prof','eleve'].map(role => grouped[role].length>0 && (
+        <div className="card" key={role} style={{padding:0,overflow:'hidden'}}>
+          <div style={{padding:'12px 20px',fontFamily:'var(--ff-d)',fontSize:15,fontWeight:700,background:'var(--paper2)',borderBottom:'1.5px solid var(--regle)'}}>{roleLabel[role]} <span style={{color:'var(--muted)',fontWeight:400,fontSize:13}}>({grouped[role].length})</span></div>
+          <table className="tbl">
+            <thead><tr><th>Nom</th><th>Détail</th><th>Email</th><th>Accès</th></tr></thead>
+            <tbody>
+              {grouped[role].map(u=>(
+                <tr key={u.id}>
+                  <td><b>{u.name}</b></td>
+                  <td style={{fontSize:12,color:'var(--muted)'}}>{u.niveau||u.matiere||'—'}</td>
+                  <td style={{fontSize:12}}>{u.email||'—'}</td>
+                  <td>{u.auth_id ? <span className="badge b-valide">Actif</span> : <span className="badge b-attente">Pas de connexion</span>}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
