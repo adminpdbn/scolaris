@@ -202,6 +202,27 @@ footer a{color:var(--ink);text-decoration:none;}footer a:hover{color:var(--bleu)
   .tbl{display:block;overflow-x:auto;white-space:nowrap;}
 }
 @media (max-width:520px){.cal{grid-template-columns:1fr;}}
+
+/* View toggle */
+.viewtoggle{display:inline-flex;border:1.5px solid var(--ink);border-radius:9px;overflow:hidden;margin-bottom:16px;}
+.vt-btn{padding:8px 16px;border:none;background:transparent;cursor:pointer;font-family:var(--ff-m);font-size:12.5px;color:var(--ink);}
+.vt-btn.on{background:var(--ink);color:var(--paper);font-weight:700;}
+/* Public frise (timeline par prof) */
+.pf-wrap{border:1.5px solid var(--regle);border-radius:12px;overflow:hidden;background:var(--blanc);}
+.pf-scroll{overflow-x:auto;}
+.pf-row{display:flex;border-bottom:1px solid var(--regle);}
+.pf-row:last-child{border-bottom:none;}
+.pf-res{width:140px;flex-shrink:0;padding:10px 12px;font-weight:700;font-size:13px;border-right:1.5px solid var(--regle);background:var(--paper2);position:sticky;left:0;z-index:2;display:flex;align-items:center;}
+.pf-hdr .pf-res{background:var(--ink);color:var(--paper);}
+.pf-hours{position:relative;height:30px;}
+.pf-htick{position:absolute;top:0;bottom:0;font-size:10px;color:var(--muted);border-left:1px solid var(--regle);padding-left:4px;display:flex;align-items:center;}
+.pf-track{position:relative;height:64px;}
+.pf-grid{position:absolute;top:0;bottom:0;border-left:1px solid #f1ecdf;}
+.pf-block{position:absolute;top:7px;bottom:7px;border:none;border-left:3px solid;border-radius:8px;padding:5px 9px;cursor:pointer;text-align:left;display:flex;flex-direction:column;justify-content:center;gap:1px;overflow:hidden;font-family:var(--ff-m);transition:transform .1s ease,box-shadow .1s ease;}
+.pf-block:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(0,0,0,.16);}
+.pf-block b{font-size:11.5px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pf-b-time{font-size:9.5px;color:var(--muted);}
+.pf-b-price{font-size:10px;font-weight:700;color:var(--vert);}
 </style>
 </head>
 <body>
@@ -235,6 +256,11 @@ const calcMontant = d => {
 const tarifH = d => { const r = d.tarif_horaire!=null ? d.tarif_horaire : (d.tarifHoraire!=null ? d.tarifHoraire : 40); return parseFloat(r)||0; };
 const dureeH = d => Math.max(0,(parseFloat(d.fin)||0)-(parseFloat(d.debut)||0));
 const dureeLabel = d => { const x=dureeH(d); if(x===Math.floor(x)) return x+' h'; const h=Math.floor(x), m=Math.round((x-h)*60); return h+'h'+String(m).padStart(2,'0'); };
+const MAT_COLORS = {'Mathématiques':'#1a4fc4','Physique-Chimie':'#c2410c','Français':'#15803d','Anglais':'#9333ea','SVT':'#0d9488','Histoire-Géo':'#b45309','Philosophie':'#4338ca','Informatique':'#0369a1'};
+const matColor = m => MAT_COLORS[m] || '#1a4fc4';
+const shiftISO = (iso,n)=>{ const d=new Date(iso+'T12:00'); d.setDate(d.getDate()+n); return d.toISOString().split('T')[0]; };
+const dayLabelFR = iso => { try{ return new Date(iso+'T12:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'}); }catch(_){ return iso; } };
+const splitMat = s => (s||'').split(',').map(x=>x.trim()).filter(Boolean);
 
 function getMonday(offset=0){
   const d = new Date(); d.setHours(0,0,0,0);
@@ -279,6 +305,36 @@ function TopNav({ onAdmin, onExit, adminName }){
 }
 
 // ═══════════════ PUBLIC BOOKING ═══════════════
+function PublicFrise({ items, onPick }){
+  const H0=8,H1=21,COLW=58;
+  const hours=[]; for(let h=H0;h<=H1;h++) hours.push(h);
+  const width=(H1-H0)*COLW;
+  const groups={};
+  (items||[]).forEach(it=>{ const mats=splitMat(it.matiere); (mats.length?mats:['Autre']).forEach(mat=>{ if(!groups[mat])groups[mat]={label:mat,items:[]}; groups[mat].items.push({...it,_mat:mat}); }); });
+  const rows=Object.entries(groups).sort((a,b)=>a[1].label.localeCompare(b[1].label));
+  if(rows.length===0) return <div className="empty"><div className="ico">🗓️</div><h3>Aucun créneau ce jour</h3><p>Essayez un autre jour ou élargissez les filtres.</p></div>;
+  return <div className="pf-wrap"><div className="pf-scroll"><div style={{minWidth:140+width}}>
+    <div className="pf-row pf-hdr">
+      <div className="pf-res">Matière</div>
+      <div className="pf-hours" style={{width}}>{hours.map(h=><div key={h} className="pf-htick" style={{left:(h-H0)*COLW,width:COLW}}>{h}h</div>)}</div>
+    </div>
+    {rows.map(([k,g])=>(
+      <div className="pf-row" key={k}>
+        <div className="pf-res">{g.label}</div>
+        <div className="pf-track" style={{width}}>
+          {hours.map(h=><div key={h} className="pf-grid" style={{left:(h-H0)*COLW}}/>)}
+          {g.items.map(it=>{const col=matColor(it._mat||it.matiere);const left=(it.debut-H0)*COLW;const w=Math.max(46,(it.fin-it.debut)*COLW-3);return (
+            <button key={it.id+'_'+(it._mat||'')} className="pf-block" onClick={()=>onPick({...it,matiere:it._mat||it.matiere})} style={{left,width:w,borderLeftColor:col,background:col+'18'}} title={it.matiere+' · '+hs(it.debut)+'→'+hs(it.fin)+' · '+(it.mode==='visio'?'Visio':'Présentiel')}>
+              <b style={{color:col}}>{hs(it.debut)}→{hs(it.fin)}</b>
+              <span className="pf-b-time">{it.mode==='visio'?'Visio':'Présentiel'}</span>
+              <span className="pf-b-price">{money(tarifH(it))}/h</span>
+            </button>);})}
+        </div>
+      </div>
+    ))}
+  </div></div></div>;
+}
+
 function PublicBooking({ onAdmin }){
   const [loading, setLoading] = useState(true);
   const [loadErr, setLoadErr] = useState('');
@@ -289,6 +345,8 @@ function PublicBooking({ onAdmin }){
   const [fMode, setFMode] = useState('');
   const [fProf, setFProf] = useState('');
   const [booking, setBooking] = useState(null); // slot being booked
+  const [viewMode, setViewMode] = useState('frise');
+  const [friseDay, setFriseDay] = useState(todayISO());
 
   const load = useCallback(async () => {
     setLoading(true); setLoadErr('');
@@ -314,7 +372,7 @@ function PublicBooking({ onAdmin }){
   const weekLabel = `${monday.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})} – ${weekDays[6].toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'})}`;
 
   const filtered = useMemo(() => dispos.filter(d => {
-    if (fMat && d.matiere !== fMat) return false;
+    if (fMat && !splitMat(d.matiere).includes(fMat)) return false;
     if (fMode && d.mode !== fMode) return false;
     if (fProf && d.prof_id !== fProf) return false;
     return true;
@@ -330,6 +388,7 @@ function PublicBooking({ onAdmin }){
 
   const totalWeek = weekDays.reduce((n,d)=>n+(byDay[fmtDate(d)]||[]).length,0);
   const tIso = todayISO();
+  const friseItems = filtered.filter(d=>d.date===friseDay).sort((a,b)=>(a.debut||0)-(b.debut||0));
 
   return (
     <React.Fragment>
@@ -344,8 +403,8 @@ function PublicBooking({ onAdmin }){
 
         <div className="steps">
           <div className="step"><div className="step-n">1</div><h3>Choisissez</h3><p>Filtrez par matière ou professeur, puis cliquez sur un créneau libre.</p></div>
-          <div className="step"><div className="step-n">2</div><h3>Réservez</h3><p>Renseignez le nom de l'élève et un contact. La place est mise de côté.</p></div>
-          <div className="step"><div className="step-n">3</div><h3>Réglez</h3><p>Vous recevez le lien de paiement (ou réglez sur place). Le cours est alors confirmé.</p></div>
+          <div className="step"><div className="step-n">2</div><h3>Demandez</h3><p>Renseignez le nom de l'élève et un contact. Vous serez recontacté(e).</p></div>
+          <div className="step"><div className="step-n">3</div><h3>Validez</h3><p>Nous confirmons le créneau, vous communiquons le professeur et le règlement.</p></div>
         </div>
 
         <div className="filters">
@@ -364,74 +423,83 @@ function PublicBooking({ onAdmin }){
               <option value="visio">Visio</option>
             </select>
           </div>
-          <div className="filter-group">
-            <label>Professeur</label>
-            <select className="sel" value={fProf} onChange={e=>setFProf(e.target.value)}>
-              <option value="">Tous</option>
-              {profs.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
-          </div>
           <div style={{flex:1}}></div>
           <button className="wbtn" onClick={load} title="Rafraîchir">↻ Actualiser</button>
         </div>
 
-        <div className="weeknav">
-          <div className="wlabel">📅 {weekLabel}</div>
-          <div className="wbtns">
-            <button className="wbtn" onClick={()=>setWeekOffset(w=>w-1)} disabled={weekOffset<=0}>← Semaine préc.</button>
-            <button className="wbtn today" onClick={()=>setWeekOffset(0)}>Aujourd'hui</button>
-            <button className="wbtn" onClick={()=>setWeekOffset(w=>w+1)}>Semaine suiv. →</button>
-          </div>
+        <div className="viewtoggle">
+          <button className={'vt-btn'+(viewMode==='frise'?' on':'')} onClick={()=>setViewMode('frise')}>📊 Frise horaire</button>
+          <button className={'vt-btn'+(viewMode==='cartes'?' on':'')} onClick={()=>setViewMode('cartes')}>🗂️ Cartes par semaine</button>
         </div>
 
-        {loading ? (
-          <div className="empty"><div className="spinner"></div><p>Chargement des créneaux…</p></div>
-        ) : loadErr ? (
-          <div className="empty">
-            <div className="ico">⚠️</div>
-            <h3>Impossible de charger les créneaux</h3>
-            <p>{loadErr}</p>
-            <p style={{marginTop:10,fontSize:12}}>Si le problème persiste, la configuration Supabase (accès public en lecture) n'est peut-être pas encore activée.</p>
-          </div>
-        ) : totalWeek === 0 ? (
-          <div className="empty">
-            <div className="ico">🗓️</div>
-            <h3>Aucun créneau cette semaine</h3>
-            <p>Aucune disponibilité ne correspond à vos filtres pour cette semaine. Essayez la semaine suivante ou élargissez les filtres.</p>
-          </div>
+        {viewMode==='frise' ? (
+          <React.Fragment>
+            <div className="weeknav">
+              <div className="wlabel" style={{textTransform:'capitalize'}}>📅 {dayLabelFR(friseDay)}</div>
+              <div className="wbtns">
+                <button className="wbtn" onClick={()=>setFriseDay(d=>shiftISO(d,-1))} disabled={friseDay<=tIso}>← Jour préc.</button>
+                <button className="wbtn today" onClick={()=>setFriseDay(tIso)}>Aujourd'hui</button>
+                <button className="wbtn" onClick={()=>setFriseDay(d=>shiftISO(d,1))}>Jour suiv. →</button>
+              </div>
+            </div>
+            {loading ? (
+              <div className="empty"><div className="spinner"></div><p>Chargement des créneaux…</p></div>
+            ) : loadErr ? (
+              <div className="empty"><div className="ico">⚠️</div><h3>Impossible de charger les créneaux</h3><p>{loadErr}</p><p style={{marginTop:10,fontSize:12}}>La configuration Supabase (accès public en lecture) n'est peut-être pas encore activée.</p></div>
+            ) : (
+              <PublicFrise items={friseItems} onPick={setBooking} />
+            )}
+          </React.Fragment>
         ) : (
-          <div className="cal">
-            {weekDays.map((d,i) => {
-              const iso = fmtDate(d);
-              const slots = byDay[iso] || [];
-              const isPast = iso < tIso;
-              const isToday = iso === tIso;
-              return (
-                <div key={iso} className={'daycol'+(isPast?' past':'')}>
-                  <div className={'day-hd'+(isToday?' is-today':'')}>
-                    <div className="dow">{DOW_SHORT[i]}</div>
-                    <div className="dnum">{d.getDate()}</div>
-                  </div>
-                  <div className="day-body">
-                    {slots.length === 0
-                      ? <div className="day-empty">—</div>
-                      : slots.map(s => (
-                        <div key={s.id} className="slot" onClick={()=>!isPast && setBooking(s)}>
-                          <div className="slot-time">{hs(s.debut)} → {hs(s.fin)} <span style={{fontWeight:400,fontSize:10,color:'var(--muted)'}}>· {dureeLabel(s)}</span></div>
-                          <div className="slot-mat">{s.matiere}</div>
-                          <div className="slot-prof">{s.prof_nom||'Professeur'}</div>
-                          {s.niveau && <div style={{fontSize:10,color:'var(--muted)',marginTop:1}}>Niveau : {s.niveau}</div>}
-                          <div className="slot-foot">
-                            <span className={'mode-tag '+(s.mode==='visio'?'mode-visio':'mode-presentiel')}>{s.mode==='visio'?'Visio':'Présentiel'}</span>
-                            <span className="slot-price">{money(tarifH(s))}<span style={{fontWeight:400,fontSize:10,color:'var(--muted)'}}>/h</span></span>
-                          </div>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <React.Fragment>
+            <div className="weeknav">
+              <div className="wlabel">📅 {weekLabel}</div>
+              <div className="wbtns">
+                <button className="wbtn" onClick={()=>setWeekOffset(w=>w-1)} disabled={weekOffset<=0}>← Semaine préc.</button>
+                <button className="wbtn today" onClick={()=>setWeekOffset(0)}>Aujourd'hui</button>
+                <button className="wbtn" onClick={()=>setWeekOffset(w=>w+1)}>Semaine suiv. →</button>
+              </div>
+            </div>
+            {loading ? (
+              <div className="empty"><div className="spinner"></div><p>Chargement des créneaux…</p></div>
+            ) : loadErr ? (
+              <div className="empty"><div className="ico">⚠️</div><h3>Impossible de charger les créneaux</h3><p>{loadErr}</p><p style={{marginTop:10,fontSize:12}}>La configuration Supabase (accès public en lecture) n'est peut-être pas encore activée.</p></div>
+            ) : totalWeek === 0 ? (
+              <div className="empty"><div className="ico">🗓️</div><h3>Aucun créneau cette semaine</h3><p>Aucune disponibilité ne correspond à vos filtres pour cette semaine. Essayez la semaine suivante ou élargissez les filtres.</p></div>
+            ) : (
+              <div className="cal">
+                {weekDays.map((d,i) => {
+                  const iso = fmtDate(d);
+                  const slots = byDay[iso] || [];
+                  const isPast = iso < tIso;
+                  const isToday = iso === tIso;
+                  return (
+                    <div key={iso} className={'daycol'+(isPast?' past':'')}>
+                      <div className={'day-hd'+(isToday?' is-today':'')}>
+                        <div className="dow">{DOW_SHORT[i]}</div>
+                        <div className="dnum">{d.getDate()}</div>
+                      </div>
+                      <div className="day-body">
+                        {slots.length === 0
+                          ? <div className="day-empty">—</div>
+                          : slots.map(s => (
+                            <div key={s.id} className="slot" onClick={()=>!isPast && setBooking(s)}>
+                              <div className="slot-time">{hs(s.debut)} → {hs(s.fin)} <span style={{fontWeight:400,fontSize:10,color:'var(--muted)'}}>· {dureeLabel(s)}</span></div>
+                              <div className="slot-mat">{s.matiere}</div>
+                              {s.niveau && <div style={{fontSize:10,color:'var(--muted)',marginTop:1}}>Niveau : {s.niveau}</div>}
+                              <div className="slot-foot">
+                                <span className={'mode-tag '+(s.mode==='visio'?'mode-visio':'mode-presentiel')}>{s.mode==='visio'?'Visio':'Présentiel'}</span>
+                                <span className="slot-price">{money(tarifH(s))}<span style={{fontWeight:400,fontSize:10,color:'var(--muted)'}}>/h</span></span>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </React.Fragment>
         )}
       </main>
 
@@ -447,7 +515,9 @@ function PublicBooking({ onAdmin }){
 
 // ═══════════════ BOOKING MODAL ═══════════════
 function BookingModal({ slot, profName, onClose, onBooked }){
+  const matList = splitMat(slot.matiere);
   const [form, setForm] = useState({ eleveNom:'', eleveNiveau:'', parentNom:'', parentEmail:'', parentTel:'', notes:'' });
+  const [chosenMat, setChosenMat] = useState(matList.length===1?matList[0]:'');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const [done, setDone] = useState(false);
@@ -456,6 +526,7 @@ function BookingModal({ slot, profName, onClose, onBooked }){
 
   const submit = async () => {
     setErr('');
+    if (matList.length>1 && !chosenMat) { setErr('Choisissez la matière souhaitée.'); return; }
     if (!form.eleveNom.trim()) { setErr("Indiquez le nom de l'élève."); return; }
     if (!form.parentTel.trim() && !form.parentEmail.trim()) { setErr('Indiquez au moins un contact (téléphone ou email).'); return; }
     setBusy(true);
@@ -470,7 +541,7 @@ function BookingModal({ slot, profName, onClose, onBooked }){
         id: genId('resa_'),
         creneau_id: slot.id,
         prof_id: slot.prof_id,
-        matiere: slot.matiere,
+        matiere: chosenMat || matList[0] || slot.matiere,
         date: slot.date,
         debut: slot.debut,
         fin: slot.fin,
@@ -508,12 +579,12 @@ function BookingModal({ slot, profName, onClose, onBooked }){
           <div className="modal-bd">
             <div className="confirm">
               <div className="ico">✓</div>
-              <h2>Créneau réservé !</h2>
-              <p>La place est mise de côté au nom de <b>{form.eleveNom}</b>.</p>
+              <h2>Demande envoyée ✓</h2>
+              <p>Votre demande pour <b>{form.eleveNom}</b> a bien été envoyée. La place est mise en attente.</p>
               <div className="next-steps">
                 <b style={{fontFamily:'var(--ff-d)',fontSize:15}}>Prochaines étapes</b>
                 <ul>
-                  <li>Nous vous contactons rapidement (téléphone / email) avec le <b>lien de paiement</b>, ou vous réglez sur place.</li>
+                  <li>Nous vous contactons <b>très prochainement</b> pour valider le créneau, vous communiquer le professeur et le règlement.</li>
                   <li>Dès réception du règlement, le créneau est <b>confirmé</b> et vous recevez la confirmation.</li>
                   <li>Le 1<sup>er</sup> cours d'essai est offert — mentionnez-le si c'est votre première séance.</li>
                 </ul>
@@ -524,15 +595,14 @@ function BookingModal({ slot, profName, onClose, onBooked }){
         ) : (
           <React.Fragment>
             <div className="modal-hd">
-              <h2>Réserver ce créneau</h2>
+              <h2>Demander ce créneau</h2>
               <button className="modal-x" onClick={onClose}>×</button>
             </div>
             <div className="modal-bd">
               <div className="recap">
                 <div className="recap-row"><span className="k">Date</span><span className="v">{DAYS[(new Date(slot.date).getDay()+6)%7]} {fmtFR(slot.date)}</span></div>
                 <div className="recap-row"><span className="k">Horaire</span><span className="v">{hs(slot.debut)} → {hs(slot.fin)}</span></div>
-                <div className="recap-row"><span className="k">Matière</span><span className="v">{slot.matiere}</span></div>
-                <div className="recap-row"><span className="k">Professeur</span><span className="v">{profName}</span></div>
+                <div className="recap-row"><span className="k">Matière</span><span className="v">{chosenMat || (matList.length>1?'à préciser':(matList[0]||slot.matiere))}</span></div>
                 <div className="recap-row"><span className="k">Format</span><span className="v">{slot.mode==='visio'?'Visio':'Présentiel'}</span></div>
                 <div className="recap-row"><span className="k">Durée</span><span className="v">{dureeLabel(slot)}</span></div>
                 <div className="recap-total"><span className="k">Tarif horaire</span><span className="v">{money(tarifH(slot))}<span style={{fontSize:13,fontWeight:400,color:'var(--muted)'}}> /h</span></span></div>
@@ -541,6 +611,8 @@ function BookingModal({ slot, profName, onClose, onBooked }){
 
               {err && <div className="alert alert-err"><span>⚠️</span><span>{err}</span></div>}
 
+              {matList.length>1 && <div className="fld"><label>Matière souhaitée <span className="req">*</span></label>
+                <select className="sel" value={chosenMat} onChange={e=>setChosenMat(e.target.value)}><option value="">— Choisir —</option>{matList.map(m=><option key={m} value={m}>{m}</option>)}</select></div>}
               <div className="fld"><label>Nom de l'élève <span className="req">*</span></label>
                 <input className="inp" value={form.eleveNom} onChange={e=>set('eleveNom',e.target.value)} placeholder="Prénom Nom" autoFocus/></div>
               <div className="fld"><label>Niveau</label>
@@ -557,9 +629,9 @@ function BookingModal({ slot, profName, onClose, onBooked }){
               <div className="fld"><label>Message (facultatif)</label>
                 <textarea value={form.notes} onChange={e=>set('notes',e.target.value)} placeholder="Objectifs, difficultés, 1er cours d'essai…"/></div>
 
-              <div className="alert alert-info"><span>ℹ️</span><span>La réservation bloque la place. Le <b>montant total (durée × tarif)</b> vous sera communiqué au moment du règlement — <b>confirmation après paiement</b>. Aucun montant n'est débité sur cette page.</span></div>
+              <div className="alert alert-info"><span>ℹ️</span><span>Ceci est une <b>demande</b> : la place est mise en attente. Vous serez <b>recontacté(e) sous peu</b> pour la validation et le règlement. Aucun montant n'est débité ici.</span></div>
 
-              <button className="btn-primary" onClick={submit} disabled={busy}>{busy ? 'Réservation…' : 'Réserver ce créneau →'}</button>
+              <button className="btn-primary" onClick={submit} disabled={busy}>{busy ? 'Envoi…' : 'Envoyer ma demande →'}</button>
             </div>
           </React.Fragment>
         )}
