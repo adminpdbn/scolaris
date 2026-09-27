@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a4fc4">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PdBN">
 <title>PlusdeBonnesNotes — Soutien scolaire à La Courneuve (93) | Maths, Physique, Français</title>
 <meta name="description" content="Soutien scolaire à La Courneuve depuis 10 ans : cours en petits groupes menés en amont du programme, du primaire au post-bac. Maths, physique-chimie, français, anglais (centre Cambridge). Dès 65 €/mois, 1er cours d'essai offert.">
 <link rel="canonical" href="https://plusdebonnesnotes.com/">
@@ -926,5 +931,6 @@ footer nav{display:flex;gap:18px;flex-wrap:wrap}
   }catch(_){}
 })();
 </script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}</script>
 </body>
 </html>

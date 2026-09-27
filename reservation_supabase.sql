@@ -18,6 +18,7 @@ create table if not exists public.creneaux (
   mode          text default 'presentiel',   -- presentiel | visio
   matiere       text,
   niveau        text,
+  salle         text,
   notes         text,
   tarif_horaire numeric default 40,
   frais_infra   numeric default 0,
@@ -25,6 +26,8 @@ create table if not exists public.creneaux (
   created_at    timestamptz not null default now()
 );
 create index if not exists creneaux_statut_date_idx on public.creneaux (statut, date);
+-- Pour une base déjà créée, ajoute la colonne salle (sans risque) :
+alter table public.creneaux add column if not exists salle text;
 
 -- ─── 2. Réservations publiques ───
 create table if not exists public.reservations (
@@ -97,3 +100,21 @@ create policy resa_admin_all on public.reservations
 --  L'admin connecté saisit les créneaux et valide/refuse les résas.
 --  Aucune table existante n'est modifiée (hors ajout email).
 -- ════════════════════════════════════════════════════════════════
+
+
+-- ════════════════════════════════════════════════════════════════
+--  AJOUT — Espace élève connecté (réservation directe)
+--  À exécuter si tu as déjà lancé le SQL précédent.
+-- ════════════════════════════════════════════════════════════════
+alter table public.reservations add column if not exists eleve_id text;
+
+-- L'élève connecté peut créer sa réservation (statut 'valide' inclus)
+drop policy if exists resa_insert_auth on public.reservations;
+create policy resa_insert_auth on public.reservations
+  for insert to authenticated with check (true);
+
+-- L'élève connecté peut lire SES réservations
+drop policy if exists resa_select_own on public.reservations;
+create policy resa_select_own on public.reservations
+  for select to authenticated
+  using (exists (select 1 from public.users u where u.auth_id = auth.uid() and u.id = reservations.eleve_id));

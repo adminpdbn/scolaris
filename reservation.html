@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a4fc4">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PdBN">
 <title>Réserver un cours particulier — PlusdeBonnesNotes</title>
 <meta name="description" content="Réservez un créneau de cours particulier à La Courneuve : choisissez le professeur, la matière et l'horaire qui vous conviennent. Réservation en ligne, validation après paiement.">
 <meta name="robots" content="noindex">
@@ -201,7 +206,7 @@ footer a{color:var(--ink);text-decoration:none;}footer a:hover{color:var(--bleu)
   main{padding:18px 14px 50px;}
   .tbl{display:block;overflow-x:auto;white-space:nowrap;}
 }
-@media (max-width:520px){.cal{grid-template-columns:1fr;}}
+@media (max-width:520px){.cal{grid-template-columns:1fr;}main{padding:16px 12px 44px;}.hero h1{font-size:26px;}.viewtoggle{width:100%;}.vt-btn{flex:1;}}
 
 /* View toggle */
 .viewtoggle{display:inline-flex;border:1.5px solid var(--ink);border-radius:9px;overflow:hidden;margin-bottom:16px;}
@@ -1046,5 +1051,6 @@ function AdminComptes(){
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
 </script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}</script>
 </body>
 </html>
