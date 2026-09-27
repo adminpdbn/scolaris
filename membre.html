@@ -659,6 +659,34 @@ html{-webkit-text-size-adjust:100%;}
   .home-fab{width:50px;height:50px;font-size:22px;left:14px;bottom:14px;}
 }
 @media(max-width:480px){ .rgrid{grid-template-columns:1fr;} }
+/* ===== GROUPES & ATTRIBUTIONS (injecté) ===== */
+.attrib-grid{display:grid;grid-template-columns:320px 1fr;gap:16px;}
+.grp-card{text-align:left;width:100%;background:var(--white);border:1.5px solid var(--cream2);border-radius:6px;padding:10px 12px;cursor:pointer;font-family:var(--ff-mono);transition:all .12s;}
+.grp-card:hover{border-color:#aaa;}
+.grp-card.on{border-color:var(--navy);background:var(--cream);box-shadow:0 2px 8px rgba(0,0,0,.08);}
+.grp-count{font-size:10px;color:var(--info);font-weight:700;margin-top:3px;}
+.echip{display:inline-flex;align-items:center;gap:6px;background:var(--cream2);border:1px solid #d6ccb5;border-radius:14px;padding:3px 6px 3px 11px;font-size:12px;font-family:var(--ff-mono);margin:0 6px 6px 0;}
+.echip button{background:none;border:none;cursor:pointer;color:var(--err);font-size:13px;line-height:1;padding:0 2px;}
+.addrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 11px;border-bottom:1px solid var(--cream2);cursor:pointer;font-family:var(--ff-mono);font-size:12.5px;}
+.addrow:last-child{border-bottom:none;}
+.addrow:hover{background:var(--cream);}
+.addrow .plus{color:var(--ok);font-weight:700;white-space:nowrap;}
+@media(max-width:768px){ .attrib-grid{grid-template-columns:1fr;} }
+/* ===== PLANNING HEBDO GROUPES (injecté) ===== */
+.pw-wrap{border:1.5px solid var(--cream2);border-radius:6px;overflow:auto;background:var(--white);max-height:74vh;}
+.pw-head{display:flex;position:sticky;top:0;z-index:3;background:var(--cream);border-bottom:2px solid var(--navy);}
+.pw-gutter{width:44px;flex-shrink:0;}
+.pw-dayname{flex:1;min-width:96px;text-align:center;padding:7px 4px;font-size:11px;font-weight:700;font-family:var(--ff-mono);border-left:1px solid var(--cream2);text-transform:uppercase;letter-spacing:.5px;color:var(--navy);}
+.pw-body{display:flex;position:relative;}
+.pw-times{width:44px;flex-shrink:0;}
+.pw-hour{height:42px;font-size:9px;color:var(--muted);text-align:right;padding-right:5px;border-bottom:1px solid #f0ece1;box-sizing:border-box;}
+.pw-day{flex:1;min-width:96px;position:relative;border-left:1px solid var(--cream2);}
+.pw-hline{position:absolute;left:0;right:0;height:42px;border-bottom:1px solid #f4f0e6;box-sizing:border-box;}
+.pw-block{position:absolute;border-radius:5px;padding:4px 5px;overflow:hidden;cursor:pointer;border-left:3px solid;font-family:var(--ff-mono);color:#111;transition:filter .1s,box-shadow .1s;box-sizing:border-box;}
+.pw-block:hover{filter:brightness(.95);box-shadow:0 3px 10px rgba(0,0,0,.18);z-index:2;}
+.pw-b-mat{font-size:10.5px;font-weight:700;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pw-b-meta{font-size:9px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pw-b-count{font-size:9px;font-weight:700;margin-top:1px;}
 </style>
 <link rel="icon" href="https://adminpdbn.github.io/scolaris/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="https://adminpdbn.github.io/scolaris/favicon-32.png">
@@ -1282,6 +1310,16 @@ function CreneauxAdmin({
     load();
     if (profs[0]) set('profId', profs[0].id);
   }, []);
+  useEffect(() => {
+    const p = profs.find(x => x.id === f.profId);
+    if (p) {
+      const mm = (p.matiere || '').split(',').map(x => x.trim()).filter(Boolean);
+      if (mm.length) setF(prev => ({
+        ...prev,
+        matieres: mm
+      }));
+    }
+  }, [f.profId]);
   const profName = id => {
     const p = profs.find(x => x.id === id);
     return p ? p.name : id || '—';
@@ -2211,6 +2249,12 @@ const LAUNCH_TILES = [{
   c1: '#0369a1',
   c2: '#38bdf8'
 }, {
+  id: 'groupes',
+  icon: '👥',
+  label: 'Groupes & attributions',
+  c1: '#be123c',
+  c2: '#fb7185'
+}, {
   id: 'admin',
   icon: '⚙️',
   label: 'Administration',
@@ -2294,6 +2338,476 @@ function AdminLauncher({
     className: "ipad-lbl"
   }, t.label)))));
 }
+// ─── GROUPES & ATTRIBUTIONS (admin) ───
+function ProfsPanel({
+  users,
+  setUsers
+}) {
+  const profs = users.filter(u => u.role === 'prof');
+  const split = s => (s || '').split(',').map(x => x.trim()).filter(Boolean);
+  const toggleMat = (pid, m) => {
+    setUsers(prev => prev.map(u => {
+      if (u.id !== pid) return u;
+      const cur = split(u.matiere);
+      const nx = cur.includes(m) ? cur.filter(x => x !== m) : [...cur, m];
+      return {
+        ...u,
+        matiere: nx.join(', ')
+      };
+    }));
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      color: 'var(--muted)'
+    }
+  }, "Coche les mati\xE8res que chaque professeur peut enseigner. Elles seront propos\xE9es par d\xE9faut \xE0 la cr\xE9ation d'un cr\xE9neau."), profs.map(p => {
+    const cur = split(p.matiere);
+    return /*#__PURE__*/React.createElement("div", {
+      key: p.id,
+      style: {
+        background: 'var(--white)',
+        border: '1.5px solid var(--cream2)',
+        borderRadius: 6,
+        padding: '12px 14px'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "st",
+      style: {
+        fontSize: 14,
+        marginBottom: 8
+      }
+    }, p.name, " ", cur.length === 0 && /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        color: 'var(--err)',
+        fontWeight: 400
+      }
+    }, "\xB7 aucune mati\xE8re")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: 6
+      }
+    }, RESA_MAT.map(m => {
+      const on = cur.includes(m);
+      return /*#__PURE__*/React.createElement("button", {
+        key: m,
+        className: "chip",
+        onClick: () => toggleMat(p.id, m),
+        style: on ? {
+          background: 'var(--navy)',
+          color: 'var(--cream)',
+          borderColor: 'var(--navy)'
+        } : {}
+      }, on ? '✓ ' : '', m);
+    })));
+  }));
+}
+const R_MATCOL = {
+  'Mathématiques': '#1a4fc4',
+  'Physique-Chimie': '#c2410c',
+  'Physique': '#c2410c',
+  'Chimie': '#c2410c',
+  'Français': '#15803d',
+  'Anglais': '#9333ea',
+  'SVT': '#0d9488',
+  'Biologie': '#0d9488',
+  'Histoire-Géo': '#b45309',
+  'Histoire': '#b45309',
+  'Géographie': '#b45309',
+  'Philosophie': '#4338ca',
+  'Informatique': '#0369a1',
+  'Multi': '#334155'
+};
+const R_matColor = m => {
+  if (!m) return '#1a4fc4';
+  const first = String(m).split(',')[0].trim();
+  return R_MATCOL[first] || '#64748b';
+};
+function PlanningGrid({
+  cours,
+  onPick
+}) {
+  const DAYS7 = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+  const H0 = 8,
+    H1 = 21,
+    ROWH = 42;
+  const hours = [];
+  for (let h = H0; h <= H1; h++) hours.push(h);
+  const layoutDay = day => {
+    const items = cours.filter(c => c.jour === day).sort((a, b) => (a.debut || 0) - (b.debut || 0));
+    const colsEnd = [];
+    const placed = items.map(it => {
+      let col = colsEnd.findIndex(end => end <= (it.debut || 0));
+      if (col === -1) {
+        col = colsEnd.length;
+        colsEnd.push(it.fin || 0);
+      } else {
+        colsEnd[col] = it.fin || 0;
+      }
+      return {
+        it,
+        col
+      };
+    });
+    return {
+      placed,
+      totalCols: Math.max(1, colsEnd.length)
+    };
+  };
+  const anyDay = DAYS7.some(d => cours.some(c => c.jour === d));
+  if (!anyDay) return /*#__PURE__*/React.createElement("div", {
+    className: "emp"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "emp-icon"
+  }, "\uD83D\uDDD3\uFE0F"), /*#__PURE__*/React.createElement("h3", null, "Aucun groupe positionn\xE9"), /*#__PURE__*/React.createElement("p", null, "Cr\xE9e des cours (avec jour + horaire) dans l'Emploi du temps pour les voir ici."));
+  return /*#__PURE__*/React.createElement("div", {
+    className: "pw-wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      minWidth: 44 + DAYS7.length * 96
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "pw-head"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "pw-gutter"
+  }), DAYS7.map(d => /*#__PURE__*/React.createElement("div", {
+    key: d,
+    className: "pw-dayname"
+  }, d.slice(0, 3)))), /*#__PURE__*/React.createElement("div", {
+    className: "pw-body"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "pw-times"
+  }, hours.map(h => /*#__PURE__*/React.createElement("div", {
+    key: h,
+    className: "pw-hour"
+  }, h, "h"))), DAYS7.map(day => {
+    const {
+      placed,
+      totalCols
+    } = layoutDay(day);
+    return /*#__PURE__*/React.createElement("div", {
+      key: day,
+      className: "pw-day",
+      style: {
+        height: (H1 - H0) * ROWH
+      }
+    }, hours.map(h => /*#__PURE__*/React.createElement("div", {
+      key: h,
+      className: "pw-hline",
+      style: {
+        top: (h - H0) * ROWH
+      }
+    })), placed.map(({
+      it,
+      col
+    }) => {
+      const c0 = R_matColor(it.matiere);
+      const top = ((it.debut || H0) - H0) * ROWH;
+      const hgt = Math.max(26, ((it.fin || it.debut) - (it.debut || 0)) * ROWH - 2);
+      const w = 100 / totalCols;
+      return /*#__PURE__*/React.createElement("div", {
+        key: it.id,
+        className: "pw-block",
+        onClick: () => onPick(it.id),
+        title: (it.matiere || '') + ' ' + (it.niveau || '') + ' · ' + hs(it.debut) + '-' + hs(it.fin) + ' · ' + (it.eleveIds || []).length + ' élèves',
+        style: {
+          top,
+          height: hgt,
+          left: 'calc(' + col * w + '% + 1px)',
+          width: 'calc(' + w + '% - 3px)',
+          background: c0 + '22',
+          borderLeftColor: c0
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "pw-b-mat"
+      }, it.matiere), /*#__PURE__*/React.createElement("div", {
+        className: "pw-b-meta"
+      }, it.niveau ? it.niveau + ' · ' : '', hs(it.debut)), /*#__PURE__*/React.createElement("div", {
+        className: "pw-b-count",
+        style: {
+          color: c0
+        }
+      }, (it.eleveIds || []).length, " \xE9l."));
+    }));
+  }))));
+}
+function AttribPanel({
+  cours,
+  setCours,
+  users
+}) {
+  const eleves = users.filter(u => u.role === 'eleve');
+  const profs = users.filter(u => u.role === 'prof');
+  const profName = id => {
+    const p = profs.find(x => x.id === id);
+    return p ? p.name : '—';
+  };
+  const [mode, setMode] = useState('groupe');
+  const [modalG, setModalG] = useState(null);
+  const [selE, setSelE] = useState(null);
+  const [qA, setQA] = useState('');
+  const [fNiv, setFNiv] = useState('');
+  const [qE, setQE] = useState('');
+  const norm = s => (s || '').toLowerCase();
+  const gTime = c => `${c.jour || ''} ${hs(c.debut)}–${hs(c.fin)}`;
+  const toggle = (cid, eid) => setCours(prev => prev.map(c => {
+    if (c.id !== cid) return c;
+    const ids = c.eleveIds || [];
+    return {
+      ...c,
+      eleveIds: ids.includes(eid) ? ids.filter(x => x !== eid) : [...ids, eid]
+    };
+  }));
+  const tabBtn = on => ({
+    padding: '6px 16px',
+    border: 'none',
+    cursor: 'pointer',
+    fontFamily: 'var(--ff-mono)',
+    fontSize: 12,
+    background: on ? 'var(--navy)' : 'transparent',
+    color: on ? 'var(--cream)' : 'var(--navy)'
+  });
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      border: '1.5px solid var(--navy)',
+      borderRadius: 4,
+      overflow: 'hidden',
+      width: 'fit-content',
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setMode('groupe'),
+    style: tabBtn(mode === 'groupe')
+  }, "\uD83D\uDDD3\uFE0F Planning des groupes"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setMode('eleve'),
+    style: tabBtn(mode === 'eleve')
+  }, "\uD83C\uDF93 Par \xE9l\xE8ve")), mode === 'groupe' ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      color: 'var(--muted)',
+      marginBottom: 10
+    }
+  }, "Clique sur un groupe pour g\xE9rer ses \xE9l\xE8ves."), /*#__PURE__*/React.createElement(PlanningGrid, {
+    cours: cours,
+    onPick: id => {
+      setModalG(id);
+      setQA('');
+    }
+  })) : /*#__PURE__*/React.createElement("div", {
+    className: "attrib-grid"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
+    className: "fi",
+    placeholder: "\uD83D\uDD0D Rechercher un \xE9l\xE8ve\u2026",
+    value: qE,
+    onChange: e => setQE(e.target.value)
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 4,
+      marginTop: 8,
+      maxHeight: '64vh',
+      overflowY: 'auto'
+    }
+  }, eleves.filter(e => !qE || norm(e.name).includes(norm(qE))).map(e => {
+    const cnt = cours.filter(c => (c.eleveIds || []).includes(e.id)).length;
+    return /*#__PURE__*/React.createElement("button", {
+      key: e.id,
+      className: 'grp-card' + (selE === e.id ? ' on' : ''),
+      onClick: () => setSelE(e.id)
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, e.name), e.niveau ? ' · ' + e.niveau : ''), /*#__PURE__*/React.createElement("div", {
+      className: "grp-count"
+    }, cnt, " groupe", cnt > 1 ? 's' : ''));
+  }))), /*#__PURE__*/React.createElement("div", null, (() => {
+    const e = eleves.find(x => x.id === selE);
+    if (!e) return /*#__PURE__*/React.createElement("div", {
+      className: "emp"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "emp-icon"
+    }, "\uD83D\uDC48"), /*#__PURE__*/React.createElement("p", null, "Choisis un \xE9l\xE8ve \xE0 gauche."));
+    return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "st",
+      style: {
+        marginBottom: 12
+      }
+    }, e.name, e.niveau ? ' · ' + e.niveau : ''), /*#__PURE__*/React.createElement("div", {
+      style: {
+        border: '1.5px solid var(--cream2)',
+        borderRadius: 6,
+        overflow: 'hidden',
+        background: 'var(--white)'
+      }
+    }, cours.length === 0 ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: 'var(--muted)',
+        padding: 10
+      }
+    }, "Aucun groupe.") : cours.map(c => {
+      const inG = (c.eleveIds || []).includes(e.id);
+      return /*#__PURE__*/React.createElement("div", {
+        key: c.id,
+        className: "addrow",
+        onClick: () => toggle(c.id, e.id)
+      }, /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("b", null, c.matiere), c.niveau ? ' · ' + c.niveau : '', " ", /*#__PURE__*/React.createElement("span", {
+        style: {
+          color: 'var(--muted)',
+          fontSize: 11
+        }
+      }, "\xB7 ", gTime(c), " \xB7 ", profName(c.profId))), /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontWeight: 700,
+          color: inG ? 'var(--err)' : 'var(--ok)'
+        }
+      }, inG ? '✓ retirer' : '+ ajouter'));
+    })));
+  })())), modalG && (() => {
+    const c = cours.find(x => x.id === modalG);
+    if (!c) return null;
+    const members = eleves.filter(e => (c.eleveIds || []).includes(e.id));
+    const others = eleves.filter(e => !(c.eleveIds || []).includes(e.id)).filter(e => !fNiv || e.niveau === fNiv).filter(e => !qA || norm(e.name).includes(norm(qA)));
+    return /*#__PURE__*/React.createElement(Modal, {
+      title: (c.matiere || 'Groupe') + (c.niveau ? ' · ' + c.niveau : ''),
+      onClose: () => {
+        setModalG(null);
+        setQA('');
+        setFNiv('');
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: 'var(--muted)',
+        marginBottom: 12
+      }
+    }, gTime(c), " \xB7 ", profName(c.profId), c.salle ? ' · ' + c.salle : ''), /*#__PURE__*/React.createElement("div", {
+      className: "fl"
+    }, "Membres (", members.length, ")"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        margin: '5px 0 16px'
+      }
+    }, members.length === 0 ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 12,
+        color: 'var(--muted)'
+      }
+    }, "Aucun \xE9l\xE8ve pour l'instant.") : members.map(e => /*#__PURE__*/React.createElement("span", {
+      key: e.id,
+      className: "echip"
+    }, e.name, e.niveau ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: 'var(--muted)',
+        fontSize: 10
+      }
+    }, " \xB7 ", e.niveau) : null, /*#__PURE__*/React.createElement("button", {
+      onClick: () => toggle(c.id, e.id),
+      title: "Retirer"
+    }, "\u2715")))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        gap: 8,
+        alignItems: 'center',
+        marginBottom: 6,
+        flexWrap: 'wrap'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "fl",
+      style: {
+        margin: 0
+      }
+    }, "Ajouter"), /*#__PURE__*/React.createElement("input", {
+      className: "fi",
+      style: {
+        flex: 1,
+        minWidth: 120
+      },
+      placeholder: "\uD83D\uDD0D nom\u2026",
+      value: qA,
+      onChange: e => setQA(e.target.value)
+    }), /*#__PURE__*/React.createElement("select", {
+      className: "fi",
+      style: {
+        width: 120
+      },
+      value: fNiv,
+      onChange: e => setFNiv(e.target.value)
+    }, /*#__PURE__*/React.createElement("option", {
+      value: ""
+    }, "Tous niveaux"), RESA_NIV.map(n => /*#__PURE__*/React.createElement("option", {
+      key: n,
+      value: n
+    }, n)))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        border: '1.5px solid var(--cream2)',
+        borderRadius: 6,
+        maxHeight: '36vh',
+        overflowY: 'auto',
+        background: 'var(--white)'
+      }
+    }, others.length === 0 ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: 'var(--muted)',
+        padding: 10
+      }
+    }, "Aucun \xE9l\xE8ve \xE0 ajouter.") : others.map(e => /*#__PURE__*/React.createElement("div", {
+      key: e.id,
+      className: "addrow",
+      onClick: () => toggle(c.id, e.id)
+    }, /*#__PURE__*/React.createElement("span", null, e.name, e.niveau ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: 'var(--muted)',
+        fontSize: 11
+      }
+    }, " \xB7 ", e.niveau) : null), /*#__PURE__*/React.createElement("span", {
+      className: "plus"
+    }, "+ Ajouter")))));
+  })());
+}
+function GroupesAdmin({
+  cours,
+  setCours,
+  users,
+  setUsers
+}) {
+  const [tab, setTab] = useState('attrib');
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(TB, {
+    title: "Groupes & attributions"
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: 'var(--muted)'
+    }
+  }, "Placer les \xE9l\xE8ves dans leurs cr\xE9neaux")), /*#__PURE__*/React.createElement("div", {
+    className: "pg"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "tabs",
+    style: {
+      maxWidth: 460
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: 'tab' + (tab === 'attrib' ? ' on' : ''),
+    onClick: () => setTab('attrib')
+  }, "\uD83D\uDC65 Attributions"), /*#__PURE__*/React.createElement("button", {
+    className: 'tab' + (tab === 'profs' ? ' on' : ''),
+    onClick: () => setTab('profs')
+  }, "\uD83D\uDC68\u200D\uD83C\uDFEB Profs & mati\xE8res")), tab === 'attrib' ? /*#__PURE__*/React.createElement(AttribPanel, {
+    cours: cours,
+    setCours: setCours,
+    users: users
+  }) : /*#__PURE__*/React.createElement(ProfsPanel, {
+    users: users,
+    setUsers: setUsers
+  })));
+}
 function HomeButton({
   setPage
 }) {
@@ -2321,7 +2835,7 @@ let so=[];try{so=await sbLoadKV('sorties','global',[]);}catch(_){so=[];}let ents
 try{ch=await sbLoadKV('charges','global',charges);}catch(_){}let dw=[];try{dw=await sbLoad('inscriptions_web',[]);}catch(_){dw=[];}setUsers(u);setResources(r);setModules(mo);setFactures(fa);setDispos(di);setDemandes(de);setCustomTrophies(ct);setAppel(ap);setGrades(g);setEnrollments(en);setSalaires(sa);setAwardedTrophies(at);setCompEtats(ce);setCustomComps(cc);setCours(co);setInscriptions(ins_data);setSorties(so);setCharges(ch);setDemandesWeb(dw);setEntreprises(ents);setStages(stgs);setDataReady(true);}catch(loadErr){console.error('[App] Erreur chargement données:',loadErr);// Charger les données seed en cas d'erreur pour ne pas bloquer
 setUsers(SEED_USERS);setCours(SEED_COURS);setFactures(SEED_FACTURES);setDataReady(true);}})();},[cu?.id]);// ── Sync retour vers Supabase ──
 // ── Sync Supabase avec debounce 1.5s ──
-useEffect(()=>{if(dataReady)sbDebounce('sv_users',()=>sbSave('users',users));},[users]);useEffect(()=>{if(dataReady)sbDebounce('sv_res',()=>sbSave('ressources',resources));},[resources]);useEffect(()=>{if(dataReady)sbDebounce('sv_mod',()=>sbSave('modules',modules));},[modules]);useEffect(()=>{if(dataReady)sbDebounce('sv_fact',()=>sbSave('factures',factures));},[factures]);useEffect(()=>{if(dataReady)sbDebounce('sv_dispo',()=>sbSave('dispos',dispos));},[dispos]);useEffect(()=>{if(dataReady)sbDebounce('sv_dem',()=>sbSave('demandes',demandes));},[demandes]);useEffect(()=>{if(dataReady)sbDebounce('sv_troph',()=>sbSave('trophees_custom',customTrophies));},[customTrophies]);useEffect(()=>{if(dataReady)sbDebounce('sv_cours',()=>sbSaveKV('cours',cours,'global'));},[cours]);useEffect(()=>{if(dataReady)sbDebounce('sv_appel',()=>sbSaveKV('appel',appel,'global'));},[appel]);useEffect(()=>{if(dataReady)sbDebounce('sv_grd',()=>sbSaveKV('grades',grades,'global'));},[grades]);useEffect(()=>{if(dataReady)sbDebounce('sv_enr',()=>sbSaveKV('enrollments',enrollments,'global'));},[enrollments]);useEffect(()=>{if(dataReady)sbDebounce('sv_sal',()=>sbSaveKV('salaires',salaires,'global'));},[salaires]);useEffect(()=>{if(dataReady)sbDebounce('sv_traw',()=>sbSaveKV('trophees_awarded',awardedTrophies,'global'));},[awardedTrophies]);useEffect(()=>{if(dataReady&&cu)sbDebounce('sv_ce',()=>sbSaveKV('comp_etats',compEtats,cu.id));},[compEtats]);useEffect(()=>{if(dataReady&&cu)sbDebounce('sv_cc',()=>sbSaveKV('custom_comps',customComps,cu.id));},[customComps]);useEffect(()=>{if(dataReady)sbDebounce('sv_sor',()=>sbSaveKV('sorties',sorties,'global'));},[sorties]);useEffect(()=>{if(dataReady)sbDebounce('sv_ent',()=>sbSaveKV('entreprises',entreprises,'global'));},[entreprises]);useEffect(()=>{if(dataReady)sbDebounce('sv_stg',()=>sbSaveKV('stages',stages,'global'));},[stages]);useEffect(()=>{if(dataReady)sbDebounce('sv_ins',()=>sbSaveKV('inscriptions',inscriptions,'global'));},[inscriptions]);useEffect(()=>{if(dataReady)sbDebounce('sv_chg',()=>sbSaveKV('charges',charges,'global'));},[charges]);const login=u=>{setCu(u);setPage(u&&u.role==='admin'?'accueil':'dashboard');};const logout=async()=>{try{await sb.auth.signOut();}catch(_){}try{window.location.href='./';}catch(_){setCu(null);}};if(!appReady)return/*#__PURE__*/React.createElement("div",{style:{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',background:'#111',color:'var(--gold)',fontFamily:'var(--ff-mono)',fontSize:14,letterSpacing:1}},"⟳ Chargement…");if(!cu){const toSite=()=>{try{window.location.href='./';}catch(_){}};if(pub==='inscription')return/*#__PURE__*/React.createElement(Inscription,{onBack:toSite,onLogin:()=>openPub('login')});if(pub==='paiement')return/*#__PURE__*/React.createElement(Abonnement,{onBack:toSite,onInscription:()=>openPub('inscription')});return/*#__PURE__*/React.createElement(Login,{onLogin:login,onBack:toSite});}if(!dataReady)return/*#__PURE__*/React.createElement("div",{style:{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',background:'var(--cream2)',color:'var(--navy)',fontFamily:'var(--ff-mono)',fontSize:13,letterSpacing:.5}},/*#__PURE__*/React.createElement("div",{style:{textAlign:'center'}},/*#__PURE__*/React.createElement("div",{style:{fontSize:28,marginBottom:12}},"📚"),/*#__PURE__*/React.createElement("div",null,"Chargement des données…")));const props={user:cu,users,setUsers,resources,setResources,modules,setModules,grades,setGrades,enrollments,setEnrollments,cours,setCours,appel,setAppel,factures,setFactures,salaires,setSalaires,dispos,setDispos,demandes,setDemandes,compEtats,setCompEtats,customComps,setCustomComps,customTrophies,setCustomTrophies,awardedTrophies,setAwardedTrophies,inscriptions,setInscriptions,sorties,setSorties,charges,setCharges};const renderPage=()=>{switch(page){case'dashboard':return/*#__PURE__*/React.createElement(Dashboard,props);case'programme':return/*#__PURE__*/React.createElement(MonProgramme,{...props,customComps:props.customComps});case'bibliotheque':return/*#__PURE__*/React.createElement(Bibliotheque,{...props,cours:props.cours,compEtats:props.compEtats});case'emploidutemps':return/*#__PURE__*/React.createElement(EmploiDuTemps,{...props,setCours:props.setCours,dispos:props.dispos});case'modules':return/*#__PURE__*/React.createElement(Modules,props);case'monespace':return/*#__PURE__*/React.createElement(MonEspace,props);case'meseleves':return/*#__PURE__*/React.createElement(MesEleves,{...props,compEtats:props.compEtats,setCompEtats:props.setCompEtats,customComps:props.customComps});case'statistiques':return/*#__PURE__*/React.createElement(Statistiques,props);case'facturation':return/*#__PURE__*/React.createElement(Facturation,{...props,cours:props.cours});case'inscriptions':return/*#__PURE__*/React.createElement(Inscriptions,{...props,setFactures:props.setFactures,demandesWeb:demandesWeb,setDemandesWeb:setDemandesWeb});case'suivi':return/*#__PURE__*/React.createElement(SuiviCompetences,{...props,customComps:props.customComps,setCustomComps:props.setCustomComps,awardedTrophies:props.awardedTrophies,setAwardedTrophies:props.setAwardedTrophies});case'coursparticuliers':return/*#__PURE__*/React.createElement(CoursParticuliers,props);case'reservations':return/*#__PURE__*/React.createElement(GestionReservations,{user:cu,users:props.users});case'reserver':return/*#__PURE__*/React.createElement(EleveReservations,{user:cu,users:props.users});case'accueil':return/*#__PURE__*/React.createElement(AdminLauncher,{setPage:setPage,user:cu,onLogout:logout});case'paiement':return/*#__PURE__*/React.createElement(Paiement,null);case'pages':return/*#__PURE__*/React.createElement(Pages,null);case'annonces':return/*#__PURE__*/React.createElement(Annonces,null);case'vitrine':return/*#__PURE__*/React.createElement(Vitrine,null);case'admin':return/*#__PURE__*/React.createElement(Admin,{...props,factures:props.factures,setFactures:props.setFactures,customTrophies:props.customTrophies,setCustomTrophies:props.setCustomTrophies,awardedTrophies:props.awardedTrophies,setAwardedTrophies:props.setAwardedTrophies,inscriptions:props.inscriptions,setInscriptions:props.setInscriptions});case'sorties':return/*#__PURE__*/React.createElement(Sorties,{sorties:props.sorties,setSorties:props.setSorties,users:props.users,cours:props.cours});default:return/*#__PURE__*/React.createElement(Dashboard,props);}};const _isAdmin=cu&&cu.role==='admin';return/*#__PURE__*/React.createElement("div",{className:`app ${_isAdmin?'launcher-mode':''} ${sidebarPinned?'sidebar-pinned':''}`},_isAdmin?(page!=='accueil'?/*#__PURE__*/React.createElement(HomeButton,{setPage:setPage}):null):/*#__PURE__*/React.createElement(React.Fragment,null,/*#__PURE__*/React.createElement(Sidebar,{user:cu,page:page,setPage:setPage,onLogout:logout,pinned:sidebarPinned,setPinned:setSidebarPinned}),/*#__PURE__*/React.createElement(MobileBurger,{pinned:sidebarPinned,setPinned:setSidebarPinned})),/*#__PURE__*/React.createElement("div",{className:"main"},renderPage()));}class ErrorBoundary extends React.Component{constructor(p){super(p);this.state={err:null};}static getDerivedStateFromError(err){return{err};}componentDidCatch(err,info){try{console.error('App error:',err,info);}catch(_){}}render(){if(this.state.err){return/*#__PURE__*/React.createElement("div",{style:{padding:'28px',fontFamily:'monospace',color:'#8b2222',whiteSpace:'pre-wrap',fontSize:13,lineHeight:1.5}},"⚠️ Une erreur est survenue :","\n\n",String(this.state.err&&this.state.err.message||this.state.err),"\n\n",String(this.state.err&&this.state.err.stack||''));}return this.props.children;}}ReactDOM.createRoot(document.getElementById('root')).render(/*#__PURE__*/React.createElement(ErrorBoundary,null,/*#__PURE__*/React.createElement(App,null)));
+useEffect(()=>{if(dataReady)sbDebounce('sv_users',()=>sbSave('users',users));},[users]);useEffect(()=>{if(dataReady)sbDebounce('sv_res',()=>sbSave('ressources',resources));},[resources]);useEffect(()=>{if(dataReady)sbDebounce('sv_mod',()=>sbSave('modules',modules));},[modules]);useEffect(()=>{if(dataReady)sbDebounce('sv_fact',()=>sbSave('factures',factures));},[factures]);useEffect(()=>{if(dataReady)sbDebounce('sv_dispo',()=>sbSave('dispos',dispos));},[dispos]);useEffect(()=>{if(dataReady)sbDebounce('sv_dem',()=>sbSave('demandes',demandes));},[demandes]);useEffect(()=>{if(dataReady)sbDebounce('sv_troph',()=>sbSave('trophees_custom',customTrophies));},[customTrophies]);useEffect(()=>{if(dataReady)sbDebounce('sv_cours',()=>sbSaveKV('cours',cours,'global'));},[cours]);useEffect(()=>{if(dataReady)sbDebounce('sv_appel',()=>sbSaveKV('appel',appel,'global'));},[appel]);useEffect(()=>{if(dataReady)sbDebounce('sv_grd',()=>sbSaveKV('grades',grades,'global'));},[grades]);useEffect(()=>{if(dataReady)sbDebounce('sv_enr',()=>sbSaveKV('enrollments',enrollments,'global'));},[enrollments]);useEffect(()=>{if(dataReady)sbDebounce('sv_sal',()=>sbSaveKV('salaires',salaires,'global'));},[salaires]);useEffect(()=>{if(dataReady)sbDebounce('sv_traw',()=>sbSaveKV('trophees_awarded',awardedTrophies,'global'));},[awardedTrophies]);useEffect(()=>{if(dataReady&&cu)sbDebounce('sv_ce',()=>sbSaveKV('comp_etats',compEtats,cu.id));},[compEtats]);useEffect(()=>{if(dataReady&&cu)sbDebounce('sv_cc',()=>sbSaveKV('custom_comps',customComps,cu.id));},[customComps]);useEffect(()=>{if(dataReady)sbDebounce('sv_sor',()=>sbSaveKV('sorties',sorties,'global'));},[sorties]);useEffect(()=>{if(dataReady)sbDebounce('sv_ent',()=>sbSaveKV('entreprises',entreprises,'global'));},[entreprises]);useEffect(()=>{if(dataReady)sbDebounce('sv_stg',()=>sbSaveKV('stages',stages,'global'));},[stages]);useEffect(()=>{if(dataReady)sbDebounce('sv_ins',()=>sbSaveKV('inscriptions',inscriptions,'global'));},[inscriptions]);useEffect(()=>{if(dataReady)sbDebounce('sv_chg',()=>sbSaveKV('charges',charges,'global'));},[charges]);const login=u=>{setCu(u);setPage(u&&u.role==='admin'?'accueil':'dashboard');};const logout=async()=>{try{await sb.auth.signOut();}catch(_){}try{window.location.href='./';}catch(_){setCu(null);}};if(!appReady)return/*#__PURE__*/React.createElement("div",{style:{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',background:'#111',color:'var(--gold)',fontFamily:'var(--ff-mono)',fontSize:14,letterSpacing:1}},"⟳ Chargement…");if(!cu){const toSite=()=>{try{window.location.href='./';}catch(_){}};if(pub==='inscription')return/*#__PURE__*/React.createElement(Inscription,{onBack:toSite,onLogin:()=>openPub('login')});if(pub==='paiement')return/*#__PURE__*/React.createElement(Abonnement,{onBack:toSite,onInscription:()=>openPub('inscription')});return/*#__PURE__*/React.createElement(Login,{onLogin:login,onBack:toSite});}if(!dataReady)return/*#__PURE__*/React.createElement("div",{style:{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',background:'var(--cream2)',color:'var(--navy)',fontFamily:'var(--ff-mono)',fontSize:13,letterSpacing:.5}},/*#__PURE__*/React.createElement("div",{style:{textAlign:'center'}},/*#__PURE__*/React.createElement("div",{style:{fontSize:28,marginBottom:12}},"📚"),/*#__PURE__*/React.createElement("div",null,"Chargement des données…")));const props={user:cu,users,setUsers,resources,setResources,modules,setModules,grades,setGrades,enrollments,setEnrollments,cours,setCours,appel,setAppel,factures,setFactures,salaires,setSalaires,dispos,setDispos,demandes,setDemandes,compEtats,setCompEtats,customComps,setCustomComps,customTrophies,setCustomTrophies,awardedTrophies,setAwardedTrophies,inscriptions,setInscriptions,sorties,setSorties,charges,setCharges};const renderPage=()=>{switch(page){case'dashboard':return/*#__PURE__*/React.createElement(Dashboard,props);case'programme':return/*#__PURE__*/React.createElement(MonProgramme,{...props,customComps:props.customComps});case'bibliotheque':return/*#__PURE__*/React.createElement(Bibliotheque,{...props,cours:props.cours,compEtats:props.compEtats});case'emploidutemps':return/*#__PURE__*/React.createElement(EmploiDuTemps,{...props,setCours:props.setCours,dispos:props.dispos});case'modules':return/*#__PURE__*/React.createElement(Modules,props);case'monespace':return/*#__PURE__*/React.createElement(MonEspace,props);case'meseleves':return/*#__PURE__*/React.createElement(MesEleves,{...props,compEtats:props.compEtats,setCompEtats:props.setCompEtats,customComps:props.customComps});case'statistiques':return/*#__PURE__*/React.createElement(Statistiques,props);case'facturation':return/*#__PURE__*/React.createElement(Facturation,{...props,cours:props.cours});case'inscriptions':return/*#__PURE__*/React.createElement(Inscriptions,{...props,setFactures:props.setFactures,demandesWeb:demandesWeb,setDemandesWeb:setDemandesWeb});case'suivi':return/*#__PURE__*/React.createElement(SuiviCompetences,{...props,customComps:props.customComps,setCustomComps:props.setCustomComps,awardedTrophies:props.awardedTrophies,setAwardedTrophies:props.setAwardedTrophies});case'coursparticuliers':return/*#__PURE__*/React.createElement(CoursParticuliers,props);case'reservations':return/*#__PURE__*/React.createElement(GestionReservations,{user:cu,users:props.users});case'reserver':return/*#__PURE__*/React.createElement(EleveReservations,{user:cu,users:props.users});case'groupes':return/*#__PURE__*/React.createElement(GroupesAdmin,{cours:cours,setCours:setCours,users:users,setUsers:setUsers});case'accueil':return/*#__PURE__*/React.createElement(AdminLauncher,{setPage:setPage,user:cu,onLogout:logout});case'paiement':return/*#__PURE__*/React.createElement(Paiement,null);case'pages':return/*#__PURE__*/React.createElement(Pages,null);case'annonces':return/*#__PURE__*/React.createElement(Annonces,null);case'vitrine':return/*#__PURE__*/React.createElement(Vitrine,null);case'admin':return/*#__PURE__*/React.createElement(Admin,{...props,factures:props.factures,setFactures:props.setFactures,customTrophies:props.customTrophies,setCustomTrophies:props.setCustomTrophies,awardedTrophies:props.awardedTrophies,setAwardedTrophies:props.setAwardedTrophies,inscriptions:props.inscriptions,setInscriptions:props.setInscriptions});case'sorties':return/*#__PURE__*/React.createElement(Sorties,{sorties:props.sorties,setSorties:props.setSorties,users:props.users,cours:props.cours});default:return/*#__PURE__*/React.createElement(Dashboard,props);}};const _isAdmin=cu&&cu.role==='admin';return/*#__PURE__*/React.createElement("div",{className:`app ${_isAdmin?'launcher-mode':''} ${sidebarPinned?'sidebar-pinned':''}`},_isAdmin?(page!=='accueil'?/*#__PURE__*/React.createElement(HomeButton,{setPage:setPage}):null):/*#__PURE__*/React.createElement(React.Fragment,null,/*#__PURE__*/React.createElement(Sidebar,{user:cu,page:page,setPage:setPage,onLogout:logout,pinned:sidebarPinned,setPinned:setSidebarPinned}),/*#__PURE__*/React.createElement(MobileBurger,{pinned:sidebarPinned,setPinned:setSidebarPinned})),/*#__PURE__*/React.createElement("div",{className:"main"},renderPage()));}class ErrorBoundary extends React.Component{constructor(p){super(p);this.state={err:null};}static getDerivedStateFromError(err){return{err};}componentDidCatch(err,info){try{console.error('App error:',err,info);}catch(_){}}render(){if(this.state.err){return/*#__PURE__*/React.createElement("div",{style:{padding:'28px',fontFamily:'monospace',color:'#8b2222',whiteSpace:'pre-wrap',fontSize:13,lineHeight:1.5}},"⚠️ Une erreur est survenue :","\n\n",String(this.state.err&&this.state.err.message||this.state.err),"\n\n",String(this.state.err&&this.state.err.stack||''));}return this.props.children;}}ReactDOM.createRoot(document.getElementById('root')).render(/*#__PURE__*/React.createElement(ErrorBoundary,null,/*#__PURE__*/React.createElement(App,null)));
 </script>
 
 
