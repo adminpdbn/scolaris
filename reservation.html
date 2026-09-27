@@ -232,6 +232,9 @@ const calcMontant = d => {
   const th = parseFloat(thRaw)||0, fi = parseFloat(fiRaw)||0;
   return Math.max(0, dur*th + fi);
 };
+const tarifH = d => { const r = d.tarif_horaire!=null ? d.tarif_horaire : (d.tarifHoraire!=null ? d.tarifHoraire : 40); return parseFloat(r)||0; };
+const dureeH = d => Math.max(0,(parseFloat(d.fin)||0)-(parseFloat(d.debut)||0));
+const dureeLabel = d => { const x=dureeH(d); if(x===Math.floor(x)) return x+' h'; const h=Math.floor(x), m=Math.round((x-h)*60); return h+'h'+String(m).padStart(2,'0'); };
 
 function getMonday(offset=0){
   const d = new Date(); d.setHours(0,0,0,0);
@@ -419,7 +422,7 @@ function PublicBooking({ onAdmin }){
                           <div className="slot-prof">{s.prof_nom||'Professeur'}</div>
                           <div className="slot-foot">
                             <span className={'mode-tag '+(s.mode==='visio'?'mode-visio':'mode-presentiel')}>{s.mode==='visio'?'Visio':'Présentiel'}</span>
-                            <span className="slot-price">{money(calcMontant(s))}</span>
+                            <span className="slot-price">{money(tarifH(s))}<span style={{fontWeight:400,fontSize:10,color:'var(--muted)'}}>/h</span></span>
                           </div>
                         </div>
                       ))}
@@ -530,7 +533,8 @@ function BookingModal({ slot, profName, onClose, onBooked }){
                 <div className="recap-row"><span className="k">Matière</span><span className="v">{slot.matiere}</span></div>
                 <div className="recap-row"><span className="k">Professeur</span><span className="v">{profName}</span></div>
                 <div className="recap-row"><span className="k">Format</span><span className="v">{slot.mode==='visio'?'Visio':'Présentiel'}</span></div>
-                <div className="recap-total"><span className="k">À régler</span><span className="v">{money(montant)}</span></div>
+                <div className="recap-row"><span className="k">Durée</span><span className="v">{dureeLabel(slot)}</span></div>
+                <div className="recap-total"><span className="k">Tarif</span><span className="v">{money(tarifH(slot))}<span style={{fontSize:13,fontWeight:400,color:'var(--muted)'}}> / heure</span></span></div>
               </div>
 
               {err && <div className="alert alert-err"><span>⚠️</span><span>{err}</span></div>}
@@ -551,7 +555,7 @@ function BookingModal({ slot, profName, onClose, onBooked }){
               <div className="fld"><label>Message (facultatif)</label>
                 <textarea value={form.notes} onChange={e=>set('notes',e.target.value)} placeholder="Objectifs, difficultés, 1er cours d'essai…"/></div>
 
-              <div className="alert alert-info"><span>ℹ️</span><span>La réservation bloque la place. Elle est <b>confirmée après règlement</b>. Aucun paiement n'est demandé sur cette page.</span></div>
+              <div className="alert alert-info"><span>ℹ️</span><span>La réservation bloque la place. Le <b>montant total (durée × tarif)</b> vous sera communiqué au moment du règlement — <b>confirmation après paiement</b>. Aucun montant n'est débité sur cette page.</span></div>
 
               <button className="btn-primary" onClick={submit} disabled={busy}>{busy ? 'Réservation…' : 'Réserver ce créneau →'}</button>
             </div>
