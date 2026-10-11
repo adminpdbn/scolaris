@@ -690,6 +690,22 @@ html{-webkit-text-size-adjust:100%;}
 .pw-block.pw-on{box-shadow:0 0 0 2px currentColor inset;}
 .pw-badge{position:absolute;top:2px;right:3px;width:16px;height:16px;border-radius:50%;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700;}
 .attrib-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;background:var(--cream2);border-radius:6px;padding:9px 12px;}
+/* ===== APP ÉLÈVE (barre haut + onglets bas) ===== */
+.stud-mode{flex-direction:column;}
+.stud-mode .sidebar{display:none!important;}
+.stud-mode .topbar{display:none!important;}
+.stud-mode .main{margin-left:0!important;padding-bottom:72px;width:100%;}
+.stud-top{position:sticky;top:0;z-index:60;display:flex;align-items:center;justify-content:space-between;background:var(--navy);color:var(--cream);padding:11px 16px;}
+.stud-top .st-brand{display:flex;align-items:center;gap:8px;font-family:var(--ff-serif);font-size:15px;letter-spacing:.3px;}
+.stud-top .st-actions{display:flex;align-items:center;gap:7px;}
+.stud-top .st-actions button{background:rgba(255,255,255,.1);border:none;color:var(--cream);width:34px;height:34px;border-radius:9px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;}
+.stud-top .st-actions button:hover{background:rgba(255,255,255,.2);}
+.tabbar{position:fixed;bottom:0;left:0;right:0;z-index:120;display:flex;background:var(--cream);border-top:1.5px solid var(--cream2);box-shadow:0 -2px 14px rgba(0,0,0,.09);padding-bottom:env(safe-area-inset-bottom);}
+.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px 7px;background:none;border:none;cursor:pointer;color:var(--muted);font-family:var(--ff-mono);transition:color .12s;}
+.tabbar button.on{color:var(--gold);}
+.tabbar .tb-ic{font-size:19px;line-height:1;transition:transform .12s;}
+.tabbar button.on .tb-ic{transform:translateY(-2px) scale(1.06);}
+.tabbar .tb-lbl{font-size:9.5px;letter-spacing:.2px;}
 </style>
 <link rel="icon" href="https://adminpdbn.github.io/scolaris/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="https://adminpdbn.github.io/scolaris/favicon-32.png">
@@ -747,7 +763,7 @@ function Modal({title,onClose,children,width}){return/*#__PURE__*/React.createEl
 function Login({onLogin,onBack}){const[email,setEmail]=useState('');const[password,setPassword]=useState('');const[error,setError]=useState('');const[loading,setLoading]=useState(false);const[showPwd,setShowPwd]=useState(false);const handleLogin=async e=>{if(e&&e.preventDefault)e.preventDefault();setError('');setLoading(true);try{// 1. Authentification Supabase
 const{data:authData,error:authErr}=await sb.auth.signInWithPassword({email:email.toLowerCase().trim(),password});if(authErr){setError(authErr.message==='Invalid login credentials'?'Email ou mot de passe incorrect.':authErr.message);setLoading(false);return;}// 2. Récupérer le profil dans la table users
 const{data:profile,error:profErr}=await sb.from('users').select('*').eq('auth_id',authData.user.id).single();if(profErr||!profile){setError('Profil introuvable. Contactez l\'administration.');await sb.auth.signOut();setLoading(false);return;}setLoading(false);onLogin(profile);}catch(err){setError('Erreur de connexion. Vérifiez votre connexion internet.');setLoading(false);}};return/*#__PURE__*/React.createElement("div",{className:"ls"},/*#__PURE__*/React.createElement("div",{className:"ls-left"},/*#__PURE__*/React.createElement("div",{className:"ls-brand-top"},/*#__PURE__*/React.createElement("svg",{width:"28",height:"28",viewBox:"0 0 52 52",fill:"none"},/*#__PURE__*/React.createElement("circle",{cx:"26",cy:"26",r:"24",fill:"var(--gold2)",opacity:"0.2"}),/*#__PURE__*/React.createElement("path",{d:"M26 8 L38 18 L38 34 L26 42 L14 34 L14 18 Z",fill:"var(--gold2)",opacity:"0.9"}),/*#__PURE__*/React.createElement("path",{d:"M20 24 L26 18 L32 24 L26 30 Z",fill:"white"})),/*#__PURE__*/React.createElement("span",{className:"ls-brand-top-name"},"Plus de bonnes notes")),/*#__PURE__*/React.createElement("div",{className:"ls-inner"},/*#__PURE__*/React.createElement("div",{className:"ls-badge"},/*#__PURE__*/React.createElement("span",{className:"ls-badge-dot"}),/*#__PURE__*/React.createElement("span",{className:"ls-badge-txt"},"Soutien scolaire — La Courneuve")),/*#__PURE__*/React.createElement("div",{className:"ls-tag"},"Apprendre,",/*#__PURE__*/React.createElement("br",null),/*#__PURE__*/React.createElement("em",null,"progresser"),",",/*#__PURE__*/React.createElement("br",null),/*#__PURE__*/React.createElement("strong",null,"réussir.")),/*#__PURE__*/React.createElement("p",{className:"ls-desc"},"Bibliothèque de ressources, emploi du temps, appel, suivi des notes et trophées — tout en un seul endroit."),/*#__PURE__*/React.createElement("div",{className:"ls-stats"},[{n:'12+',l:'Professeurs'},{n:'4',l:'Niveaux'},{n:'8',l:'Cours / semaine'}].map((s,i)=>/*#__PURE__*/React.createElement("div",{key:i,className:"ls-stat"},/*#__PURE__*/React.createElement("div",{className:"ls-stat-n"},s.n),/*#__PURE__*/React.createElement("div",{className:"ls-stat-l"},s.l)))))),/*#__PURE__*/React.createElement("div",{className:"ls-right"},onBack?/*#__PURE__*/React.createElement("button",{className:"lp-back",onClick:onBack},"← Accueil"):null,/*#__PURE__*/React.createElement("div",{className:"ls-right-head"},/*#__PURE__*/React.createElement("h2",null,"Connexion"),/*#__PURE__*/React.createElement("p",null,"Entrez vos identifiants pour accéder à votre espace")),/*#__PURE__*/React.createElement("div",{className:"fg",style:{marginBottom:14}},/*#__PURE__*/React.createElement("label",{className:"fl",style:{color:'#888'}},"Adresse email"),/*#__PURE__*/React.createElement("input",{className:"fi",type:"email",placeholder:"prenom@edu.fr",value:email,onChange:e=>setEmail(e.target.value),onKeyDown:e=>e.key==='Enter'&&handleLogin(e),autoFocus:true,style:{fontSize:13,padding:'10px 12px'}})),/*#__PURE__*/React.createElement("div",{className:"fg",style:{marginBottom:6,position:'relative'}},/*#__PURE__*/React.createElement("label",{className:"fl",style:{color:'#888'}},"Mot de passe"),/*#__PURE__*/React.createElement("div",{style:{position:'relative'}},/*#__PURE__*/React.createElement("input",{className:"fi",type:showPwd?'text':'password',placeholder:"••••••••",value:password,onChange:e=>setPassword(e.target.value),onKeyDown:e=>e.key==='Enter'&&handleLogin(e),style:{fontSize:13,padding:'10px 38px 10px 12px',paddingRight:38}}),/*#__PURE__*/React.createElement("button",{onClick:()=>setShowPwd(p=>!p),style:{position:'absolute',right:10,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:14,color:'#999',padding:2}},showPwd?'🙈':'👁'))),error&&/*#__PURE__*/React.createElement("div",{style:{background:'#FFF0F0',border:'1px solid #f5b8b8',borderRadius:2,padding:'8px 12px',fontSize:12,color:'#c0392b',marginBottom:10}},"⚠️ ",error),/*#__PURE__*/React.createElement("button",{className:"ls-btn",disabled:loading||!email||!password,onClick:handleLogin,style:{marginTop:18}},loading?/*#__PURE__*/React.createElement(React.Fragment,null,/*#__PURE__*/React.createElement("span",{style:{fontSize:12,letterSpacing:1}},"Connexion…")):/*#__PURE__*/React.createElement(React.Fragment,null,/*#__PURE__*/React.createElement("span",null,"Accéder à mon espace"),/*#__PURE__*/React.createElement("span",{className:"ls-btn-arrow"},"→"))),/*#__PURE__*/React.createElement("div",{style:{margin:'22px 0 10px',borderTop:'1px solid #e0dcd4'}}),/*#__PURE__*/React.createElement("div",{style:{fontSize:10,color:'#bbb',textAlign:'center',letterSpacing:.5,lineHeight:1.7}},"Mot de passe oublié ? Contactez l'administration.",/*#__PURE__*/React.createElement("br",null),/*#__PURE__*/React.createElement("span",{style:{color:'#ccc'}},"admin@educenter.fr"),/*#__PURE__*/React.createElement("br",null),/*#__PURE__*/React.createElement("a",{href:"reservation.html",style:{color:'#4a7fd4',textDecoration:'none',fontWeight:700}},"📅 Réserver un cours particulier")),/*#__PURE__*/React.createElement("div",{className:"ls-right-footer"},/*#__PURE__*/React.createElement("span",{className:"ls-right-footer-txt"},"© 2025 Plus de bonnes notes · La Courneuve"))));}// ─── SIDEBAR ───
-function Sidebar({user,page,setPage,onLogout,pinned,setPinned}){const items=[{id:'dashboard',icon:'🏠',label:'Tableau de bord',roles:['admin','prof','eleve']},{id:'programme',icon:'📖',label:'Mon Programme',roles:['eleve']},{id:'bibliotheque',icon:'📚',label:'Bibliothèque',roles:['admin','prof']},{id:'emploidutemps',icon:'📅',label:'Emploi du temps',roles:['admin','prof','eleve']},{id:'modules',icon:'🗓️',label:'Modules & Activités',roles:['admin','prof','eleve']},{id:'monespace',icon:'🎓',label:'Mon Espace',roles:['eleve']},{id:'meseleves',icon:'👥',label:'Élèves & Appel',roles:['prof']},{id:'statistiques',icon:'📊',label:'Statistiques',roles:['admin']},{id:'facturation',icon:'🧾',label:'Facturation',roles:['admin']},{id:'inscriptions',icon:'📝',label:'Inscriptions',roles:['admin']},{id:'suivi',icon:'📋',label:'Suivi Compétences',roles:['admin','prof']},{id:'coursparticuliers',icon:'🎯',label:'Cours particuliers',roles:['prof']},{id:'reservations',icon:'🗓️',label:'Réservations',roles:['admin']},{id:'reserver',icon:'🎯',label:'Réserver un cours',roles:['eleve']},{id:'sorties',icon:'🚌',label:'Sorties scolaires',roles:['admin']},{id:'paiement',icon:'💳',label:'Paiement',roles:['admin']},{id:'pages',icon:'📄',label:'Pages',roles:['admin']},{id:'annonces',icon:'📢',label:'Annonces',roles:['admin']},{id:'vitrine',icon:'🌐',label:'Site vitrine',roles:['admin']},{id:'admin',icon:'⚙️',label:'Administration',roles:['admin']}].filter(i=>i.roles.includes(user.role));return/*#__PURE__*/React.createElement("div",{className:`sidebar ${pinned?'pinned':''}`},/*#__PURE__*/React.createElement("div",{className:"sb-brand"},/*#__PURE__*/React.createElement("div",{className:"sb-logo",style:{fontSize:22,marginBottom:2}},/*#__PURE__*/React.createElement("svg",{width:"28",height:"28",viewBox:"0 0 28 28",fill:"none",xmlns:"http://www.w3.org/2000/svg"},/*#__PURE__*/React.createElement("circle",{cx:"14",cy:"14",r:"13",fill:"var(--gold2)",opacity:"0.15"}),/*#__PURE__*/React.createElement("path",{d:"M14 4 L20 10 L20 18 L14 22 L8 18 L8 10 Z",fill:"var(--gold2)",opacity:"0.9"}),/*#__PURE__*/React.createElement("path",{d:"M11 13 L14 10 L17 13 L14 16 Z",fill:"white"}))),/*#__PURE__*/React.createElement("div",{className:"sb-title",style:{fontSize:13,lineHeight:1.2}},"Plus de bonnes",/*#__PURE__*/React.createElement("br",null),"notes"),/*#__PURE__*/React.createElement("div",{className:"sb-sub"},"Soutien scolaire connecté"),/*#__PURE__*/React.createElement("button",{className:`sb-pin ${pinned?'on':''}`,onClick:()=>setPinned(!pinned),title:pinned?'Détacher (auto-réduire)':'Épingler le menu (rester ouvert)'},pinned?'📌':'📍')),/*#__PURE__*/React.createElement("nav",{className:"sb-nav"},/*#__PURE__*/React.createElement("div",{className:"sb-sec"},"Navigation"),items.map(it=>/*#__PURE__*/React.createElement("div",{key:it.id,className:`ni ${page===it.id?'on':''}`,onClick:()=>setPage(it.id),title:it.label},/*#__PURE__*/React.createElement("span",{className:"ni-ic"},it.icon),/*#__PURE__*/React.createElement("span",{className:"ni-lbl"},it.label)))),/*#__PURE__*/React.createElement("div",{className:"sb-user"},/*#__PURE__*/React.createElement("div",{className:"sb-av"},RI[user.role]),/*#__PURE__*/React.createElement("div",{className:"sb-uinfo"},/*#__PURE__*/React.createElement("div",{className:"sb-uname"},user.name.split(' ').slice(-1)[0]),/*#__PURE__*/React.createElement("div",{className:"sb-urole"},RL[user.role])),/*#__PURE__*/React.createElement("button",{className:"sb-out",onClick:onLogout,title:"Déconnexion"},"⏻")));}// ─── TOPBAR ───
+function Sidebar({user,page,setPage,onLogout,pinned,setPinned}){const items=[{id:'dashboard',icon:'🏠',label:'Tableau de bord',roles:['admin','prof','eleve']},{id:'programme',icon:'📖',label:'Mon Programme',roles:['eleve']},{id:'bibliotheque',icon:'📚',label:'Bibliothèque',roles:['admin','prof']},{id:'emploidutemps',icon:'📅',label:'Emploi du temps',roles:['admin','prof','eleve']},{id:'modules',icon:'🗓️',label:'Modules & Activités',roles:['admin','prof','eleve']},{id:'monespace',icon:'🎓',label:'Mon Espace',roles:['eleve']},{id:'meseleves',icon:'👥',label:'Élèves & Appel',roles:['prof']},{id:'statistiques',icon:'📊',label:'Statistiques',roles:['admin']},{id:'facturation',icon:'🧾',label:'Facturation',roles:['admin']},{id:'inscriptions',icon:'📝',label:'Inscriptions',roles:['admin']},{id:'suivi',icon:'📋',label:'Suivi Compétences',roles:['admin','prof']},{id:'coursparticuliers',icon:'🎯',label:'Cours particuliers',roles:['prof']},{id:'reservations',icon:'🗓️',label:'Réservations',roles:['admin']},{id:'reserver',icon:'🎯',label:'Réserver un cours',roles:['eleve']},{id:'live',icon:'🎥',label:'Lives',roles:['prof']},{id:'sorties',icon:'🚌',label:'Sorties scolaires',roles:['admin']},{id:'paiement',icon:'💳',label:'Paiement',roles:['admin']},{id:'pages',icon:'📄',label:'Pages',roles:['admin']},{id:'annonces',icon:'📢',label:'Annonces',roles:['admin']},{id:'vitrine',icon:'🌐',label:'Site vitrine',roles:['admin']},{id:'admin',icon:'⚙️',label:'Administration',roles:['admin']}].filter(i=>i.roles.includes(user.role));return/*#__PURE__*/React.createElement("div",{className:`sidebar ${pinned?'pinned':''}`},/*#__PURE__*/React.createElement("div",{className:"sb-brand"},/*#__PURE__*/React.createElement("div",{className:"sb-logo",style:{fontSize:22,marginBottom:2}},/*#__PURE__*/React.createElement("svg",{width:"28",height:"28",viewBox:"0 0 28 28",fill:"none",xmlns:"http://www.w3.org/2000/svg"},/*#__PURE__*/React.createElement("circle",{cx:"14",cy:"14",r:"13",fill:"var(--gold2)",opacity:"0.15"}),/*#__PURE__*/React.createElement("path",{d:"M14 4 L20 10 L20 18 L14 22 L8 18 L8 10 Z",fill:"var(--gold2)",opacity:"0.9"}),/*#__PURE__*/React.createElement("path",{d:"M11 13 L14 10 L17 13 L14 16 Z",fill:"white"}))),/*#__PURE__*/React.createElement("div",{className:"sb-title",style:{fontSize:13,lineHeight:1.2}},"Plus de bonnes",/*#__PURE__*/React.createElement("br",null),"notes"),/*#__PURE__*/React.createElement("div",{className:"sb-sub"},"Soutien scolaire connecté"),/*#__PURE__*/React.createElement("button",{className:`sb-pin ${pinned?'on':''}`,onClick:()=>setPinned(!pinned),title:pinned?'Détacher (auto-réduire)':'Épingler le menu (rester ouvert)'},pinned?'📌':'📍')),/*#__PURE__*/React.createElement("nav",{className:"sb-nav"},/*#__PURE__*/React.createElement("div",{className:"sb-sec"},"Navigation"),items.map(it=>/*#__PURE__*/React.createElement("div",{key:it.id,className:`ni ${page===it.id?'on':''}`,onClick:()=>setPage(it.id),title:it.label},/*#__PURE__*/React.createElement("span",{className:"ni-ic"},it.icon),/*#__PURE__*/React.createElement("span",{className:"ni-lbl"},it.label)))),/*#__PURE__*/React.createElement("div",{className:"sb-user"},/*#__PURE__*/React.createElement("div",{className:"sb-av"},RI[user.role]),/*#__PURE__*/React.createElement("div",{className:"sb-uinfo"},/*#__PURE__*/React.createElement("div",{className:"sb-uname"},user.name.split(' ').slice(-1)[0]),/*#__PURE__*/React.createElement("div",{className:"sb-urole"},RL[user.role])),/*#__PURE__*/React.createElement("button",{className:"sb-out",onClick:onLogout,title:"Déconnexion"},"⏻")));}// ─── TOPBAR ───
 function TB({title,children}){return/*#__PURE__*/React.createElement("div",{className:"topbar"},/*#__PURE__*/React.createElement("h1",{className:"tb-ttl"},title),/*#__PURE__*/React.createElement("div",{className:"tb-act"},children));}// ─── TIMETABLE COMPONENT ───
 function generatePlanningPDF(cours,users,filtres){const{jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4',orientation:'landscape'});const W=297,H=210,ML=10,MR=10;// ── Couleurs par niveau (PDF) ──
 const NCLR={'6ème':{bg:[243,232,255],bd:[124,58,237],tx:[91,33,182],gold:false},'5ème':{bg:[255,252,210],bd:[202,138,4],tx:[146,64,14],gold:false},'4ème':{bg:[219,234,255],bd:[29,79,196],tx:[30,64,175],gold:false},'3ème':{bg:[209,250,229],bd:[5,150,105],tx:[6,95,70],gold:false},'Seconde':{bg:[254,220,220],bd:[220,38,38],tx:[153,27,27],gold:false},'Première':{bg:[235,238,243],bd:[71,85,105],tx:[30,41,59],gold:false},'Terminale':{bg:[255,248,195],bd:[180,130,0],tx:[120,80,0],gold:true},'Supérieures':{bg:[253,244,255],bd:[162,28,175],tx:[134,25,143],gold:false},'Module':{bg:[224,252,249],bd:[13,148,136],tx:[15,118,110],gold:false,isModule:true}};const defC={bg:[235,240,248],bd:[90,110,150],tx:[60,80,120],gold:false};const getC=niv=>{for(const[k,v]of Object.entries(NCLR))if(niv===k)return v;return defC;};// Filtres
@@ -1004,6 +1020,86 @@ const R_montant = d => {
   return Math.max(0, dur * th + fi);
 };
 const R_tarifH = d => parseFloat(d.tarif_horaire != null ? d.tarif_horaire : d.tarifHoraire != null ? d.tarifHoraire : 40) || 0;
+const R_euro = n => (Math.round((n || 0) * 100) / 100).toLocaleString('fr-FR', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+}) + ' €';
+const R_fetchCredit = async id => {
+  try {
+    const {
+      data
+    } = await sb.from('users').select('credit').eq('id', id).single();
+    return parseFloat(data && data.credit || 0) || 0;
+  } catch (_) {
+    return 0;
+  }
+};
+const R_spend = async (id, montant, motif, ref) => {
+  const bal = await R_fetchCredit(id);
+  if (bal < montant) return {
+    ok: false,
+    bal
+  };
+  try {
+    const {
+      error: e1
+    } = await sb.from('users').update({
+      credit: bal - montant
+    }).eq('id', id);
+    if (e1) throw e1;
+    try {
+      await sb.from('credit_tx').insert({
+        id: R_genId('tx_'),
+        eleve_id: id,
+        montant: -montant,
+        type: 'depense',
+        motif: motif || '',
+        ref: ref || null
+      });
+    } catch (_) {}
+    return {
+      ok: true,
+      bal: bal - montant
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      bal,
+      err: e.message
+    };
+  }
+};
+const R_topup = async (id, montant, type, motif, by) => {
+  const bal = await R_fetchCredit(id);
+  const delta = type === 'debit' ? -montant : montant;
+  try {
+    const {
+      error: e1
+    } = await sb.from('users').update({
+      credit: bal + delta
+    }).eq('id', id);
+    if (e1) throw e1;
+    try {
+      await sb.from('credit_tx').insert({
+        id: R_genId('tx_'),
+        eleve_id: id,
+        montant: delta,
+        type: type === 'debit' ? 'ajustement' : 'recharge',
+        motif: motif || '',
+        by: by || null
+      });
+    } catch (_) {}
+    return {
+      ok: true,
+      bal: bal + delta
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      err: e.message
+    };
+  }
+};
 const R_badge = (s, map) => {
   const m = map[s] || {
     l: s,
@@ -2252,6 +2348,18 @@ const LAUNCH_TILES = [{
   c1: '#0369a1',
   c2: '#38bdf8'
 }, {
+  id: 'liveadmin',
+  icon: '🎥',
+  label: 'Lives ouverts',
+  c1: '#c8362e',
+  c2: '#f0776e'
+}, {
+  id: 'credits',
+  icon: '💳',
+  label: 'Crédits élèves',
+  c1: '#0d9488',
+  c2: '#2dd4bf'
+}, {
   id: 'groupes',
   icon: '👥',
   label: 'Groupes & attributions',
@@ -2587,6 +2695,28 @@ function AttribPanel({
       };
     }));
   };
+  const [repDate, setRepDate] = useState('');
+  const [repUrl, setRepUrl] = useState('');
+  const setMeet = (cid, url) => setCours(prev => prev.map(x => x.id === cid ? {
+    ...x,
+    meetUrl: url
+  } : x));
+  const addReplay = cid => {
+    if (!repUrl.trim()) return;
+    setCours(prev => prev.map(x => x.id === cid ? {
+      ...x,
+      replays: [...(x.replays || []), {
+        date: repDate,
+        url: repUrl.trim()
+      }]
+    } : x));
+    setRepUrl('');
+    setRepDate('');
+  };
+  const delReplay = (cid, idx) => setCours(prev => prev.map(x => x.id === cid ? {
+    ...x,
+    replays: (x.replays || []).filter((_, i) => i !== idx)
+  } : x));
   const tabBtn = on => ({
     padding: '6px 16px',
     border: 'none',
@@ -2828,7 +2958,89 @@ function AttribPanel({
       }
     }, " \xB7 ", e.niveau) : null), /*#__PURE__*/React.createElement("span", {
       className: "plus"
-    }, "+ Ajouter")))));
+    }, "+ Ajouter")))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: 16,
+        borderTop: '1.5px dashed var(--cream2)',
+        paddingTop: 12
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "fl"
+    }, "\uD83C\uDFA5 Cours en ligne (Google Meet)"), /*#__PURE__*/React.createElement("input", {
+      className: "fi",
+      style: {
+        marginTop: 4
+      },
+      placeholder: "Lien Meet du direct (https://meet.google.com/\u2026)",
+      value: c.meetUrl || '',
+      onChange: e => setMeet(c.id, e.target.value)
+    }), /*#__PURE__*/React.createElement("div", {
+      className: "fl",
+      style: {
+        marginTop: 12
+      }
+    }, "Rediffusions (liens Drive)"), (c.replays || []).length > 0 && /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 4,
+        margin: '5px 0'
+      }
+    }, (c.replays || []).map((r, i) => /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        gap: 8,
+        fontSize: 12,
+        background: 'var(--cream)',
+        borderRadius: 5,
+        padding: '5px 9px'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
+      }
+    }, r.date ? R_fmtFR(r.date) + ' — ' : '', (r.url || '').slice(0, 42)), /*#__PURE__*/React.createElement("button", {
+      onClick: () => delReplay(c.id, i),
+      style: {
+        border: 'none',
+        background: 'none',
+        color: 'var(--err)',
+        cursor: 'pointer',
+        fontSize: 13
+      }
+    }, "\u2715")))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        gap: 6,
+        marginTop: 6,
+        flexWrap: 'wrap'
+      }
+    }, /*#__PURE__*/React.createElement("input", {
+      className: "fi",
+      type: "date",
+      style: {
+        width: 140
+      },
+      value: repDate,
+      onChange: e => setRepDate(e.target.value)
+    }), /*#__PURE__*/React.createElement("input", {
+      className: "fi",
+      style: {
+        flex: 1,
+        minWidth: 150
+      },
+      placeholder: "Lien de l'enregistrement",
+      value: repUrl,
+      onChange: e => setRepUrl(e.target.value)
+    }), /*#__PURE__*/React.createElement("button", {
+      className: "btn btn-p btn-sm",
+      onClick: () => addReplay(c.id)
+    }, "+ Ajouter"))));
   })());
 }
 function GroupesAdmin({
@@ -2867,6 +3079,1292 @@ function GroupesAdmin({
     setUsers: setUsers
   })));
 }
+
+// ─── APP ÉLÈVE : barre du haut + onglets du bas ───
+function StudentTopBar({
+  page,
+  onLogout
+}) {
+  const titles = {
+    dashboard: 'Accueil',
+    live: 'Lives ouverts',
+    monplanning: 'Planning',
+    emploidutemps: 'Planning',
+    programme: 'Mon Programme',
+    reserver: 'Réserver un cours',
+    chat: 'Aide aux devoirs',
+    monespace: 'Mon espace',
+    modules: 'Modules',
+    bibliotheque: 'Fiches'
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "stud-top"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "st-brand"
+  }, "\uD83D\uDCDA ", titles[page] || 'Plus de bonnes notes'), /*#__PURE__*/React.createElement("div", {
+    className: "st-actions"
+  }, /*#__PURE__*/React.createElement("button", {
+    title: "Notifications",
+    onClick: () => alert('🔔 Les notifications arrivent très bientôt : tu seras prévenu(e) en cas de déplacement de cours ou d\'annonce.')
+  }, "\uD83D\uDD14"), /*#__PURE__*/React.createElement("button", {
+    title: "D\xE9connexion",
+    onClick: onLogout
+  }, "\u23FB")));
+}
+function StudentTabBar({
+  page,
+  setPage
+}) {
+  const tabs = [{
+    id: 'dashboard',
+    ic: '🏠',
+    lbl: 'Accueil'
+  }, {
+    id: 'monplanning',
+    ic: '📅',
+    lbl: 'Planning'
+  }, {
+    id: 'programme',
+    ic: '📚',
+    lbl: 'Cours'
+  }, {
+    id: 'live',
+    ic: '🎥',
+    lbl: 'Live'
+  }, {
+    id: 'reserver',
+    ic: '🎯',
+    lbl: 'Réserver'
+  }, {
+    id: 'chat',
+    ic: '💬',
+    lbl: 'Aide'
+  }];
+  return /*#__PURE__*/React.createElement("div", {
+    className: "tabbar"
+  }, tabs.map(t => /*#__PURE__*/React.createElement("button", {
+    key: t.id,
+    className: page === t.id ? 'on' : '',
+    onClick: () => setPage(t.id)
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "tb-ic"
+  }, t.ic), /*#__PURE__*/React.createElement("span", {
+    className: "tb-lbl"
+  }, t.lbl))));
+}
+function EleveChat({
+  user
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "pg"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "emp",
+    style: {
+      padding: '56px 20px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "emp-icon"
+  }, "\uD83D\uDCAC"), /*#__PURE__*/React.createElement("h3", null, "Aide aux devoirs"), /*#__PURE__*/React.createElement("p", null, "Bient\xF4t : pose tes questions \xE0 tes professeurs et re\xE7ois de l'aide directement ici."), /*#__PURE__*/React.createElement("p", {
+    style: {
+      marginTop: 8,
+      fontSize: 11,
+      color: 'var(--muted)'
+    }
+  }, "Cette messagerie arrive dans la prochaine mise \xE0 jour.")));
+}
+function EleveePlanning({
+  user,
+  users,
+  cours
+}) {
+  const mine = (cours || []).filter(c => (c.eleveIds || []).includes(user.id));
+  const profs = (users || []).filter(u => u.role === 'prof');
+  const profName = id => {
+    const p = profs.find(x => x.id === id);
+    return p ? p.name : '';
+  };
+  const DAYS7 = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+  const now = new Date();
+  const todayName = DAYS7[(now.getDay() + 6) % 7];
+  const nowH = now.getHours() + now.getMinutes() / 60;
+  const isLive = c => c.jour === todayName && nowH >= (c.debut || 0) - 0.25 && nowH <= (c.fin || 0) + 0.03;
+  const isSoon = c => c.jour === todayName && nowH < (c.debut || 0) - 0.25 && nowH >= (c.debut || 0) - 1;
+  const [openReplays, setOpenReplays] = useState(null);
+  const byDay = {};
+  DAYS7.forEach(d => byDay[d] = mine.filter(c => c.jour === d).sort((a, b) => (a.debut || 0) - (b.debut || 0)));
+  return /*#__PURE__*/React.createElement("div", {
+    className: "pg"
+  }, mine.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "emp"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "emp-icon"
+  }, "\uD83D\uDCC5"), /*#__PURE__*/React.createElement("h3", null, "Aucun cours pour l'instant"), /*#__PURE__*/React.createElement("p", null, "Tes cours appara\xEEtront ici d\xE8s que tu seras inscrit(e) \xE0 des groupes.")) : DAYS7.filter(d => byDay[d].length).map(d => /*#__PURE__*/React.createElement("div", {
+    key: d,
+    style: {
+      marginBottom: 18
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "st",
+    style: {
+      marginBottom: 8
+    }
+  }, d), byDay[d].map(c => {
+    const live = isLive(c);
+    const soon = isSoon(c);
+    const col = R_matColor(c.matiere);
+    const reps = c.replays || [];
+    return /*#__PURE__*/React.createElement("div", {
+      key: c.id,
+      style: {
+        background: 'var(--white)',
+        border: '1.5px solid ' + (live ? '#c8362e' : 'var(--cream2)'),
+        borderLeft: '4px solid ' + col,
+        borderRadius: 8,
+        padding: '12px 14px',
+        marginBottom: 8
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        gap: 10,
+        flexWrap: 'wrap'
+      }
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontWeight: 700,
+        fontSize: 14
+      }
+    }, c.matiere, c.niveau ? ' · ' + c.niveau : ''), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: 'var(--muted)'
+      }
+    }, hs(c.debut), "\u2013", hs(c.fin), c.profId ? ' · ' + profName(c.profId) : '', c.salle ? ' · ' + c.salle : '')), live ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        background: '#c8362e',
+        color: '#fff',
+        fontSize: 10,
+        fontWeight: 700,
+        padding: '3px 9px',
+        borderRadius: 20
+      }
+    }, "\uD83D\uDD34 EN DIRECT") : soon ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        background: '#fff4e0',
+        color: '#9a5c00',
+        fontSize: 10,
+        fontWeight: 700,
+        padding: '3px 9px',
+        borderRadius: 20,
+        border: '1px solid #9a5c00'
+      }
+    }, "\u23F3 Bient\xF4t") : null), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        gap: 8,
+        marginTop: 10,
+        flexWrap: 'wrap'
+      }
+    }, c.meetUrl ? /*#__PURE__*/React.createElement("a", {
+      className: "btn btn-p btn-sm",
+      href: c.meetUrl,
+      target: "_blank",
+      rel: "noopener",
+      style: live ? {
+        background: '#c8362e',
+        borderColor: '#c8362e'
+      } : {}
+    }, live ? '🔴 Rejoindre le direct' : '📹 Rejoindre le cours') : /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        color: 'var(--muted)'
+      }
+    }, "Cours en pr\xE9sentiel"), reps.length > 0 && /*#__PURE__*/React.createElement("button", {
+      className: "btn btn-o btn-sm",
+      onClick: () => setOpenReplays(openReplays === c.id ? null : c.id)
+    }, "\u25B6\uFE0F Revoir (", reps.length, ")")), openReplays === c.id && /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: 8,
+        borderTop: '1px solid var(--cream2)',
+        paddingTop: 8,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 5
+      }
+    }, reps.slice().sort((a, b) => (b.date || '').localeCompare(a.date || '')).map((r, i) => /*#__PURE__*/React.createElement("a", {
+      key: i,
+      href: r.url,
+      target: "_blank",
+      rel: "noopener",
+      style: {
+        fontSize: 12.5,
+        color: 'var(--info)',
+        textDecoration: 'none'
+      }
+    }, "\u25B6\uFE0F ", r.titre || 'Séance du ' + (r.date ? R_fmtFR(r.date) : '?')))));
+  }))));
+}
+
+// ─── LIVES OUVERTS (sessions ponctuelles + chat) ───
+function LiveChat({
+  session,
+  user,
+  onClose
+}) {
+  const [msgs, setMsgs] = useState([]);
+  const [txt, setTxt] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  const load = async () => {
+    try {
+      const {
+        data,
+        error
+      } = await sb.from('live_messages').select('*').eq('session_id', session.id).order('created_at');
+      if (!error) {
+        setMsgs(data || []);
+        setErr('');
+      } else setErr(error.message);
+    } catch (e) {}
+  };
+  useEffect(() => {
+    load();
+    const t = setInterval(load, 5000);
+    return () => clearInterval(t);
+  }, [session.id]);
+  const send = async () => {
+    if (!txt.trim()) return;
+    setBusy(true);
+    try {
+      const m = {
+        id: R_genId('m_'),
+        session_id: session.id,
+        auteur_id: user.id,
+        auteur_nom: user.name,
+        role: user.role,
+        texte: txt.trim()
+      };
+      const {
+        error
+      } = await sb.from('live_messages').insert(m);
+      if (error) throw error;
+      setTxt('');
+      load();
+    } catch (e) {
+      setErr(e.message || 'Erreur');
+    } finally {
+      setBusy(false);
+    }
+  };
+  const roleBadge = r => r === 'prof' ? {
+    l: 'Prof',
+    c: '#1a4fc4'
+  } : r === 'admin' ? {
+    l: 'Admin',
+    c: '#7c3aed'
+  } : null;
+  return /*#__PURE__*/React.createElement(Modal, {
+    title: '💬 ' + session.titre,
+    onClose: onClose
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: 'var(--muted)',
+      marginBottom: 8
+    }
+  }, "Pose tes questions pendant le live \u2014 tout le monde les voit."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      border: '1.5px solid var(--cream2)',
+      borderRadius: 6,
+      background: 'var(--white)',
+      height: '44vh',
+      overflowY: 'auto',
+      padding: '8px 10px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 7
+    }
+  }, msgs.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--muted)',
+      margin: 'auto',
+      textAlign: 'center'
+    }
+  }, "Aucun message. Sois le/la premier(e) \xE0 poser une question !") : msgs.map(m => {
+    const rb = roleBadge(m.role);
+    const mine = m.auteur_id === user.id;
+    return /*#__PURE__*/React.createElement("div", {
+      key: m.id,
+      style: {
+        alignSelf: mine ? 'flex-end' : 'flex-start',
+        maxWidth: '85%'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: 'var(--muted)',
+        marginBottom: 1,
+        textAlign: mine ? 'right' : 'left'
+      }
+    }, m.auteur_nom, rb ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: rb.c,
+        fontWeight: 700
+      }
+    }, " \xB7 ", rb.l) : ''), /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: mine ? 'var(--info)' : 'var(--cream2)',
+        color: mine ? '#fff' : 'var(--text)',
+        borderRadius: 10,
+        padding: '6px 11px',
+        fontSize: 13,
+        fontFamily: 'var(--ff-mono)',
+        lineHeight: 1.4
+      }
+    }, m.texte));
+  })), err && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: 'var(--err)',
+      marginTop: 6
+    }
+  }, "\u26A0\uFE0F ", err, " \u2014 la table \xAB live_messages \xBB n'existe peut-\xEAtre pas (SQL \xE0 ex\xE9cuter)."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 6,
+      marginTop: 10
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "fi",
+    style: {
+      flex: 1
+    },
+    placeholder: "Ta question\u2026",
+    value: txt,
+    onChange: e => setTxt(e.target.value),
+    onKeyDown: e => e.key === 'Enter' && send()
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-p",
+    onClick: send,
+    disabled: busy || !txt.trim()
+  }, "Envoyer")));
+}
+function RechargeModal({
+  user,
+  credit,
+  onClose
+}) {
+  const presets = [10, 20, 30, 50];
+  return /*#__PURE__*/React.createElement(Modal, {
+    title: "Recharger mon cr\xE9dit",
+    onClose: onClose
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      marginBottom: 12
+    }
+  }, "Solde actuel : ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      fontFamily: 'var(--ff-serif)',
+      fontSize: 18
+    }
+  }, R_euro(credit))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 8,
+      flexWrap: 'wrap',
+      marginBottom: 14
+    }
+  }, presets.map(p => /*#__PURE__*/React.createElement("div", {
+    key: p,
+    style: {
+      border: '1.5px solid var(--cream2)',
+      borderRadius: 8,
+      padding: '12px 18px',
+      fontFamily: 'var(--ff-serif)',
+      fontSize: 18,
+      color: 'var(--muted)'
+    }
+  }, p, " \u20AC"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: '#fff4e0',
+      border: '1px solid #e8c98a',
+      color: '#7a5200',
+      padding: '11px 14px',
+      borderRadius: 8,
+      fontSize: 12.5,
+      lineHeight: 1.5
+    }
+  }, "\uD83D\uDCB3 Le paiement en ligne par carte arrive tr\xE8s bient\xF4t. En attendant, ", /*#__PURE__*/React.createElement("b", null, "contacte l'administration"), " pour recharger ton cr\xE9dit (esp\xE8ces, virement\u2026)."));
+}
+function LivePage({
+  user
+}) {
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState('');
+  const [sel, setSel] = useState(null);
+  const [credit, setCredit] = useState(0);
+  const [parts, setParts] = useState({});
+  const [recharge, setRecharge] = useState(false);
+  const [busyId, setBusyId] = useState(null);
+  const isEleve = user.role === 'eleve';
+  const load = async () => {
+    setLoading(true);
+    setErr('');
+    try {
+      const sRes = await sb.from('live_sessions').select('*').gte('date', R_shiftDay(R_todayISO(), -1)).order('date');
+      if (sRes.error) throw sRes.error;
+      setRows(sRes.data || []);
+      if (isEleve) {
+        const cVal = await R_fetchCredit(user.id);
+        setCredit(cVal);
+        try {
+          const pRes = await sb.from('live_participants').select('session_id').eq('eleve_id', user.id);
+          const pm = {};
+          (pRes.data || []).forEach(p => pm[p.session_id] = true);
+          setParts(pm);
+        } catch (_) {}
+      }
+    } catch (e) {
+      setErr(e.message || 'Erreur');
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    load();
+  }, []);
+  const now = new Date();
+  const nowISO = R_todayISO();
+  const nowH = now.getHours() + now.getMinutes() / 60;
+  const state = s => {
+    if (s.date > nowISO) return 'a_venir';
+    if (s.date < nowISO) return 'termine';
+    if (nowH >= (s.debut || 0) - 0.25 && nowH <= (s.fin || 0) + 0.05) return 'en_cours';
+    if (nowH < (s.debut || 0) - 0.25) return 'a_venir';
+    return 'termine';
+  };
+  const order = {
+    en_cours: 0,
+    a_venir: 1,
+    termine: 2
+  };
+  const sorted = rows.slice().sort((a, b) => order[state(a)] - order[state(b)] || (a.date + String(a.debut)).localeCompare(b.date + String(b.debut)));
+  const prixOf = s => parseFloat(s.prix != null ? s.prix : 0) || 0;
+  const hasAccess = s => !isEleve || prixOf(s) <= 0 || parts[s.id];
+  const reserve = async s => {
+    const prix = prixOf(s);
+    if (credit < prix) {
+      setRecharge(true);
+      return;
+    }
+    setBusyId(s.id);
+    const r = await R_spend(user.id, prix, 'Live : ' + s.titre, s.id);
+    if (!r.ok) {
+      setBusyId(null);
+      if (r.err) {
+        alert('Erreur : ' + r.err);
+      } else {
+        setCredit(r.bal);
+        setRecharge(true);
+      }
+      return;
+    }
+    try {
+      await sb.from('live_participants').insert({
+        id: R_genId('lp_'),
+        session_id: s.id,
+        eleve_id: user.id,
+        prix: prix
+      });
+    } catch (_) {}
+    setCredit(r.bal);
+    setParts(p => ({
+      ...p,
+      [s.id]: true
+    }));
+    setBusyId(null);
+  };
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "pg"
+  }, isEleve && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 10,
+      background: 'var(--navy)',
+      color: 'var(--cream)',
+      borderRadius: 8,
+      padding: '11px 15px',
+      marginBottom: 14,
+      flexWrap: 'wrap'
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      opacity: .7
+    }
+  }, "Mon cr\xE9dit"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'var(--ff-serif)',
+      fontSize: 22,
+      lineHeight: 1.1
+    }
+  }, R_euro(credit))), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    style: {
+      background: 'var(--gold2)',
+      color: '#fff',
+      border: 'none'
+    },
+    onClick: () => setRecharge(true)
+  }, "\u2795 Recharger")), /*#__PURE__*/React.createElement("div", {
+    className: "sh"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "st"
+  }, "\uD83C\uDFA5 Lives ouverts"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-o btn-sm",
+    onClick: load
+  }, "\u21BB")), loading ? /*#__PURE__*/React.createElement("div", {
+    className: "emp"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "emp-icon"
+  }, "\u23F3"), /*#__PURE__*/React.createElement("p", null, "Chargement\u2026")) : err ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: '#fdf0ef',
+      border: '1px solid #e0a8a3',
+      color: '#8b2018',
+      padding: '11px 14px',
+      borderRadius: 6,
+      fontSize: 12.5
+    }
+  }, "\u26A0\uFE0F ", err, /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 6,
+      fontSize: 11
+    }
+  }, "La table \xAB live_sessions \xBB n'existe peut-\xEAtre pas. Ex\xE9cute le SQL fourni.")) : sorted.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "emp"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "emp-icon"
+  }, "\uD83C\uDFA5"), /*#__PURE__*/React.createElement("h3", null, "Aucune session pour l'instant"), /*#__PURE__*/React.createElement("p", null, "Les cours live ouverts appara\xEEtront ici.")) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 10
+    }
+  }, sorted.map(s => {
+    const st = state(s);
+    const col = R_matColor(s.matiere);
+    const prix = prixOf(s);
+    const access = hasAccess(s);
+    return /*#__PURE__*/React.createElement("div", {
+      key: s.id,
+      style: {
+        background: 'var(--white)',
+        border: '1.5px solid ' + (st === 'en_cours' ? '#c8362e' : 'var(--cream2)'),
+        borderLeft: '4px solid ' + col,
+        borderRadius: 8,
+        padding: '13px 15px'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        gap: 10,
+        flexWrap: 'wrap'
+      }
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontWeight: 700,
+        fontSize: 14.5
+      }
+    }, s.titre), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: 'var(--muted)',
+        marginTop: 2
+      }
+    }, s.matiere, s.chapitre ? ' · ' + s.chapitre : '', " \xB7 ", R_fmtFR(s.date), " ", hs(s.debut), "\u2013", hs(s.fin), s.niveau ? ' · ' + s.niveau : '')), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        gap: 6,
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        justifyContent: 'flex-end'
+      }
+    }, prix > 0 ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        background: 'var(--cream2)',
+        borderRadius: 14,
+        padding: '2px 10px',
+        fontSize: 11,
+        fontWeight: 700
+      }
+    }, R_euro(prix)) : /*#__PURE__*/React.createElement("span", {
+      style: {
+        background: '#e8f5ec',
+        color: '#2d7a3c',
+        border: '1px solid #2d7a3c',
+        borderRadius: 14,
+        padding: '2px 10px',
+        fontSize: 10,
+        fontWeight: 700
+      }
+    }, "GRATUIT"), st === 'en_cours' ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        background: '#c8362e',
+        color: '#fff',
+        fontSize: 10,
+        fontWeight: 700,
+        padding: '3px 9px',
+        borderRadius: 20
+      }
+    }, "\uD83D\uDD34 EN DIRECT") : st === 'a_venir' ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        background: '#eef3ff',
+        color: 'var(--info)',
+        fontSize: 10,
+        fontWeight: 700,
+        padding: '3px 9px',
+        borderRadius: 20,
+        border: '1px solid var(--info)'
+      }
+    }, "\xC0 venir") : /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 10,
+        color: 'var(--muted)'
+      }
+    }, "Termin\xE9"))), s.description ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12.5,
+        marginTop: 8
+      }
+    }, s.description) : null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        gap: 8,
+        marginTop: 10,
+        flexWrap: 'wrap',
+        alignItems: 'center'
+      }
+    }, access ? /*#__PURE__*/React.createElement(React.Fragment, null, s.meet_url && st !== 'termine' && /*#__PURE__*/React.createElement("a", {
+      className: "btn btn-p btn-sm",
+      href: s.meet_url,
+      target: "_blank",
+      rel: "noopener",
+      style: st === 'en_cours' ? {
+        background: '#c8362e',
+        borderColor: '#c8362e'
+      } : {}
+    }, st === 'en_cours' ? '🔴 Rejoindre le direct' : '📹 Lien du live'), /*#__PURE__*/React.createElement("button", {
+      className: "btn btn-o btn-sm",
+      onClick: () => setSel(s)
+    }, "\uD83D\uDCAC Chat & questions"), isEleve && prix > 0 && parts[s.id] && /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        color: 'var(--ok)',
+        fontWeight: 700
+      }
+    }, "\u2713 Place r\xE9serv\xE9e")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
+      className: "btn btn-p btn-sm",
+      onClick: () => reserve(s),
+      disabled: busyId === s.id
+    }, busyId === s.id ? '…' : 'Réserver ma place (' + R_euro(prix) + ')'), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        color: 'var(--muted)'
+      }
+    }, "\uD83D\uDD12 Acc\xE8s (Meet + chat) apr\xE8s r\xE9servation"))));
+  }))), sel && /*#__PURE__*/React.createElement(LiveChat, {
+    session: sel,
+    user: user,
+    onClose: () => setSel(null)
+  }), recharge && /*#__PURE__*/React.createElement(RechargeModal, {
+    user: user,
+    credit: credit,
+    onClose: () => setRecharge(false)
+  }));
+}
+function LivesAdmin({
+  user
+}) {
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [f, setF] = useState({
+    titre: '',
+    matiere: 'Mathématiques',
+    chapitre: '',
+    description: '',
+    date: R_todayISO(),
+    debut: '18',
+    fin: '19',
+    meet_url: '',
+    niveau: '',
+    prix: '5'
+  });
+  const set = (k, v) => setF(p => ({
+    ...p,
+    [k]: v
+  }));
+  const load = async () => {
+    setLoading(true);
+    setErr('');
+    try {
+      const {
+        data,
+        error
+      } = await sb.from('live_sessions').select('*').order('date', {
+        ascending: false
+      });
+      if (error) throw error;
+      setRows(data || []);
+    } catch (e) {
+      setErr(e.message || 'Erreur');
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    load();
+  }, []);
+  const add = async () => {
+    if (!f.titre.trim()) {
+      alert('Indique un titre.');
+      return;
+    }
+    setSaving(true);
+    try {
+      const row = {
+        id: R_genId('live_'),
+        titre: f.titre.trim(),
+        matiere: f.matiere,
+        chapitre: f.chapitre.trim(),
+        description: f.description.trim(),
+        date: f.date,
+        debut: parseFloat(f.debut),
+        fin: parseFloat(f.fin),
+        meet_url: f.meet_url.trim(),
+        niveau: f.niveau,
+        prix: parseFloat(f.prix) || 0
+      };
+      const {
+        error
+      } = await sb.from('live_sessions').insert(row);
+      if (error) throw error;
+      setF({
+        ...f,
+        titre: '',
+        chapitre: '',
+        description: '',
+        meet_url: ''
+      });
+      load();
+    } catch (e) {
+      alert('Erreur : ' + (e.message || e));
+    } finally {
+      setSaving(false);
+    }
+  };
+  const del = async id => {
+    if (!confirm('Supprimer cette session (et son chat) ?')) return;
+    try {
+      await sb.from('live_messages').delete().eq('session_id', id);
+    } catch (_) {}
+    try {
+      await sb.from('live_sessions').delete().eq('id', id);
+      load();
+    } catch (e) {
+      alert('Erreur : ' + (e.message || e));
+    }
+  };
+  const timeOpts = [];
+  for (let h = 8; h <= 22; h += 0.5) timeOpts.push(h);
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(TB, {
+    title: "Lives ouverts"
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: 'var(--muted)'
+    }
+  }, "Sessions live ponctuelles + chat")), /*#__PURE__*/React.createElement("div", {
+    className: "pg"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: 'var(--white)',
+      border: '1.5px solid var(--cream2)',
+      borderRadius: 4,
+      padding: '16px 18px',
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "st",
+    style: {
+      marginBottom: 12
+    }
+  }, "\u2795 Nouvelle session live"), /*#__PURE__*/React.createElement("div", {
+    className: "rgrid"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "fg",
+    style: {
+      gridColumn: 'span 2'
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "fl"
+  }, "Titre"), /*#__PURE__*/React.createElement("input", {
+    className: "fi",
+    value: f.titre,
+    onChange: e => set('titre', e.target.value),
+    placeholder: "Ex : R\xE9vision \u2014 Th\xE9or\xE8me de Thal\xE8s"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "fg"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "fl"
+  }, "Mati\xE8re"), /*#__PURE__*/React.createElement("select", {
+    className: "fi",
+    value: f.matiere,
+    onChange: e => set('matiere', e.target.value)
+  }, RESA_MAT.map(m => /*#__PURE__*/React.createElement("option", {
+    key: m,
+    value: m
+  }, m)))), /*#__PURE__*/React.createElement("div", {
+    className: "fg"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "fl"
+  }, "Niveau"), /*#__PURE__*/React.createElement("select", {
+    className: "fi",
+    value: f.niveau,
+    onChange: e => set('niveau', e.target.value)
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "Tous"), RESA_NIV.map(n => /*#__PURE__*/React.createElement("option", {
+    key: n,
+    value: n
+  }, n)))), /*#__PURE__*/React.createElement("div", {
+    className: "fg"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "fl"
+  }, "Prix / \xE9l\xE8ve (\u20AC) \u2014 0 = gratuit"), /*#__PURE__*/React.createElement("input", {
+    className: "fi",
+    type: "number",
+    step: "0.5",
+    value: f.prix,
+    onChange: e => set('prix', e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "fg"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "fl"
+  }, "Chapitre"), /*#__PURE__*/React.createElement("input", {
+    className: "fi",
+    value: f.chapitre,
+    onChange: e => set('chapitre', e.target.value),
+    placeholder: "facultatif"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "fg"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "fl"
+  }, "Date"), /*#__PURE__*/React.createElement("input", {
+    className: "fi",
+    type: "date",
+    value: f.date,
+    min: R_todayISO(),
+    onChange: e => set('date', e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "fg"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "fl"
+  }, "D\xE9but"), /*#__PURE__*/React.createElement("select", {
+    className: "fi",
+    value: f.debut,
+    onChange: e => set('debut', e.target.value)
+  }, timeOpts.map(h => /*#__PURE__*/React.createElement("option", {
+    key: h,
+    value: h
+  }, hs(h))))), /*#__PURE__*/React.createElement("div", {
+    className: "fg"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "fl"
+  }, "Fin"), /*#__PURE__*/React.createElement("select", {
+    className: "fi",
+    value: f.fin,
+    onChange: e => set('fin', e.target.value)
+  }, timeOpts.map(h => /*#__PURE__*/React.createElement("option", {
+    key: h,
+    value: h
+  }, hs(h))))), /*#__PURE__*/React.createElement("div", {
+    className: "fg",
+    style: {
+      gridColumn: 'span 2'
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "fl"
+  }, "Lien Google Meet"), /*#__PURE__*/React.createElement("input", {
+    className: "fi",
+    value: f.meet_url,
+    onChange: e => set('meet_url', e.target.value),
+    placeholder: "https://meet.google.com/\u2026"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "fg",
+    style: {
+      gridColumn: 'span 2'
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "fl"
+  }, "Description"), /*#__PURE__*/React.createElement("input", {
+    className: "fi",
+    value: f.description,
+    onChange: e => set('description', e.target.value),
+    placeholder: "Ce qu'on va voir, pr\xE9requis\u2026"
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: 'right',
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-p",
+    onClick: add,
+    disabled: saving
+  }, saving ? 'Publication…' : 'Publier la session'))), /*#__PURE__*/React.createElement("div", {
+    className: "sh"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "st"
+  }, "Sessions"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-o btn-sm",
+    onClick: load
+  }, "\u21BB")), loading ? /*#__PURE__*/React.createElement("div", {
+    className: "emp"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "emp-icon"
+  }, "\u23F3")) : err ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: '#fdf0ef',
+      border: '1px solid #e0a8a3',
+      color: '#8b2018',
+      padding: '11px 14px',
+      borderRadius: 6,
+      fontSize: 12.5
+    }
+  }, "\u26A0\uFE0F ", err, /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 6,
+      fontSize: 11
+    }
+  }, "Les tables \xAB live_sessions \xBB / \xAB live_messages \xBB n'existent pas encore. Ex\xE9cute le SQL fourni.")) : rows.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "emp"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "emp-icon"
+  }, "\uD83C\uDFA5"), /*#__PURE__*/React.createElement("h3", null, "Aucune session"), /*#__PURE__*/React.createElement("p", null, "Publie ta premi\xE8re session live ci-dessus.")) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 8
+    }
+  }, rows.map(s => /*#__PURE__*/React.createElement("div", {
+    key: s.id,
+    style: {
+      background: 'var(--white)',
+      border: '1.5px solid var(--cream2)',
+      borderRadius: 6,
+      padding: '10px 13px',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      gap: 10,
+      flexWrap: 'wrap'
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, s.titre), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: 'var(--muted)'
+    }
+  }, s.matiere, s.chapitre ? ' · ' + s.chapitre : '', " \xB7 ", R_fmtFR(s.date), " ", hs(s.debut), "\u2013", hs(s.fin), s.niveau ? ' · ' + s.niveau : '', " \xB7 ", parseFloat(s.prix || 0) > 0 ? R_euro(s.prix) : 'Gratuit', s.meet_url ? ' · 🔗 Meet' : '')), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-d btn-sm",
+    onClick: () => del(s.id)
+  }, "Suppr."))))));
+}
+function CreditsAdmin({
+  user
+}) {
+  const [studs, setStuds] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState('');
+  const [sel, setSel] = useState(null);
+  const [amt, setAmt] = useState('20');
+  const [motif, setMotif] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [hist, setHist] = useState([]);
+  const [q, setQ] = useState('');
+  const norm = s => (s || '').toLowerCase();
+  const load = async () => {
+    setLoading(true);
+    setErr('');
+    try {
+      const {
+        data,
+        error
+      } = await sb.from('users').select('id,name,role,niveau,credit').eq('role', 'eleve');
+      if (error) throw error;
+      setStuds((data || []).sort((a, b) => (a.name || '').localeCompare(b.name || '')));
+    } catch (e) {
+      setErr(e.message || 'Erreur');
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    load();
+  }, []);
+  const loadHist = async id => {
+    try {
+      const {
+        data
+      } = await sb.from('credit_tx').select('*').eq('eleve_id', id).order('created_at', {
+        ascending: false
+      });
+      setHist(data || []);
+    } catch (_) {
+      setHist([]);
+    }
+  };
+  const openStud = s => {
+    setSel(s);
+    setAmt('20');
+    setMotif('');
+    loadHist(s.id);
+  };
+  const doOp = async sign => {
+    if (!sel) return;
+    const m = parseFloat(amt);
+    if (!m || m <= 0) {
+      alert('Montant invalide.');
+      return;
+    }
+    setBusy(true);
+    const r = await R_topup(sel.id, m, sign > 0 ? 'recharge' : 'debit', motif || (sign > 0 ? 'Recharge' : 'Ajustement'), user.name);
+    setBusy(false);
+    if (!r.ok) {
+      alert(r.err ? 'Erreur : ' + r.err : 'Erreur.');
+      return;
+    }
+    setSel({
+      ...sel,
+      credit: r.bal
+    });
+    setStuds(prev => prev.map(u => u.id === sel.id ? {
+      ...u,
+      credit: r.bal
+    } : u));
+    loadHist(sel.id);
+    setMotif('');
+  };
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(TB, {
+    title: "Cr\xE9dits \xE9l\xE8ves"
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: 'var(--muted)'
+    }
+  }, "Portefeuille & recharges")), /*#__PURE__*/React.createElement("div", {
+    className: "pg"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "attrib-grid"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
+    className: "fi",
+    placeholder: "\uD83D\uDD0D Rechercher un \xE9l\xE8ve\u2026",
+    value: q,
+    onChange: e => setQ(e.target.value)
+  }), loading ? /*#__PURE__*/React.createElement("div", {
+    className: "emp"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "emp-icon"
+  }, "\u23F3")) : err ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: '#fdf0ef',
+      border: '1px solid #e0a8a3',
+      color: '#8b2018',
+      padding: '11px 14px',
+      borderRadius: 6,
+      fontSize: 12
+    }
+  }, "\u26A0\uFE0F ", err, /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 6,
+      fontSize: 11
+    }
+  }, "La colonne \xAB credit \xBB / la table \xAB credit_tx \xBB n'existe pas encore. Ex\xE9cute le SQL fourni.")) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 5,
+      marginTop: 8,
+      maxHeight: '64vh',
+      overflowY: 'auto'
+    }
+  }, studs.filter(s => !q || norm(s.name).includes(norm(q))).map(s => /*#__PURE__*/React.createElement("button", {
+    key: s.id,
+    className: 'grp-card' + (sel && sel.id === s.id ? ' on' : ''),
+    onClick: () => openStud(s)
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("b", null, s.name), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: parseFloat(s.credit || 0) > 0 ? 'var(--ok)' : 'var(--muted)',
+      fontWeight: 700
+    }
+  }, R_euro(s.credit))), s.niveau ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: 'var(--muted)'
+    }
+  }, s.niveau) : null)))), /*#__PURE__*/React.createElement("div", null, !sel ? /*#__PURE__*/React.createElement("div", {
+    className: "emp"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "emp-icon"
+  }, "\uD83D\uDC48"), /*#__PURE__*/React.createElement("p", null, "Choisis un \xE9l\xE8ve pour g\xE9rer son cr\xE9dit.")) : /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: 'var(--navy)',
+      color: 'var(--cream)',
+      borderRadius: 8,
+      padding: '14px 16px',
+      marginBottom: 14,
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'var(--ff-serif)',
+      fontSize: 17
+    }
+  }, sel.name), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      opacity: .7
+    }
+  }, sel.niveau || '')), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: 'right'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      opacity: .7
+    }
+  }, "Solde"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'var(--ff-serif)',
+      fontSize: 24
+    }
+  }, R_euro(sel.credit)))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: 'var(--white)',
+      border: '1.5px solid var(--cream2)',
+      borderRadius: 8,
+      padding: '14px 16px',
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "fl"
+  }, "Montant (\u20AC)"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 6,
+      flexWrap: 'wrap',
+      margin: '4px 0 8px'
+    }
+  }, [5, 10, 20, 30, 50].map(p => /*#__PURE__*/React.createElement("button", {
+    key: p,
+    className: "chip",
+    onClick: () => setAmt(String(p)),
+    style: amt === String(p) ? {
+      background: 'var(--navy)',
+      color: 'var(--cream)',
+      borderColor: 'var(--navy)'
+    } : {}
+  }, p, " \u20AC"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 8,
+      flexWrap: 'wrap',
+      alignItems: 'flex-end'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: '0 0 110px'
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "fi",
+    type: "number",
+    step: "0.01",
+    value: amt,
+    onChange: e => setAmt(e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 140
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "fi",
+    placeholder: "Motif (ex : forfait 4 lives)",
+    value: motif,
+    onChange: e => setMotif(e.target.value)
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 8,
+      marginTop: 10
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-p",
+    onClick: () => doOp(1),
+    disabled: busy
+  }, "\u2795 Recharger"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-d",
+    onClick: () => doOp(-1),
+    disabled: busy
+  }, "\u2796 D\xE9biter / corriger"))), /*#__PURE__*/React.createElement("div", {
+    className: "st",
+    style: {
+      fontSize: 14,
+      marginBottom: 8
+    }
+  }, "Historique"), hist.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--muted)'
+    }
+  }, "Aucun mouvement.") : /*#__PURE__*/React.createElement("table", {
+    className: "tbl"
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Date"), /*#__PURE__*/React.createElement("th", null, "Type"), /*#__PURE__*/React.createElement("th", null, "Motif"), /*#__PURE__*/React.createElement("th", null, "Montant"))), /*#__PURE__*/React.createElement("tbody", null, hist.map(t => /*#__PURE__*/React.createElement("tr", {
+    key: t.id
+  }, /*#__PURE__*/React.createElement("td", {
+    style: {
+      fontSize: 11
+    }
+  }, (t.created_at || '').slice(0, 10)), /*#__PURE__*/React.createElement("td", null, t.type), /*#__PURE__*/React.createElement("td", {
+    style: {
+      fontSize: 12
+    }
+  }, t.motif || '—'), /*#__PURE__*/React.createElement("td", {
+    style: {
+      fontWeight: 700,
+      color: parseFloat(t.montant) >= 0 ? 'var(--ok)' : 'var(--err)'
+    }
+  }, parseFloat(t.montant) >= 0 ? '+' : '', R_euro(t.montant)))))))))));
+}
 function HomeButton({
   setPage
 }) {
@@ -2894,7 +4392,7 @@ let so=[];try{so=await sbLoadKV('sorties','global',[]);}catch(_){so=[];}let ents
 try{ch=await sbLoadKV('charges','global',charges);}catch(_){}let dw=[];try{dw=await sbLoad('inscriptions_web',[]);}catch(_){dw=[];}setUsers(u);setResources(r);setModules(mo);setFactures(fa);setDispos(di);setDemandes(de);setCustomTrophies(ct);setAppel(ap);setGrades(g);setEnrollments(en);setSalaires(sa);setAwardedTrophies(at);setCompEtats(ce);setCustomComps(cc);setCours(co);setInscriptions(ins_data);setSorties(so);setCharges(ch);setDemandesWeb(dw);setEntreprises(ents);setStages(stgs);setDataReady(true);}catch(loadErr){console.error('[App] Erreur chargement données:',loadErr);// Charger les données seed en cas d'erreur pour ne pas bloquer
 setUsers(SEED_USERS);setCours(SEED_COURS);setFactures(SEED_FACTURES);setDataReady(true);}})();},[cu?.id]);// ── Sync retour vers Supabase ──
 // ── Sync Supabase avec debounce 1.5s ──
-useEffect(()=>{if(dataReady)sbDebounce('sv_users',()=>sbSave('users',users));},[users]);useEffect(()=>{if(dataReady)sbDebounce('sv_res',()=>sbSave('ressources',resources));},[resources]);useEffect(()=>{if(dataReady)sbDebounce('sv_mod',()=>sbSave('modules',modules));},[modules]);useEffect(()=>{if(dataReady)sbDebounce('sv_fact',()=>sbSave('factures',factures));},[factures]);useEffect(()=>{if(dataReady)sbDebounce('sv_dispo',()=>sbSave('dispos',dispos));},[dispos]);useEffect(()=>{if(dataReady)sbDebounce('sv_dem',()=>sbSave('demandes',demandes));},[demandes]);useEffect(()=>{if(dataReady)sbDebounce('sv_troph',()=>sbSave('trophees_custom',customTrophies));},[customTrophies]);useEffect(()=>{if(dataReady)sbDebounce('sv_cours',()=>sbSaveKV('cours',cours,'global'));},[cours]);useEffect(()=>{if(dataReady)sbDebounce('sv_appel',()=>sbSaveKV('appel',appel,'global'));},[appel]);useEffect(()=>{if(dataReady)sbDebounce('sv_grd',()=>sbSaveKV('grades',grades,'global'));},[grades]);useEffect(()=>{if(dataReady)sbDebounce('sv_enr',()=>sbSaveKV('enrollments',enrollments,'global'));},[enrollments]);useEffect(()=>{if(dataReady)sbDebounce('sv_sal',()=>sbSaveKV('salaires',salaires,'global'));},[salaires]);useEffect(()=>{if(dataReady)sbDebounce('sv_traw',()=>sbSaveKV('trophees_awarded',awardedTrophies,'global'));},[awardedTrophies]);useEffect(()=>{if(dataReady&&cu)sbDebounce('sv_ce',()=>sbSaveKV('comp_etats',compEtats,cu.id));},[compEtats]);useEffect(()=>{if(dataReady&&cu)sbDebounce('sv_cc',()=>sbSaveKV('custom_comps',customComps,cu.id));},[customComps]);useEffect(()=>{if(dataReady)sbDebounce('sv_sor',()=>sbSaveKV('sorties',sorties,'global'));},[sorties]);useEffect(()=>{if(dataReady)sbDebounce('sv_ent',()=>sbSaveKV('entreprises',entreprises,'global'));},[entreprises]);useEffect(()=>{if(dataReady)sbDebounce('sv_stg',()=>sbSaveKV('stages',stages,'global'));},[stages]);useEffect(()=>{if(dataReady)sbDebounce('sv_ins',()=>sbSaveKV('inscriptions',inscriptions,'global'));},[inscriptions]);useEffect(()=>{if(dataReady)sbDebounce('sv_chg',()=>sbSaveKV('charges',charges,'global'));},[charges]);const login=u=>{setCu(u);setPage(u&&u.role==='admin'?'accueil':'dashboard');};const logout=async()=>{try{await sb.auth.signOut();}catch(_){}try{window.location.href='./';}catch(_){setCu(null);}};if(!appReady)return/*#__PURE__*/React.createElement("div",{style:{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',background:'#111',color:'var(--gold)',fontFamily:'var(--ff-mono)',fontSize:14,letterSpacing:1}},"⟳ Chargement…");if(!cu){const toSite=()=>{try{window.location.href='./';}catch(_){}};if(pub==='inscription')return/*#__PURE__*/React.createElement(Inscription,{onBack:toSite,onLogin:()=>openPub('login')});if(pub==='paiement')return/*#__PURE__*/React.createElement(Abonnement,{onBack:toSite,onInscription:()=>openPub('inscription')});return/*#__PURE__*/React.createElement(Login,{onLogin:login,onBack:toSite});}if(!dataReady)return/*#__PURE__*/React.createElement("div",{style:{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',background:'var(--cream2)',color:'var(--navy)',fontFamily:'var(--ff-mono)',fontSize:13,letterSpacing:.5}},/*#__PURE__*/React.createElement("div",{style:{textAlign:'center'}},/*#__PURE__*/React.createElement("div",{style:{fontSize:28,marginBottom:12}},"📚"),/*#__PURE__*/React.createElement("div",null,"Chargement des données…")));const props={user:cu,users,setUsers,resources,setResources,modules,setModules,grades,setGrades,enrollments,setEnrollments,cours,setCours,appel,setAppel,factures,setFactures,salaires,setSalaires,dispos,setDispos,demandes,setDemandes,compEtats,setCompEtats,customComps,setCustomComps,customTrophies,setCustomTrophies,awardedTrophies,setAwardedTrophies,inscriptions,setInscriptions,sorties,setSorties,charges,setCharges};const renderPage=()=>{switch(page){case'dashboard':return/*#__PURE__*/React.createElement(Dashboard,props);case'programme':return/*#__PURE__*/React.createElement(MonProgramme,{...props,customComps:props.customComps});case'bibliotheque':return/*#__PURE__*/React.createElement(Bibliotheque,{...props,cours:props.cours,compEtats:props.compEtats});case'emploidutemps':return/*#__PURE__*/React.createElement(EmploiDuTemps,{...props,setCours:props.setCours,dispos:props.dispos});case'modules':return/*#__PURE__*/React.createElement(Modules,props);case'monespace':return/*#__PURE__*/React.createElement(MonEspace,props);case'meseleves':return/*#__PURE__*/React.createElement(MesEleves,{...props,compEtats:props.compEtats,setCompEtats:props.setCompEtats,customComps:props.customComps});case'statistiques':return/*#__PURE__*/React.createElement(Statistiques,props);case'facturation':return/*#__PURE__*/React.createElement(Facturation,{...props,cours:props.cours});case'inscriptions':return/*#__PURE__*/React.createElement(Inscriptions,{...props,setFactures:props.setFactures,demandesWeb:demandesWeb,setDemandesWeb:setDemandesWeb});case'suivi':return/*#__PURE__*/React.createElement(SuiviCompetences,{...props,customComps:props.customComps,setCustomComps:props.setCustomComps,awardedTrophies:props.awardedTrophies,setAwardedTrophies:props.setAwardedTrophies});case'coursparticuliers':return/*#__PURE__*/React.createElement(CoursParticuliers,props);case'reservations':return/*#__PURE__*/React.createElement(GestionReservations,{user:cu,users:props.users});case'reserver':return/*#__PURE__*/React.createElement(EleveReservations,{user:cu,users:props.users});case'groupes':return/*#__PURE__*/React.createElement(GroupesAdmin,{cours:cours,setCours:setCours,users:users,setUsers:setUsers});case'accueil':return/*#__PURE__*/React.createElement(AdminLauncher,{setPage:setPage,user:cu,onLogout:logout});case'paiement':return/*#__PURE__*/React.createElement(Paiement,null);case'pages':return/*#__PURE__*/React.createElement(Pages,null);case'annonces':return/*#__PURE__*/React.createElement(Annonces,null);case'vitrine':return/*#__PURE__*/React.createElement(Vitrine,null);case'admin':return/*#__PURE__*/React.createElement(Admin,{...props,factures:props.factures,setFactures:props.setFactures,customTrophies:props.customTrophies,setCustomTrophies:props.setCustomTrophies,awardedTrophies:props.awardedTrophies,setAwardedTrophies:props.setAwardedTrophies,inscriptions:props.inscriptions,setInscriptions:props.setInscriptions});case'sorties':return/*#__PURE__*/React.createElement(Sorties,{sorties:props.sorties,setSorties:props.setSorties,users:props.users,cours:props.cours});default:return/*#__PURE__*/React.createElement(Dashboard,props);}};const _isAdmin=cu&&cu.role==='admin';return/*#__PURE__*/React.createElement("div",{className:`app ${_isAdmin?'launcher-mode':''} ${sidebarPinned?'sidebar-pinned':''}`},_isAdmin?(page!=='accueil'?/*#__PURE__*/React.createElement(HomeButton,{setPage:setPage}):null):/*#__PURE__*/React.createElement(React.Fragment,null,/*#__PURE__*/React.createElement(Sidebar,{user:cu,page:page,setPage:setPage,onLogout:logout,pinned:sidebarPinned,setPinned:setSidebarPinned}),/*#__PURE__*/React.createElement(MobileBurger,{pinned:sidebarPinned,setPinned:setSidebarPinned})),/*#__PURE__*/React.createElement("div",{className:"main"},renderPage()));}class ErrorBoundary extends React.Component{constructor(p){super(p);this.state={err:null};}static getDerivedStateFromError(err){return{err};}componentDidCatch(err,info){try{console.error('App error:',err,info);}catch(_){}}render(){if(this.state.err){return/*#__PURE__*/React.createElement("div",{style:{padding:'28px',fontFamily:'monospace',color:'#8b2222',whiteSpace:'pre-wrap',fontSize:13,lineHeight:1.5}},"⚠️ Une erreur est survenue :","\n\n",String(this.state.err&&this.state.err.message||this.state.err),"\n\n",String(this.state.err&&this.state.err.stack||''));}return this.props.children;}}ReactDOM.createRoot(document.getElementById('root')).render(/*#__PURE__*/React.createElement(ErrorBoundary,null,/*#__PURE__*/React.createElement(App,null)));
+useEffect(()=>{if(dataReady)sbDebounce('sv_users',()=>sbSave('users',users));},[users]);useEffect(()=>{if(dataReady)sbDebounce('sv_res',()=>sbSave('ressources',resources));},[resources]);useEffect(()=>{if(dataReady)sbDebounce('sv_mod',()=>sbSave('modules',modules));},[modules]);useEffect(()=>{if(dataReady)sbDebounce('sv_fact',()=>sbSave('factures',factures));},[factures]);useEffect(()=>{if(dataReady)sbDebounce('sv_dispo',()=>sbSave('dispos',dispos));},[dispos]);useEffect(()=>{if(dataReady)sbDebounce('sv_dem',()=>sbSave('demandes',demandes));},[demandes]);useEffect(()=>{if(dataReady)sbDebounce('sv_troph',()=>sbSave('trophees_custom',customTrophies));},[customTrophies]);useEffect(()=>{if(dataReady)sbDebounce('sv_cours',()=>sbSaveKV('cours',cours,'global'));},[cours]);useEffect(()=>{if(dataReady)sbDebounce('sv_appel',()=>sbSaveKV('appel',appel,'global'));},[appel]);useEffect(()=>{if(dataReady)sbDebounce('sv_grd',()=>sbSaveKV('grades',grades,'global'));},[grades]);useEffect(()=>{if(dataReady)sbDebounce('sv_enr',()=>sbSaveKV('enrollments',enrollments,'global'));},[enrollments]);useEffect(()=>{if(dataReady)sbDebounce('sv_sal',()=>sbSaveKV('salaires',salaires,'global'));},[salaires]);useEffect(()=>{if(dataReady)sbDebounce('sv_traw',()=>sbSaveKV('trophees_awarded',awardedTrophies,'global'));},[awardedTrophies]);useEffect(()=>{if(dataReady&&cu)sbDebounce('sv_ce',()=>sbSaveKV('comp_etats',compEtats,cu.id));},[compEtats]);useEffect(()=>{if(dataReady&&cu)sbDebounce('sv_cc',()=>sbSaveKV('custom_comps',customComps,cu.id));},[customComps]);useEffect(()=>{if(dataReady)sbDebounce('sv_sor',()=>sbSaveKV('sorties',sorties,'global'));},[sorties]);useEffect(()=>{if(dataReady)sbDebounce('sv_ent',()=>sbSaveKV('entreprises',entreprises,'global'));},[entreprises]);useEffect(()=>{if(dataReady)sbDebounce('sv_stg',()=>sbSaveKV('stages',stages,'global'));},[stages]);useEffect(()=>{if(dataReady)sbDebounce('sv_ins',()=>sbSaveKV('inscriptions',inscriptions,'global'));},[inscriptions]);useEffect(()=>{if(dataReady)sbDebounce('sv_chg',()=>sbSaveKV('charges',charges,'global'));},[charges]);const login=u=>{setCu(u);setPage(u&&u.role==='admin'?'accueil':'dashboard');};const logout=async()=>{try{await sb.auth.signOut();}catch(_){}try{window.location.href='./';}catch(_){setCu(null);}};if(!appReady)return/*#__PURE__*/React.createElement("div",{style:{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',background:'#111',color:'var(--gold)',fontFamily:'var(--ff-mono)',fontSize:14,letterSpacing:1}},"⟳ Chargement…");if(!cu){const toSite=()=>{try{window.location.href='./';}catch(_){}};if(pub==='inscription')return/*#__PURE__*/React.createElement(Inscription,{onBack:toSite,onLogin:()=>openPub('login')});if(pub==='paiement')return/*#__PURE__*/React.createElement(Abonnement,{onBack:toSite,onInscription:()=>openPub('inscription')});return/*#__PURE__*/React.createElement(Login,{onLogin:login,onBack:toSite});}if(!dataReady)return/*#__PURE__*/React.createElement("div",{style:{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',background:'var(--cream2)',color:'var(--navy)',fontFamily:'var(--ff-mono)',fontSize:13,letterSpacing:.5}},/*#__PURE__*/React.createElement("div",{style:{textAlign:'center'}},/*#__PURE__*/React.createElement("div",{style:{fontSize:28,marginBottom:12}},"📚"),/*#__PURE__*/React.createElement("div",null,"Chargement des données…")));const props={user:cu,users,setUsers,resources,setResources,modules,setModules,grades,setGrades,enrollments,setEnrollments,cours,setCours,appel,setAppel,factures,setFactures,salaires,setSalaires,dispos,setDispos,demandes,setDemandes,compEtats,setCompEtats,customComps,setCustomComps,customTrophies,setCustomTrophies,awardedTrophies,setAwardedTrophies,inscriptions,setInscriptions,sorties,setSorties,charges,setCharges};const renderPage=()=>{switch(page){case'dashboard':return/*#__PURE__*/React.createElement(Dashboard,props);case'programme':return/*#__PURE__*/React.createElement(MonProgramme,{...props,customComps:props.customComps});case'bibliotheque':return/*#__PURE__*/React.createElement(Bibliotheque,{...props,cours:props.cours,compEtats:props.compEtats});case'emploidutemps':return/*#__PURE__*/React.createElement(EmploiDuTemps,{...props,setCours:props.setCours,dispos:props.dispos});case'modules':return/*#__PURE__*/React.createElement(Modules,props);case'monespace':return/*#__PURE__*/React.createElement(MonEspace,props);case'meseleves':return/*#__PURE__*/React.createElement(MesEleves,{...props,compEtats:props.compEtats,setCompEtats:props.setCompEtats,customComps:props.customComps});case'statistiques':return/*#__PURE__*/React.createElement(Statistiques,props);case'facturation':return/*#__PURE__*/React.createElement(Facturation,{...props,cours:props.cours});case'inscriptions':return/*#__PURE__*/React.createElement(Inscriptions,{...props,setFactures:props.setFactures,demandesWeb:demandesWeb,setDemandesWeb:setDemandesWeb});case'suivi':return/*#__PURE__*/React.createElement(SuiviCompetences,{...props,customComps:props.customComps,setCustomComps:props.setCustomComps,awardedTrophies:props.awardedTrophies,setAwardedTrophies:props.setAwardedTrophies});case'coursparticuliers':return/*#__PURE__*/React.createElement(CoursParticuliers,props);case'reservations':return/*#__PURE__*/React.createElement(GestionReservations,{user:cu,users:props.users});case'reserver':return/*#__PURE__*/React.createElement(EleveReservations,{user:cu,users:props.users});case'groupes':return/*#__PURE__*/React.createElement(GroupesAdmin,{cours:cours,setCours:setCours,users:users,setUsers:setUsers});case'chat':return/*#__PURE__*/React.createElement(EleveChat,{user:cu});case'monplanning':return/*#__PURE__*/React.createElement(EleveePlanning,{user:cu,users:props.users,cours:props.cours});case'live':return/*#__PURE__*/React.createElement(LivePage,{user:cu});case'liveadmin':return/*#__PURE__*/React.createElement(LivesAdmin,{user:cu});case'credits':return/*#__PURE__*/React.createElement(CreditsAdmin,{user:cu});case'accueil':return/*#__PURE__*/React.createElement(AdminLauncher,{setPage:setPage,user:cu,onLogout:logout});case'paiement':return/*#__PURE__*/React.createElement(Paiement,null);case'pages':return/*#__PURE__*/React.createElement(Pages,null);case'annonces':return/*#__PURE__*/React.createElement(Annonces,null);case'vitrine':return/*#__PURE__*/React.createElement(Vitrine,null);case'admin':return/*#__PURE__*/React.createElement(Admin,{...props,factures:props.factures,setFactures:props.setFactures,customTrophies:props.customTrophies,setCustomTrophies:props.setCustomTrophies,awardedTrophies:props.awardedTrophies,setAwardedTrophies:props.setAwardedTrophies,inscriptions:props.inscriptions,setInscriptions:props.setInscriptions});case'sorties':return/*#__PURE__*/React.createElement(Sorties,{sorties:props.sorties,setSorties:props.setSorties,users:props.users,cours:props.cours});default:return/*#__PURE__*/React.createElement(Dashboard,props);}};const _isAdmin=cu&&cu.role==='admin';const _isEleve=cu&&cu.role==='eleve';return/*#__PURE__*/React.createElement("div",{className:`app ${_isAdmin?'launcher-mode':''} ${_isEleve?'stud-mode':''} ${sidebarPinned?'sidebar-pinned':''}`},_isAdmin?(page!=='accueil'?/*#__PURE__*/React.createElement(HomeButton,{setPage:setPage}):null):_isEleve?/*#__PURE__*/React.createElement(StudentTopBar,{page:page,onLogout:logout}):/*#__PURE__*/React.createElement(React.Fragment,null,/*#__PURE__*/React.createElement(Sidebar,{user:cu,page:page,setPage:setPage,onLogout:logout,pinned:sidebarPinned,setPinned:setSidebarPinned}),/*#__PURE__*/React.createElement(MobileBurger,{pinned:sidebarPinned,setPinned:setSidebarPinned})),/*#__PURE__*/React.createElement("div",{className:"main"},renderPage()),_isEleve?/*#__PURE__*/React.createElement(StudentTabBar,{page:page,setPage:setPage}):null);}class ErrorBoundary extends React.Component{constructor(p){super(p);this.state={err:null};}static getDerivedStateFromError(err){return{err};}componentDidCatch(err,info){try{console.error('App error:',err,info);}catch(_){}}render(){if(this.state.err){return/*#__PURE__*/React.createElement("div",{style:{padding:'28px',fontFamily:'monospace',color:'#8b2222',whiteSpace:'pre-wrap',fontSize:13,lineHeight:1.5}},"⚠️ Une erreur est survenue :","\n\n",String(this.state.err&&this.state.err.message||this.state.err),"\n\n",String(this.state.err&&this.state.err.stack||''));}return this.props.children;}}ReactDOM.createRoot(document.getElementById('root')).render(/*#__PURE__*/React.createElement(ErrorBoundary,null,/*#__PURE__*/React.createElement(App,null)));
 </script>
 
 
