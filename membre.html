@@ -763,7 +763,7 @@ function Modal({title,onClose,children,width}){return/*#__PURE__*/React.createEl
 function Login({onLogin,onBack}){const[email,setEmail]=useState('');const[password,setPassword]=useState('');const[error,setError]=useState('');const[loading,setLoading]=useState(false);const[showPwd,setShowPwd]=useState(false);const handleLogin=async e=>{if(e&&e.preventDefault)e.preventDefault();setError('');setLoading(true);try{// 1. Authentification Supabase
 const{data:authData,error:authErr}=await sb.auth.signInWithPassword({email:email.toLowerCase().trim(),password});if(authErr){setError(authErr.message==='Invalid login credentials'?'Email ou mot de passe incorrect.':authErr.message);setLoading(false);return;}// 2. Récupérer le profil dans la table users
 const{data:profile,error:profErr}=await sb.from('users').select('*').eq('auth_id',authData.user.id).single();if(profErr||!profile){setError('Profil introuvable. Contactez l\'administration.');await sb.auth.signOut();setLoading(false);return;}setLoading(false);onLogin(profile);}catch(err){setError('Erreur de connexion. Vérifiez votre connexion internet.');setLoading(false);}};return/*#__PURE__*/React.createElement("div",{className:"ls"},/*#__PURE__*/React.createElement("div",{className:"ls-left"},/*#__PURE__*/React.createElement("div",{className:"ls-brand-top"},/*#__PURE__*/React.createElement("svg",{width:"28",height:"28",viewBox:"0 0 52 52",fill:"none"},/*#__PURE__*/React.createElement("circle",{cx:"26",cy:"26",r:"24",fill:"var(--gold2)",opacity:"0.2"}),/*#__PURE__*/React.createElement("path",{d:"M26 8 L38 18 L38 34 L26 42 L14 34 L14 18 Z",fill:"var(--gold2)",opacity:"0.9"}),/*#__PURE__*/React.createElement("path",{d:"M20 24 L26 18 L32 24 L26 30 Z",fill:"white"})),/*#__PURE__*/React.createElement("span",{className:"ls-brand-top-name"},"Plus de bonnes notes")),/*#__PURE__*/React.createElement("div",{className:"ls-inner"},/*#__PURE__*/React.createElement("div",{className:"ls-badge"},/*#__PURE__*/React.createElement("span",{className:"ls-badge-dot"}),/*#__PURE__*/React.createElement("span",{className:"ls-badge-txt"},"Soutien scolaire — La Courneuve")),/*#__PURE__*/React.createElement("div",{className:"ls-tag"},"Apprendre,",/*#__PURE__*/React.createElement("br",null),/*#__PURE__*/React.createElement("em",null,"progresser"),",",/*#__PURE__*/React.createElement("br",null),/*#__PURE__*/React.createElement("strong",null,"réussir.")),/*#__PURE__*/React.createElement("p",{className:"ls-desc"},"Bibliothèque de ressources, emploi du temps, appel, suivi des notes et trophées — tout en un seul endroit."),/*#__PURE__*/React.createElement("div",{className:"ls-stats"},[{n:'12+',l:'Professeurs'},{n:'4',l:'Niveaux'},{n:'8',l:'Cours / semaine'}].map((s,i)=>/*#__PURE__*/React.createElement("div",{key:i,className:"ls-stat"},/*#__PURE__*/React.createElement("div",{className:"ls-stat-n"},s.n),/*#__PURE__*/React.createElement("div",{className:"ls-stat-l"},s.l)))))),/*#__PURE__*/React.createElement("div",{className:"ls-right"},onBack?/*#__PURE__*/React.createElement("button",{className:"lp-back",onClick:onBack},"← Accueil"):null,/*#__PURE__*/React.createElement("div",{className:"ls-right-head"},/*#__PURE__*/React.createElement("h2",null,"Connexion"),/*#__PURE__*/React.createElement("p",null,"Entrez vos identifiants pour accéder à votre espace")),/*#__PURE__*/React.createElement("div",{className:"fg",style:{marginBottom:14}},/*#__PURE__*/React.createElement("label",{className:"fl",style:{color:'#888'}},"Adresse email"),/*#__PURE__*/React.createElement("input",{className:"fi",type:"email",placeholder:"prenom@edu.fr",value:email,onChange:e=>setEmail(e.target.value),onKeyDown:e=>e.key==='Enter'&&handleLogin(e),autoFocus:true,style:{fontSize:13,padding:'10px 12px'}})),/*#__PURE__*/React.createElement("div",{className:"fg",style:{marginBottom:6,position:'relative'}},/*#__PURE__*/React.createElement("label",{className:"fl",style:{color:'#888'}},"Mot de passe"),/*#__PURE__*/React.createElement("div",{style:{position:'relative'}},/*#__PURE__*/React.createElement("input",{className:"fi",type:showPwd?'text':'password',placeholder:"••••••••",value:password,onChange:e=>setPassword(e.target.value),onKeyDown:e=>e.key==='Enter'&&handleLogin(e),style:{fontSize:13,padding:'10px 38px 10px 12px',paddingRight:38}}),/*#__PURE__*/React.createElement("button",{onClick:()=>setShowPwd(p=>!p),style:{position:'absolute',right:10,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:14,color:'#999',padding:2}},showPwd?'🙈':'👁'))),error&&/*#__PURE__*/React.createElement("div",{style:{background:'#FFF0F0',border:'1px solid #f5b8b8',borderRadius:2,padding:'8px 12px',fontSize:12,color:'#c0392b',marginBottom:10}},"⚠️ ",error),/*#__PURE__*/React.createElement("button",{className:"ls-btn",disabled:loading||!email||!password,onClick:handleLogin,style:{marginTop:18}},loading?/*#__PURE__*/React.createElement(React.Fragment,null,/*#__PURE__*/React.createElement("span",{style:{fontSize:12,letterSpacing:1}},"Connexion…")):/*#__PURE__*/React.createElement(React.Fragment,null,/*#__PURE__*/React.createElement("span",null,"Accéder à mon espace"),/*#__PURE__*/React.createElement("span",{className:"ls-btn-arrow"},"→"))),/*#__PURE__*/React.createElement("div",{style:{margin:'22px 0 10px',borderTop:'1px solid #e0dcd4'}}),/*#__PURE__*/React.createElement("div",{style:{fontSize:10,color:'#bbb',textAlign:'center',letterSpacing:.5,lineHeight:1.7}},"Mot de passe oublié ? Contactez l'administration.",/*#__PURE__*/React.createElement("br",null),/*#__PURE__*/React.createElement("span",{style:{color:'#ccc'}},"admin@educenter.fr"),/*#__PURE__*/React.createElement("br",null),/*#__PURE__*/React.createElement("a",{href:"reservation.html",style:{color:'#4a7fd4',textDecoration:'none',fontWeight:700}},"📅 Réserver un cours particulier")),/*#__PURE__*/React.createElement("div",{className:"ls-right-footer"},/*#__PURE__*/React.createElement("span",{className:"ls-right-footer-txt"},"© 2025 Plus de bonnes notes · La Courneuve"))));}// ─── SIDEBAR ───
-function Sidebar({user,page,setPage,onLogout,pinned,setPinned}){const items=[{id:'dashboard',icon:'🏠',label:'Tableau de bord',roles:['admin','prof','eleve']},{id:'programme',icon:'📖',label:'Mon Programme',roles:['eleve']},{id:'bibliotheque',icon:'📚',label:'Bibliothèque',roles:['admin','prof']},{id:'emploidutemps',icon:'📅',label:'Emploi du temps',roles:['admin','prof','eleve']},{id:'modules',icon:'🗓️',label:'Modules & Activités',roles:['admin','prof','eleve']},{id:'monespace',icon:'🎓',label:'Mon Espace',roles:['eleve']},{id:'meseleves',icon:'👥',label:'Élèves & Appel',roles:['prof']},{id:'statistiques',icon:'📊',label:'Statistiques',roles:['admin']},{id:'facturation',icon:'🧾',label:'Facturation',roles:['admin']},{id:'inscriptions',icon:'👥',label:'Élèves',roles:['admin']},{id:'suivi',icon:'📋',label:'Suivi Compétences',roles:['admin','prof']},{id:'coursparticuliers',icon:'🎯',label:'Cours particuliers',roles:['prof']},{id:'reservations',icon:'🗓️',label:'Réservations',roles:['admin']},{id:'reserver',icon:'🎯',label:'Réserver un cours',roles:['eleve']},{id:'live',icon:'🎥',label:'Lives',roles:['prof']},{id:'sorties',icon:'🚌',label:'Sorties scolaires',roles:['admin']},{id:'paiement',icon:'💳',label:'Paiement',roles:['admin']},{id:'pages',icon:'📄',label:'Pages',roles:['admin']},{id:'annonces',icon:'📢',label:'Annonces',roles:['admin']},{id:'vitrine',icon:'🌐',label:'Site vitrine',roles:['admin']},{id:'admin',icon:'⚙️',label:'Administration',roles:['admin']}].filter(i=>i.roles.includes(user.role));return/*#__PURE__*/React.createElement("div",{className:`sidebar ${pinned?'pinned':''}`},/*#__PURE__*/React.createElement("div",{className:"sb-brand"},/*#__PURE__*/React.createElement("div",{className:"sb-logo",style:{fontSize:22,marginBottom:2}},/*#__PURE__*/React.createElement("svg",{width:"28",height:"28",viewBox:"0 0 28 28",fill:"none",xmlns:"http://www.w3.org/2000/svg"},/*#__PURE__*/React.createElement("circle",{cx:"14",cy:"14",r:"13",fill:"var(--gold2)",opacity:"0.15"}),/*#__PURE__*/React.createElement("path",{d:"M14 4 L20 10 L20 18 L14 22 L8 18 L8 10 Z",fill:"var(--gold2)",opacity:"0.9"}),/*#__PURE__*/React.createElement("path",{d:"M11 13 L14 10 L17 13 L14 16 Z",fill:"white"}))),/*#__PURE__*/React.createElement("div",{className:"sb-title",style:{fontSize:13,lineHeight:1.2}},"Plus de bonnes",/*#__PURE__*/React.createElement("br",null),"notes"),/*#__PURE__*/React.createElement("div",{className:"sb-sub"},"Soutien scolaire connecté"),/*#__PURE__*/React.createElement("button",{className:`sb-pin ${pinned?'on':''}`,onClick:()=>setPinned(!pinned),title:pinned?'Détacher (auto-réduire)':'Épingler le menu (rester ouvert)'},pinned?'📌':'📍')),/*#__PURE__*/React.createElement("nav",{className:"sb-nav"},/*#__PURE__*/React.createElement("div",{className:"sb-sec"},"Navigation"),items.map(it=>/*#__PURE__*/React.createElement("div",{key:it.id,className:`ni ${page===it.id?'on':''}`,onClick:()=>setPage(it.id),title:it.label},/*#__PURE__*/React.createElement("span",{className:"ni-ic"},it.icon),/*#__PURE__*/React.createElement("span",{className:"ni-lbl"},it.label)))),/*#__PURE__*/React.createElement("div",{className:"sb-user"},/*#__PURE__*/React.createElement("div",{className:"sb-av"},RI[user.role]),/*#__PURE__*/React.createElement("div",{className:"sb-uinfo"},/*#__PURE__*/React.createElement("div",{className:"sb-uname"},user.name.split(' ').slice(-1)[0]),/*#__PURE__*/React.createElement("div",{className:"sb-urole"},RL[user.role])),/*#__PURE__*/React.createElement("button",{className:"sb-out",onClick:onLogout,title:"Déconnexion"},"⏻")));}// ─── TOPBAR ───
+function Sidebar({user,page,setPage,onLogout,pinned,setPinned}){const items=[{id:'dashboard',icon:'🏠',label:'Tableau de bord',roles:['admin','prof','eleve']},{id:'programme',icon:'📖',label:'Mon Programme',roles:['eleve']},{id:'bibliotheque',icon:'📚',label:'Bibliothèque',roles:['admin','prof']},{id:'emploidutemps',icon:'📅',label:'Emploi du temps',roles:['admin','prof','eleve']},{id:'modules',icon:'🗓️',label:'Modules & Activités',roles:['admin','prof','eleve']},{id:'monespace',icon:'🎓',label:'Mon Espace',roles:['eleve']},{id:'meseleves',icon:'👥',label:'Élèves & Appel',roles:['prof']},{id:'statistiques',icon:'📊',label:'Statistiques',roles:['admin']},{id:'facturation',icon:'🧾',label:'Facturation',roles:['admin']},{id:'inscriptions',icon:'👥',label:'Élèves',roles:['admin']},{id:'suivi',icon:'📋',label:'Suivi Compétences',roles:['admin','prof']},{id:'coursparticuliers',icon:'🎯',label:'Cours particuliers',roles:['prof']},{id:'reservations',icon:'🗓️',label:'Réservations',roles:['admin']},{id:'reserver',icon:'🎯',label:'Réserver un cours',roles:['eleve']},{id:'live',icon:'🎥',label:'Lives',roles:['prof']},{id:'messages',icon:'✉️',label:'Messages',roles:['prof']},{id:'sorties',icon:'🚌',label:'Sorties scolaires',roles:['admin']},{id:'paiement',icon:'💳',label:'Paiement',roles:['admin']},{id:'pages',icon:'📄',label:'Pages',roles:['admin']},{id:'annonces',icon:'📢',label:'Annonces',roles:['admin']},{id:'vitrine',icon:'🌐',label:'Site vitrine',roles:['admin']},{id:'admin',icon:'⚙️',label:'Administration',roles:['admin']}].filter(i=>i.roles.includes(user.role));return/*#__PURE__*/React.createElement("div",{className:`sidebar ${pinned?'pinned':''}`},/*#__PURE__*/React.createElement("div",{className:"sb-brand"},/*#__PURE__*/React.createElement("div",{className:"sb-logo",style:{fontSize:22,marginBottom:2}},/*#__PURE__*/React.createElement("svg",{width:"28",height:"28",viewBox:"0 0 28 28",fill:"none",xmlns:"http://www.w3.org/2000/svg"},/*#__PURE__*/React.createElement("circle",{cx:"14",cy:"14",r:"13",fill:"var(--gold2)",opacity:"0.15"}),/*#__PURE__*/React.createElement("path",{d:"M14 4 L20 10 L20 18 L14 22 L8 18 L8 10 Z",fill:"var(--gold2)",opacity:"0.9"}),/*#__PURE__*/React.createElement("path",{d:"M11 13 L14 10 L17 13 L14 16 Z",fill:"white"}))),/*#__PURE__*/React.createElement("div",{className:"sb-title",style:{fontSize:13,lineHeight:1.2}},"Plus de bonnes",/*#__PURE__*/React.createElement("br",null),"notes"),/*#__PURE__*/React.createElement("div",{className:"sb-sub"},"Soutien scolaire connecté"),/*#__PURE__*/React.createElement("button",{className:`sb-pin ${pinned?'on':''}`,onClick:()=>setPinned(!pinned),title:pinned?'Détacher (auto-réduire)':'Épingler le menu (rester ouvert)'},pinned?'📌':'📍')),/*#__PURE__*/React.createElement("nav",{className:"sb-nav"},/*#__PURE__*/React.createElement("div",{className:"sb-sec"},"Navigation"),items.map(it=>/*#__PURE__*/React.createElement("div",{key:it.id,className:`ni ${page===it.id?'on':''}`,onClick:()=>setPage(it.id),title:it.label},/*#__PURE__*/React.createElement("span",{className:"ni-ic"},it.icon),/*#__PURE__*/React.createElement("span",{className:"ni-lbl"},it.label)))),/*#__PURE__*/React.createElement("div",{className:"sb-user"},/*#__PURE__*/React.createElement("div",{className:"sb-av"},RI[user.role]),/*#__PURE__*/React.createElement("div",{className:"sb-uinfo"},/*#__PURE__*/React.createElement("div",{className:"sb-uname"},user.name.split(' ').slice(-1)[0]),/*#__PURE__*/React.createElement("div",{className:"sb-urole"},RL[user.role])),/*#__PURE__*/React.createElement("button",{className:"sb-out",onClick:onLogout,title:"Déconnexion"},"⏻")));}// ─── TOPBAR ───
 function TB({title,children}){return/*#__PURE__*/React.createElement("div",{className:"topbar"},/*#__PURE__*/React.createElement("h1",{className:"tb-ttl"},title),/*#__PURE__*/React.createElement("div",{className:"tb-act"},children));}// ─── TIMETABLE COMPONENT ───
 function generatePlanningPDF(cours,users,filtres){const{jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4',orientation:'landscape'});const W=297,H=210,ML=10,MR=10;// ── Couleurs par niveau (PDF) ──
 const NCLR={'6ème':{bg:[243,232,255],bd:[124,58,237],tx:[91,33,182],gold:false},'5ème':{bg:[255,252,210],bd:[202,138,4],tx:[146,64,14],gold:false},'4ème':{bg:[219,234,255],bd:[29,79,196],tx:[30,64,175],gold:false},'3ème':{bg:[209,250,229],bd:[5,150,105],tx:[6,95,70],gold:false},'Seconde':{bg:[254,220,220],bd:[220,38,38],tx:[153,27,27],gold:false},'Première':{bg:[235,238,243],bd:[71,85,105],tx:[30,41,59],gold:false},'Terminale':{bg:[255,248,195],bd:[180,130,0],tx:[120,80,0],gold:true},'Supérieures':{bg:[253,244,255],bd:[162,28,175],tx:[134,25,143],gold:false},'Module':{bg:[224,252,249],bd:[13,148,136],tx:[15,118,110],gold:false,isModule:true}};const defC={bg:[235,240,248],bd:[90,110,150],tx:[60,80,120],gold:false};const getC=niv=>{for(const[k,v]of Object.entries(NCLR))if(niv===k)return v;return defC;};// Filtres
@@ -3130,6 +3130,10 @@ function StudentTabBar({
     ic: '🎯',
     lbl: 'Réserver'
   }, {
+    id: 'messages',
+    ic: '✉️',
+    lbl: 'Messages'
+  }, {
     id: 'chat',
     ic: '💬',
     lbl: 'Aide'
@@ -4368,6 +4372,567 @@ function HomeButton({
     onClick: () => setPage('accueil')
   }, "🏠");
 }
+
+// ─── MESSAGERIE & NOTIFICATIONS (prof ↔ élève) ───
+const R_msgThread = async (a, b) => {
+  try {
+    const {
+      data
+    } = await sb.from('messages').select('*').or('and(from_id.eq.' + a + ',to_id.eq.' + b + '),and(from_id.eq.' + b + ',to_id.eq.' + a + ')').order('created_at');
+    return data || [];
+  } catch (e) {
+    return [];
+  }
+};
+const R_sendMsg = async (from, fromName, to, toName, body) => {
+  try {
+    const {
+      error
+    } = await sb.from('messages').insert({
+      id: R_genId('m_'),
+      from_id: from,
+      from_name: fromName,
+      to_id: to,
+      to_name: toName,
+      body: body,
+      lu: false
+    });
+    return !error;
+  } catch (e) {
+    return false;
+  }
+};
+const R_inbox = async me => {
+  try {
+    const {
+      data
+    } = await sb.from('messages').select('*').or('from_id.eq.' + me + ',to_id.eq.' + me).order('created_at', {
+      ascending: false
+    });
+    return data || [];
+  } catch (e) {
+    return [];
+  }
+};
+const R_sendNotif = async (from, fromName, scope, titre, body) => {
+  try {
+    const {
+      error
+    } = await sb.from('notifs').insert({
+      id: R_genId('n_'),
+      from_id: from,
+      from_name: fromName,
+      scope: scope,
+      titre: titre,
+      body: body
+    });
+    return !error;
+  } catch (e) {
+    return false;
+  }
+};
+const R_notifsForEleve = async (eleveId, coursIds, profIds) => {
+  try {
+    const scopes = ['all', 'eleve:' + eleveId].concat((coursIds || []).map(c => 'cours:' + c)).concat((profIds || []).map(p => 'prof:' + p));
+    const {
+      data
+    } = await sb.from('notifs').select('*').in('scope', scopes).order('created_at', {
+      ascending: false
+    });
+    return data || [];
+  } catch (e) {
+    return [];
+  }
+};
+const R_adminAnnonces = async () => {
+  try {
+    const {
+      data
+    } = await sb.from('site_content').select('data').eq('id', 'annonces').maybeSingle();
+    return data && data.data && data.data.items || [];
+  } catch (e) {
+    return [];
+  }
+};
+function ProfMessagerie({
+  user,
+  users,
+  cours
+}) {
+  const myCours = (cours || []).filter(c => c.profId === user.id);
+  const myEleveIds = [...new Set(myCours.reduce((a, c) => a.concat(c.eleveIds || []), []))];
+  const fallbackAll = myEleveIds.length === 0;
+  const eleves = (users || []).filter(u => u.role === 'eleve' && (fallbackAll || myEleveIds.includes(u.id))).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  const [sel, setSel] = useState(null);
+  const [thread, setThread] = useState([]);
+  const [txt, setTxt] = useState('');
+  const [q, setQ] = useState('');
+  const [tab, setTab] = useState('msg');
+  const [nTitre, setNTitre] = useState('');
+  const [nBody, setNBody] = useState('');
+  const [nTarget, setNTarget] = useState('prof:' + user.id);
+  const [nMsg, setNMsg] = useState('');
+  const norm = s => (s || '').toLowerCase();
+  const loadThread = async e => {
+    setThread(await R_msgThread(user.id, e.id));
+  };
+  const openE = e => {
+    setSel(e);
+    setTxt('');
+    loadThread(e);
+  };
+  const send = async () => {
+    if (!sel || !txt.trim()) return;
+    const ok = await R_sendMsg(user.id, user.name, sel.id, sel.name, txt.trim());
+    if (ok) {
+      setTxt('');
+      loadThread(sel);
+    } else alert("Échec de l'envoi. La table « messages » n'existe peut-être pas encore (exécute le SQL fourni).");
+  };
+  const sendNotif = async () => {
+    if (!nBody.trim() && !nTitre.trim()) return;
+    const ok = await R_sendNotif(user.id, user.name, nTarget, nTitre.trim(), nBody.trim());
+    setNMsg(ok ? '✓ Notification envoyée' : "Échec : la table « notifs » n'existe pas (exécute le SQL).");
+    if (ok) {
+      setNTitre('');
+      setNBody('');
+    }
+    setTimeout(() => setNMsg(''), 3800);
+  };
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(TB, {
+    title: "Messagerie"
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: 'var(--muted)'
+    }
+  }, "Messages privés & notifications à tes élèves")), /*#__PURE__*/React.createElement("div", {
+    className: "pg"
+  }, fallbackAll ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: '#fff4e0',
+      border: '1px solid #e8c98a',
+      color: '#7a5200',
+      padding: '9px 13px',
+      borderRadius: 6,
+      fontSize: 12,
+      marginBottom: 12
+    }
+  }, "Aucun créneau ne t'est encore attribué : tous les élèves sont affichés. (L'admin peut t'affecter à des créneaux dans l'écran Élèves.)") : null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 8,
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: 'btn btn-sm ' + (tab === 'msg' ? 'btn-p' : 'btn-o'),
+    onClick: () => setTab('msg')
+  }, "✉️ Messages privés"), /*#__PURE__*/React.createElement("button", {
+    className: 'btn btn-sm ' + (tab === 'notif' ? 'btn-p' : 'btn-o'),
+    onClick: () => setTab('notif')
+  }, "🔔 Notifier la classe")), tab === 'msg' ? /*#__PURE__*/React.createElement("div", {
+    className: "attrib-grid"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
+    className: "fi",
+    placeholder: "🔍 Élève…",
+    value: q,
+    onChange: e => setQ(e.target.value)
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 5,
+      marginTop: 8,
+      maxHeight: '62vh',
+      overflowY: 'auto'
+    }
+  }, eleves.filter(e => !q || norm(e.name).includes(norm(q))).map(e => /*#__PURE__*/React.createElement("button", {
+    key: e.id,
+    className: 'grp-card' + (sel && sel.id === e.id ? ' on' : ''),
+    onClick: () => openE(e)
+  }, /*#__PURE__*/React.createElement("b", null, e.name), e.niveau ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: 'var(--muted)'
+    }
+  }, e.niveau) : null)), eleves.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--muted)'
+    }
+  }, "Aucun élève.") : null)), /*#__PURE__*/React.createElement("div", null, !sel ? /*#__PURE__*/React.createElement("div", {
+    className: "emp"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "emp-icon"
+  }, "👈"), /*#__PURE__*/React.createElement("p", null, "Choisis un élève pour lui écrire.")) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      height: '70vh'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'var(--ff-serif)',
+      fontSize: 17,
+      marginBottom: 8
+    }
+  }, sel.name), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      overflowY: 'auto',
+      border: '1.5px solid var(--cream2)',
+      borderRadius: 8,
+      padding: 12,
+      background: 'var(--white)',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 8
+    }
+  }, thread.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--muted)',
+      margin: 'auto'
+    }
+  }, "Aucun message. Écris le premier.") : thread.map(m => {
+    const mine = m.from_id === user.id;
+    return /*#__PURE__*/React.createElement("div", {
+      key: m.id,
+      style: {
+        alignSelf: mine ? 'flex-end' : 'flex-start',
+        maxWidth: '75%',
+        background: mine ? 'var(--navy)' : 'var(--cream)',
+        color: mine ? 'var(--cream)' : '#1a1a1a',
+        borderRadius: 10,
+        padding: '7px 11px',
+        fontSize: 13
+      }
+    }, m.body, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 9,
+        opacity: .6,
+        marginTop: 3
+      }
+    }, (m.created_at || '').slice(0, 16).replace('T', ' ')));
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 8,
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "fi",
+    style: {
+      flex: 1
+    },
+    placeholder: "Ton message…",
+    value: txt,
+    onChange: e => setTxt(e.target.value),
+    onKeyDown: e => {
+      if (e.key === 'Enter') send();
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-p",
+    onClick: send
+  }, "Envoyer"))))) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      maxWidth: 560
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "fl"
+  }, "Destinataires"), /*#__PURE__*/React.createElement("select", {
+    className: "fi",
+    value: nTarget,
+    onChange: e => setNTarget(e.target.value)
+  }, /*#__PURE__*/React.createElement("option", {
+    value: 'prof:' + user.id
+  }, "Tous mes élèves"), myCours.map(c => /*#__PURE__*/React.createElement("option", {
+    key: c.id,
+    value: 'cours:' + c.id
+  }, (c.matiere || 'Créneau') + ' ' + (c.niveau || '') + (c.jour ? ' · ' + c.jour : '') + (c.debut != null ? ' ' + hs(c.debut) : '')))), /*#__PURE__*/React.createElement("div", {
+    className: "fl",
+    style: {
+      marginTop: 10
+    }
+  }, "Titre"), /*#__PURE__*/React.createElement("input", {
+    className: "fi",
+    value: nTitre,
+    onChange: e => setNTitre(e.target.value),
+    placeholder: "Ex : Pas de cours samedi"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "fl",
+    style: {
+      marginTop: 10
+    }
+  }, "Message"), /*#__PURE__*/React.createElement("textarea", {
+    className: "fi",
+    rows: 4,
+    value: nBody,
+    onChange: e => setNBody(e.target.value),
+    placeholder: "Détails de l'annonce…"
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 10,
+      display: 'flex',
+      gap: 10,
+      alignItems: 'center',
+      flexWrap: 'wrap'
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-p",
+    onClick: sendNotif
+  }, "🔔 Envoyer la notification"), nMsg ? /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: nMsg.charAt(0) === '✓' ? 'var(--ok)' : 'var(--err)'
+    }
+  }, nMsg) : null), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 11,
+      color: 'var(--muted)',
+      marginTop: 10
+    }
+  }, "Les élèves concernés verront l'annonce sur leur tableau de bord et dans leur onglet Messages."))));
+}
+function EleveMessages({
+  user,
+  cours
+}) {
+  const [notifs, setNotifs] = useState([]);
+  const [annonces, setAnnonces] = useState([]);
+  const [inbox, setInbox] = useState([]);
+  const [sel, setSel] = useState(null);
+  const [txt, setTxt] = useState('');
+  const myCours = (cours || []).filter(c => (c.eleveIds || []).includes(user.id));
+  const myCoursIds = myCours.map(c => c.id);
+  const myProfIds = [...new Set(myCours.map(c => c.profId).filter(Boolean))];
+  const load = async () => {
+    setNotifs(await R_notifsForEleve(user.id, myCoursIds, myProfIds));
+    setAnnonces(await R_adminAnnonces());
+    setInbox(await R_inbox(user.id));
+  };
+  useEffect(() => {
+    load();
+  }, []);
+  const threadsMap = {};
+  inbox.forEach(m => {
+    const other = m.from_id === user.id ? m.to_id : m.from_id;
+    const name = m.from_id === user.id ? m.to_name : m.from_name;
+    if (other && !threadsMap[other]) threadsMap[other] = {
+      id: other,
+      name: name || 'Professeur'
+    };
+  });
+  const threads = Object.keys(threadsMap).map(k => threadsMap[k]);
+  const selThread = sel ? inbox.filter(m => m.from_id === sel || m.to_id === sel).slice().sort((a, b) => (a.created_at || '').localeCompare(b.created_at || '')) : [];
+  const selName = sel && threadsMap[sel] ? threadsMap[sel].name : '';
+  const send = async () => {
+    if (!sel || !txt.trim()) return;
+    const ok = await R_sendMsg(user.id, user.name, sel, selName, txt.trim());
+    if (ok) {
+      setTxt('');
+      load();
+    } else alert("Échec de l'envoi (réessaie plus tard).");
+  };
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "pg"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sh"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "st"
+  }, "📢 Annonces"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-o btn-sm",
+    onClick: load
+  }, "↻")), notifs.length === 0 && annonces.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--muted)',
+      marginBottom: 18
+    }
+  }, "Aucune annonce pour le moment.") : /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 8,
+      marginBottom: 22
+    }
+  }, notifs.map(n => /*#__PURE__*/React.createElement("div", {
+    key: n.id,
+    style: {
+      borderLeft: '3px solid var(--info)',
+      background: 'var(--white)',
+      border: '1.5px solid var(--cream2)',
+      borderRadius: 6,
+      padding: '9px 12px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      fontSize: 13
+    }
+  }, n.titre || 'Notification'), n.body ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      marginTop: 3
+    }
+  }, n.body) : null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: 'var(--muted)',
+      marginTop: 4
+    }
+  }, (n.from_name || '') + ' · ' + (n.created_at || '').slice(0, 10)))), annonces.map((a, i) => /*#__PURE__*/React.createElement("div", {
+    key: 'a' + i,
+    style: {
+      borderLeft: '3px solid var(--gold2)',
+      background: 'var(--white)',
+      border: '1.5px solid var(--cream2)',
+      borderRadius: 6,
+      padding: '9px 12px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      fontSize: 13
+    }
+  }, a.titre || a.title || 'Annonce'), a.body || a.texte || a.contenu ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      marginTop: 3
+    }
+  }, a.body || a.texte || a.contenu) : null))), /*#__PURE__*/React.createElement("div", {
+    className: "sh"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "st"
+  }, "✉️ Mes messages")), threads.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--muted)'
+    }
+  }, "Aucun message. Tes professeurs peuvent t'écrire ici.") : !sel ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 6
+    }
+  }, threads.map(t => /*#__PURE__*/React.createElement("button", {
+    key: t.id,
+    className: "grp-card",
+    onClick: () => {
+      setSel(t.id);
+      setTxt('');
+    }
+  }, /*#__PURE__*/React.createElement("b", null, t.name)))) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      height: '55vh'
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-o btn-sm",
+    style: {
+      alignSelf: 'flex-start',
+      marginBottom: 8
+    },
+    onClick: () => setSel(null)
+  }, "← Retour"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      overflowY: 'auto',
+      border: '1.5px solid var(--cream2)',
+      borderRadius: 8,
+      padding: 12,
+      background: 'var(--white)',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 8
+    }
+  }, selThread.map(m => {
+    const mine = m.from_id === user.id;
+    return /*#__PURE__*/React.createElement("div", {
+      key: m.id,
+      style: {
+        alignSelf: mine ? 'flex-end' : 'flex-start',
+        maxWidth: '75%',
+        background: mine ? 'var(--navy)' : 'var(--cream)',
+        color: mine ? 'var(--cream)' : '#1a1a1a',
+        borderRadius: 10,
+        padding: '7px 11px',
+        fontSize: 13
+      }
+    }, m.body, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 9,
+        opacity: .6,
+        marginTop: 3
+      }
+    }, (m.created_at || '').slice(0, 16).replace('T', ' ')));
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 8,
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "fi",
+    style: {
+      flex: 1
+    },
+    placeholder: "Répondre…",
+    value: txt,
+    onChange: e => setTxt(e.target.value),
+    onKeyDown: e => {
+      if (e.key === 'Enter') send();
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-p",
+    onClick: send
+  }, "Envoyer")))));
+}
+function EleveAnnoncesBanner({
+  user,
+  cours
+}) {
+  const [items, setItems] = useState([]);
+  useEffect(() => {
+    (async () => {
+      const myC = (cours || []).filter(c => (c.eleveIds || []).includes(user.id));
+      const n = await R_notifsForEleve(user.id, myC.map(c => c.id), [...new Set(myC.map(c => c.profId).filter(Boolean))]);
+      const a = await R_adminAnnonces();
+      const merged = [].concat((n || []).map(x => ({
+        t: x.titre || 'Notification',
+        b: x.body
+      })), (a || []).map(x => ({
+        t: x.titre || x.title || 'Annonce',
+        b: x.body || x.texte || x.contenu
+      })));
+      setItems(merged.slice(0, 3));
+    })();
+  }, []);
+  if (items.length === 0) return null;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: '#EEF3FF',
+      border: '1.5px solid #c8d8f5',
+      borderRadius: 8,
+      padding: '12px 15px',
+      margin: '14px 16px 0'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      fontSize: 13,
+      color: '#1a4fc4',
+      marginBottom: 6
+    }
+  }, "📢 Annonces"), items.map((it, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      fontSize: 12.5,
+      marginBottom: 4
+    }
+  }, /*#__PURE__*/React.createElement("b", null, it.t), it.b ? ' — ' + it.b : '')));
+}
 function App(){const[cu,setCu]=useState(null);const[page,setPage]=useState('dashboard');const[sidebarPinned,setSidebarPinned]=useState(false);const[appReady,setAppReady]=useState(false);// true quand session vérifiée
 const[pub,setPub]=useState(()=>{try{const h=window.location.hash||'';if(/^#inscription/.test(h))return'inscription';if(/^#paiement/.test(h))return'paiement';if(/^#v\//.test(h))return'landing';}catch(_){}return'login';});// landing | login | inscription
 const[demandesWeb,setDemandesWeb]=useState([]);useEffect(()=>{try{window.scrollTo(0,0);}catch(_){}},[pub]);const openPub=v=>{try{window.history.pushState({pubView:v},'');}catch(_){}setPub(v);};const backPub=()=>{try{if(window.history.state&&window.history.state.pubView){window.history.back();}else{setPub('login');}}catch(_){setPub('login');}};useEffect(()=>{const onH=()=>{try{const h=window.location.hash||'';if(/^#inscription/.test(h))setPub('inscription');else if(/^#paiement/.test(h))setPub('paiement');else if(/^#v\//.test(h))setPub('landing');else if(/^#login/.test(h)||h===''||h==='#')setPub('login');}catch(_){}};window.addEventListener('hashchange',onH);return()=>window.removeEventListener('hashchange',onH);},[]);const skipPushRef=React.useRef(false);useEffect(()=>{if(!cu)return;if(skipPushRef.current){skipPushRef.current=false;return;}try{window.history.pushState({appPage:page},'');}catch(_){}},[page,cu]);useEffect(()=>{const onPop=e=>{const st=e&&e.state||{};if(st.appPage){skipPushRef.current=true;setPage(st.appPage);}else if(st.pubView){setPub(st.pubView);}else{setPub('landing');}};window.addEventListener('popstate',onPop);return()=>window.removeEventListener('popstate',onPop);},[]);const[dataReady,setDataReady]=useState(false);// true quand données chargées
@@ -4386,7 +4951,7 @@ let so=[];try{so=await sbLoadKV('sorties','global',[]);}catch(_){so=[];}let ents
 try{ch=await sbLoadKV('charges','global',charges);}catch(_){}let dw=[];try{dw=await sbLoad('inscriptions_web',[]);}catch(_){dw=[];}setUsers(u);setResources(r);setModules(mo);setFactures(fa);setDispos(di);setDemandes(de);setCustomTrophies(ct);setAppel(ap);setGrades(g);setEnrollments(en);setSalaires(sa);setAwardedTrophies(at);setCompEtats(ce);setCustomComps(cc);setCours(co);setInscriptions(ins_data);setSorties(so);setCharges(ch);setDemandesWeb(dw);setEntreprises(ents);setStages(stgs);setDataReady(true);}catch(loadErr){console.error('[App] Erreur chargement données:',loadErr);// Charger les données seed en cas d'erreur pour ne pas bloquer
 setUsers(SEED_USERS);setCours(SEED_COURS);setFactures(SEED_FACTURES);setDataReady(true);}})();},[cu?.id]);// ── Sync retour vers Supabase ──
 // ── Sync Supabase avec debounce 1.5s ──
-useEffect(()=>{if(dataReady)sbDebounce('sv_users',()=>sbSave('users',users));},[users]);useEffect(()=>{if(dataReady)sbDebounce('sv_res',()=>sbSave('ressources',resources));},[resources]);useEffect(()=>{if(dataReady)sbDebounce('sv_mod',()=>sbSave('modules',modules));},[modules]);useEffect(()=>{if(dataReady)sbDebounce('sv_fact',()=>sbSave('factures',factures));},[factures]);useEffect(()=>{if(dataReady)sbDebounce('sv_dispo',()=>sbSave('dispos',dispos));},[dispos]);useEffect(()=>{if(dataReady)sbDebounce('sv_dem',()=>sbSave('demandes',demandes));},[demandes]);useEffect(()=>{if(dataReady)sbDebounce('sv_troph',()=>sbSave('trophees_custom',customTrophies));},[customTrophies]);useEffect(()=>{if(dataReady)sbDebounce('sv_cours',()=>sbSaveKV('cours',cours,'global'));},[cours]);useEffect(()=>{if(dataReady)sbDebounce('sv_appel',()=>sbSaveKV('appel',appel,'global'));},[appel]);useEffect(()=>{if(dataReady)sbDebounce('sv_grd',()=>sbSaveKV('grades',grades,'global'));},[grades]);useEffect(()=>{if(dataReady)sbDebounce('sv_enr',()=>sbSaveKV('enrollments',enrollments,'global'));},[enrollments]);useEffect(()=>{if(dataReady)sbDebounce('sv_sal',()=>sbSaveKV('salaires',salaires,'global'));},[salaires]);useEffect(()=>{if(dataReady)sbDebounce('sv_traw',()=>sbSaveKV('trophees_awarded',awardedTrophies,'global'));},[awardedTrophies]);useEffect(()=>{if(dataReady&&cu)sbDebounce('sv_ce',()=>sbSaveKV('comp_etats',compEtats,cu.id));},[compEtats]);useEffect(()=>{if(dataReady&&cu)sbDebounce('sv_cc',()=>sbSaveKV('custom_comps',customComps,cu.id));},[customComps]);useEffect(()=>{if(dataReady)sbDebounce('sv_sor',()=>sbSaveKV('sorties',sorties,'global'));},[sorties]);useEffect(()=>{if(dataReady)sbDebounce('sv_ent',()=>sbSaveKV('entreprises',entreprises,'global'));},[entreprises]);useEffect(()=>{if(dataReady)sbDebounce('sv_stg',()=>sbSaveKV('stages',stages,'global'));},[stages]);useEffect(()=>{if(dataReady)sbDebounce('sv_ins',()=>sbSaveKV('inscriptions',inscriptions,'global'));},[inscriptions]);useEffect(()=>{if(dataReady)sbDebounce('sv_chg',()=>sbSaveKV('charges',charges,'global'));},[charges]);const login=u=>{setCu(u);setPage('dashboard');};const logout=async()=>{try{await sb.auth.signOut();}catch(_){}try{window.location.href='./';}catch(_){setCu(null);}};if(!appReady)return/*#__PURE__*/React.createElement("div",{style:{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',background:'#111',color:'var(--gold)',fontFamily:'var(--ff-mono)',fontSize:14,letterSpacing:1}},"⟳ Chargement…");if(!cu){const toSite=()=>{try{window.location.href='./';}catch(_){}};if(pub==='inscription')return/*#__PURE__*/React.createElement(Inscription,{onBack:toSite,onLogin:()=>openPub('login')});if(pub==='paiement')return/*#__PURE__*/React.createElement(Abonnement,{onBack:toSite,onInscription:()=>openPub('inscription')});return/*#__PURE__*/React.createElement(Login,{onLogin:login,onBack:toSite});}if(!dataReady)return/*#__PURE__*/React.createElement("div",{style:{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',background:'var(--cream2)',color:'var(--navy)',fontFamily:'var(--ff-mono)',fontSize:13,letterSpacing:.5}},/*#__PURE__*/React.createElement("div",{style:{textAlign:'center'}},/*#__PURE__*/React.createElement("div",{style:{fontSize:28,marginBottom:12}},"📚"),/*#__PURE__*/React.createElement("div",null,"Chargement des données…")));const props={user:cu,users,setUsers,resources,setResources,modules,setModules,grades,setGrades,enrollments,setEnrollments,cours,setCours,appel,setAppel,factures,setFactures,salaires,setSalaires,dispos,setDispos,demandes,setDemandes,compEtats,setCompEtats,customComps,setCustomComps,customTrophies,setCustomTrophies,awardedTrophies,setAwardedTrophies,inscriptions,setInscriptions,sorties,setSorties,charges,setCharges};const renderPage=()=>{switch(page){case'dashboard':return/*#__PURE__*/React.createElement(Dashboard,props);case'programme':return/*#__PURE__*/React.createElement(MonProgramme,{...props,customComps:props.customComps});case'bibliotheque':return/*#__PURE__*/React.createElement(Bibliotheque,{...props,cours:props.cours,compEtats:props.compEtats});case'emploidutemps':return/*#__PURE__*/React.createElement(EmploiDuTemps,{...props,setCours:props.setCours,dispos:props.dispos});case'modules':return/*#__PURE__*/React.createElement(Modules,props);case'monespace':return/*#__PURE__*/React.createElement(MonEspace,props);case'meseleves':return/*#__PURE__*/React.createElement(MesEleves,{...props,compEtats:props.compEtats,setCompEtats:props.setCompEtats,customComps:props.customComps});case'statistiques':return/*#__PURE__*/React.createElement(Statistiques,props);case'facturation':return/*#__PURE__*/React.createElement(Facturation,{...props,cours:props.cours});case'inscriptions':return/*#__PURE__*/React.createElement(Inscriptions,{...props,setFactures:props.setFactures,demandesWeb:demandesWeb,setDemandesWeb:setDemandesWeb});case'suivi':return/*#__PURE__*/React.createElement(SuiviCompetences,{...props,customComps:props.customComps,setCustomComps:props.setCustomComps,awardedTrophies:props.awardedTrophies,setAwardedTrophies:props.setAwardedTrophies});case'coursparticuliers':return/*#__PURE__*/React.createElement(CoursParticuliers,props);case'reservations':return/*#__PURE__*/React.createElement(GestionReservations,{user:cu,users:props.users});case'reserver':return/*#__PURE__*/React.createElement(EleveReservations,{user:cu,users:props.users});case'groupes':return/*#__PURE__*/React.createElement(GroupesAdmin,{cours:cours,setCours:setCours,users:users,setUsers:setUsers});case'chat':return/*#__PURE__*/React.createElement(EleveChat,{user:cu});case'monplanning':return/*#__PURE__*/React.createElement(EleveePlanning,{user:cu,users:props.users,cours:props.cours});case'live':return/*#__PURE__*/React.createElement(LivePage,{user:cu});case'liveadmin':return/*#__PURE__*/React.createElement(LivesAdmin,{user:cu});case'credits':return/*#__PURE__*/React.createElement(CreditsAdmin,{user:cu});case'accueil':return/*#__PURE__*/React.createElement(AdminLauncher,{setPage:setPage,user:cu,onLogout:logout});case'paiement':return/*#__PURE__*/React.createElement(Paiement,null);case'pages':return/*#__PURE__*/React.createElement(Pages,null);case'annonces':return/*#__PURE__*/React.createElement(Annonces,null);case'vitrine':return/*#__PURE__*/React.createElement(Vitrine,null);case'admin':return/*#__PURE__*/React.createElement(Admin,{...props,factures:props.factures,setFactures:props.setFactures,customTrophies:props.customTrophies,setCustomTrophies:props.setCustomTrophies,awardedTrophies:props.awardedTrophies,setAwardedTrophies:props.setAwardedTrophies,inscriptions:props.inscriptions,setInscriptions:props.setInscriptions});case'sorties':return/*#__PURE__*/React.createElement(Sorties,{sorties:props.sorties,setSorties:props.setSorties,users:props.users,cours:props.cours});default:return/*#__PURE__*/React.createElement(Dashboard,props);}};const _isAdmin=cu&&cu.role==='admin';const _isEleve=cu&&cu.role==='eleve';return/*#__PURE__*/React.createElement("div",{className:`app ${_isAdmin?'launcher-mode':''} ${_isEleve?'stud-mode':''} ${sidebarPinned?'sidebar-pinned':''}`},_isAdmin?(page!=='accueil'?/*#__PURE__*/React.createElement(HomeButton,{setPage:setPage}):null):_isEleve?/*#__PURE__*/React.createElement(StudentTopBar,{page:page,onLogout:logout}):/*#__PURE__*/React.createElement(React.Fragment,null,/*#__PURE__*/React.createElement(Sidebar,{user:cu,page:page,setPage:setPage,onLogout:logout,pinned:sidebarPinned,setPinned:setSidebarPinned}),/*#__PURE__*/React.createElement(MobileBurger,{pinned:sidebarPinned,setPinned:setSidebarPinned})),/*#__PURE__*/React.createElement("div",{className:"main"},renderPage()),_isEleve?/*#__PURE__*/React.createElement(StudentTabBar,{page:page,setPage:setPage}):null);}class ErrorBoundary extends React.Component{constructor(p){super(p);this.state={err:null};}static getDerivedStateFromError(err){return{err};}componentDidCatch(err,info){try{console.error('App error:',err,info);}catch(_){}}render(){if(this.state.err){return/*#__PURE__*/React.createElement("div",{style:{padding:'28px',fontFamily:'monospace',color:'#8b2222',whiteSpace:'pre-wrap',fontSize:13,lineHeight:1.5}},"⚠️ Une erreur est survenue :","\n\n",String(this.state.err&&this.state.err.message||this.state.err),"\n\n",String(this.state.err&&this.state.err.stack||''));}return this.props.children;}}ReactDOM.createRoot(document.getElementById('root')).render(/*#__PURE__*/React.createElement(ErrorBoundary,null,/*#__PURE__*/React.createElement(App,null)));
+useEffect(()=>{if(dataReady)sbDebounce('sv_users',()=>sbSave('users',users));},[users]);useEffect(()=>{if(dataReady)sbDebounce('sv_res',()=>sbSave('ressources',resources));},[resources]);useEffect(()=>{if(dataReady)sbDebounce('sv_mod',()=>sbSave('modules',modules));},[modules]);useEffect(()=>{if(dataReady)sbDebounce('sv_fact',()=>sbSave('factures',factures));},[factures]);useEffect(()=>{if(dataReady)sbDebounce('sv_dispo',()=>sbSave('dispos',dispos));},[dispos]);useEffect(()=>{if(dataReady)sbDebounce('sv_dem',()=>sbSave('demandes',demandes));},[demandes]);useEffect(()=>{if(dataReady)sbDebounce('sv_troph',()=>sbSave('trophees_custom',customTrophies));},[customTrophies]);useEffect(()=>{if(dataReady)sbDebounce('sv_cours',()=>sbSaveKV('cours',cours,'global'));},[cours]);useEffect(()=>{if(dataReady)sbDebounce('sv_appel',()=>sbSaveKV('appel',appel,'global'));},[appel]);useEffect(()=>{if(dataReady)sbDebounce('sv_grd',()=>sbSaveKV('grades',grades,'global'));},[grades]);useEffect(()=>{if(dataReady)sbDebounce('sv_enr',()=>sbSaveKV('enrollments',enrollments,'global'));},[enrollments]);useEffect(()=>{if(dataReady)sbDebounce('sv_sal',()=>sbSaveKV('salaires',salaires,'global'));},[salaires]);useEffect(()=>{if(dataReady)sbDebounce('sv_traw',()=>sbSaveKV('trophees_awarded',awardedTrophies,'global'));},[awardedTrophies]);useEffect(()=>{if(dataReady&&cu)sbDebounce('sv_ce',()=>sbSaveKV('comp_etats',compEtats,cu.id));},[compEtats]);useEffect(()=>{if(dataReady&&cu)sbDebounce('sv_cc',()=>sbSaveKV('custom_comps',customComps,cu.id));},[customComps]);useEffect(()=>{if(dataReady)sbDebounce('sv_sor',()=>sbSaveKV('sorties',sorties,'global'));},[sorties]);useEffect(()=>{if(dataReady)sbDebounce('sv_ent',()=>sbSaveKV('entreprises',entreprises,'global'));},[entreprises]);useEffect(()=>{if(dataReady)sbDebounce('sv_stg',()=>sbSaveKV('stages',stages,'global'));},[stages]);useEffect(()=>{if(dataReady)sbDebounce('sv_ins',()=>sbSaveKV('inscriptions',inscriptions,'global'));},[inscriptions]);useEffect(()=>{if(dataReady)sbDebounce('sv_chg',()=>sbSaveKV('charges',charges,'global'));},[charges]);const login=u=>{setCu(u);setPage('dashboard');};const logout=async()=>{try{await sb.auth.signOut();}catch(_){}try{window.location.href='./';}catch(_){setCu(null);}};if(!appReady)return/*#__PURE__*/React.createElement("div",{style:{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',background:'#111',color:'var(--gold)',fontFamily:'var(--ff-mono)',fontSize:14,letterSpacing:1}},"⟳ Chargement…");if(!cu){const toSite=()=>{try{window.location.href='./';}catch(_){}};if(pub==='inscription')return/*#__PURE__*/React.createElement(Inscription,{onBack:toSite,onLogin:()=>openPub('login')});if(pub==='paiement')return/*#__PURE__*/React.createElement(Abonnement,{onBack:toSite,onInscription:()=>openPub('inscription')});return/*#__PURE__*/React.createElement(Login,{onLogin:login,onBack:toSite});}if(!dataReady)return/*#__PURE__*/React.createElement("div",{style:{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',background:'var(--cream2)',color:'var(--navy)',fontFamily:'var(--ff-mono)',fontSize:13,letterSpacing:.5}},/*#__PURE__*/React.createElement("div",{style:{textAlign:'center'}},/*#__PURE__*/React.createElement("div",{style:{fontSize:28,marginBottom:12}},"📚"),/*#__PURE__*/React.createElement("div",null,"Chargement des données…")));const props={user:cu,users,setUsers,resources,setResources,modules,setModules,grades,setGrades,enrollments,setEnrollments,cours,setCours,appel,setAppel,factures,setFactures,salaires,setSalaires,dispos,setDispos,demandes,setDemandes,compEtats,setCompEtats,customComps,setCustomComps,customTrophies,setCustomTrophies,awardedTrophies,setAwardedTrophies,inscriptions,setInscriptions,sorties,setSorties,charges,setCharges};const renderPage=()=>{switch(page){case'dashboard':return cu&&cu.role==='eleve'?/*#__PURE__*/React.createElement(React.Fragment,null,/*#__PURE__*/React.createElement(EleveAnnoncesBanner,{user:cu,cours:props.cours}),/*#__PURE__*/React.createElement(Dashboard,props)):/*#__PURE__*/React.createElement(Dashboard,props);case'programme':return/*#__PURE__*/React.createElement(MonProgramme,{...props,customComps:props.customComps});case'bibliotheque':return/*#__PURE__*/React.createElement(Bibliotheque,{...props,cours:props.cours,compEtats:props.compEtats});case'emploidutemps':return/*#__PURE__*/React.createElement(EmploiDuTemps,{...props,setCours:props.setCours,dispos:props.dispos});case'modules':return/*#__PURE__*/React.createElement(Modules,props);case'monespace':return/*#__PURE__*/React.createElement(MonEspace,props);case'meseleves':return/*#__PURE__*/React.createElement(MesEleves,{...props,compEtats:props.compEtats,setCompEtats:props.setCompEtats,customComps:props.customComps});case'statistiques':return/*#__PURE__*/React.createElement(Statistiques,props);case'facturation':return/*#__PURE__*/React.createElement(Facturation,{...props,cours:props.cours});case'inscriptions':return/*#__PURE__*/React.createElement(Inscriptions,{...props,setFactures:props.setFactures,demandesWeb:demandesWeb,setDemandesWeb:setDemandesWeb});case'suivi':return/*#__PURE__*/React.createElement(SuiviCompetences,{...props,customComps:props.customComps,setCustomComps:props.setCustomComps,awardedTrophies:props.awardedTrophies,setAwardedTrophies:props.setAwardedTrophies});case'coursparticuliers':return/*#__PURE__*/React.createElement(CoursParticuliers,props);case'reservations':return/*#__PURE__*/React.createElement(GestionReservations,{user:cu,users:props.users});case'reserver':return/*#__PURE__*/React.createElement(EleveReservations,{user:cu,users:props.users});case'groupes':return/*#__PURE__*/React.createElement(GroupesAdmin,{cours:cours,setCours:setCours,users:users,setUsers:setUsers});case'chat':return/*#__PURE__*/React.createElement(EleveChat,{user:cu});case'monplanning':return/*#__PURE__*/React.createElement(EleveePlanning,{user:cu,users:props.users,cours:props.cours});case'live':return/*#__PURE__*/React.createElement(LivePage,{user:cu});case'liveadmin':return/*#__PURE__*/React.createElement(LivesAdmin,{user:cu});case'credits':return/*#__PURE__*/React.createElement(CreditsAdmin,{user:cu});case'messages':return cu&&cu.role==='prof'?/*#__PURE__*/React.createElement(ProfMessagerie,{user:cu,users:props.users,cours:props.cours}):/*#__PURE__*/React.createElement(EleveMessages,{user:cu,cours:props.cours});case'accueil':return/*#__PURE__*/React.createElement(AdminLauncher,{setPage:setPage,user:cu,onLogout:logout});case'paiement':return/*#__PURE__*/React.createElement(Paiement,null);case'pages':return/*#__PURE__*/React.createElement(Pages,null);case'annonces':return/*#__PURE__*/React.createElement(Annonces,null);case'vitrine':return/*#__PURE__*/React.createElement(Vitrine,null);case'admin':return/*#__PURE__*/React.createElement(Admin,{...props,factures:props.factures,setFactures:props.setFactures,customTrophies:props.customTrophies,setCustomTrophies:props.setCustomTrophies,awardedTrophies:props.awardedTrophies,setAwardedTrophies:props.setAwardedTrophies,inscriptions:props.inscriptions,setInscriptions:props.setInscriptions});case'sorties':return/*#__PURE__*/React.createElement(Sorties,{sorties:props.sorties,setSorties:props.setSorties,users:props.users,cours:props.cours});default:return/*#__PURE__*/React.createElement(Dashboard,props);}};const _isAdmin=cu&&cu.role==='admin';const _isEleve=cu&&cu.role==='eleve';return/*#__PURE__*/React.createElement("div",{className:`app ${_isAdmin?'launcher-mode':''} ${_isEleve?'stud-mode':''} ${sidebarPinned?'sidebar-pinned':''}`},_isAdmin?(page!=='accueil'?/*#__PURE__*/React.createElement(HomeButton,{setPage:setPage}):null):_isEleve?/*#__PURE__*/React.createElement(StudentTopBar,{page:page,onLogout:logout}):/*#__PURE__*/React.createElement(React.Fragment,null,/*#__PURE__*/React.createElement(Sidebar,{user:cu,page:page,setPage:setPage,onLogout:logout,pinned:sidebarPinned,setPinned:setSidebarPinned}),/*#__PURE__*/React.createElement(MobileBurger,{pinned:sidebarPinned,setPinned:setSidebarPinned})),/*#__PURE__*/React.createElement("div",{className:"main"},renderPage()),_isEleve?/*#__PURE__*/React.createElement(StudentTabBar,{page:page,setPage:setPage}):null);}class ErrorBoundary extends React.Component{constructor(p){super(p);this.state={err:null};}static getDerivedStateFromError(err){return{err};}componentDidCatch(err,info){try{console.error('App error:',err,info);}catch(_){}}render(){if(this.state.err){return/*#__PURE__*/React.createElement("div",{style:{padding:'28px',fontFamily:'monospace',color:'#8b2222',whiteSpace:'pre-wrap',fontSize:13,lineHeight:1.5}},"⚠️ Une erreur est survenue :","\n\n",String(this.state.err&&this.state.err.message||this.state.err),"\n\n",String(this.state.err&&this.state.err.stack||''));}return this.props.children;}}ReactDOM.createRoot(document.getElementById('root')).render(/*#__PURE__*/React.createElement(ErrorBoundary,null,/*#__PURE__*/React.createElement(App,null)));
 </script>
 
 
