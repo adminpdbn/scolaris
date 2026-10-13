@@ -1762,18 +1762,7 @@ function CreneauxAdmin({
       background: groupBy === 'matiere' ? 'var(--navy)' : 'transparent',
       color: groupBy === 'matiere' ? 'var(--cream)' : 'var(--navy)'
     }
-  }, "📚 Par matière"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setGroupBy('salle'),
-    style: {
-      padding: '6px 14px',
-      border: 'none',
-      cursor: 'pointer',
-      fontFamily: 'var(--ff-mono)',
-      fontSize: 12,
-      background: groupBy === 'salle' ? 'var(--navy)' : 'transparent',
-      color: groupBy === 'salle' ? 'var(--cream)' : 'var(--navy)'
-    }
-  }, "🏫 Par salle"))), loading ? /*#__PURE__*/React.createElement("div", {
+  }, "📚 Par matière"), "        ")), loading ? /*#__PURE__*/React.createElement("div", {
     className: "emp"
   }, /*#__PURE__*/React.createElement("div", {
     className: "emp-icon"
@@ -2172,18 +2161,7 @@ function EleveReservations({
       background: groupBy === 'matiere' ? 'var(--navy)' : 'transparent',
       color: groupBy === 'matiere' ? 'var(--cream)' : 'var(--navy)'
     }
-  }, "📚 Par matière"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setGroupBy('salle'),
-    style: {
-      padding: '6px 14px',
-      border: 'none',
-      cursor: 'pointer',
-      fontFamily: 'var(--ff-mono)',
-      fontSize: 12,
-      background: groupBy === 'salle' ? 'var(--navy)' : 'transparent',
-      color: groupBy === 'salle' ? 'var(--cream)' : 'var(--navy)'
-    }
-  }, "🏫 Par salle"))), loading ? /*#__PURE__*/React.createElement("div", {
+  }, "📚 Par matière"), "          ")), loading ? /*#__PURE__*/React.createElement("div", {
     className: "emp"
   }, /*#__PURE__*/React.createElement("div", {
     className: "emp-icon"
@@ -3113,10 +3091,6 @@ function StudentTabBar({
     id: 'dashboard',
     ic: '🏠',
     lbl: 'Accueil'
-  }, {
-    id: 'monplanning',
-    ic: '📅',
-    lbl: 'Planning'
   }, {
     id: 'programme',
     ic: '📚',
