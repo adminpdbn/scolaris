@@ -1,5 +1,5 @@
 /* PdBN — Service Worker (PWA installable + shell hors-ligne) */
-const CACHE = 'pdbn-v1';
+const CACHE = 'pdbn-v4';
 const SHELL = [
   './',
   'index.html',
