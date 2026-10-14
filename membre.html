@@ -6159,8 +6159,12 @@ function AttributionExpress({
     try {
       const r = await sb.from('inscriptions_web').select('*');
       if (!r.error && Array.isArray(r.data)) {
-        setDw(r.data);
-        if (setDemandes) setDemandes(r.data);
+        const data = r.data.map(d => d.eleveId ? d : d.details && d.details.eleveId ? {
+          ...d,
+          eleveId: d.details.eleveId
+        } : d);
+        setDw(data);
+        if (setDemandes) setDemandes(data);
       }
     } catch (_) {}
     setLoadingDw(false);
@@ -6171,7 +6175,22 @@ function AttributionExpress({
   useEffect(() => {
     if (Array.isArray(demandes) && demandes.length > dw.length) setDw(demandes);
   }, [demandes]);
-  const pending = (dw || []).filter(d => d.statut === 'valide' && !(d.details && d.details.transfere));
+  const pending = (dw || []).filter(d => d.statut === 'valide' && !d.eleveId && !(d.details && d.details.transfere));
+  const confirmInscription = eleveId => {
+    const cible = (dw || []).find(d => d.eleveId === eleveId && d.statut === 'valide');
+    if (!cible) return;
+    const flip = p => p.map(d => d.eleveId === eleveId && d.statut === 'valide' ? {
+      ...d,
+      statut: 'creneau'
+    } : d);
+    setDw(flip);
+    if (setDemandes) setDemandes(flip);
+    try {
+      sb.from('inscriptions_web').update({
+        statut: 'creneau'
+      }).eq('id', cible.id);
+    } catch (_) {}
+  };
   const eleves = (users || []).filter(u => u.role === 'eleve');
   const norm = s => (s || '').toLowerCase();
   const NIVs = [...new Set(eleves.map(e => e.niveau).filter(Boolean))].sort();
@@ -6185,24 +6204,26 @@ function AttributionExpress({
     setBusy(true);
     const existing = {};
     (users || []).filter(u => u.role === 'eleve').forEach(u => {
-      existing[(u.name || '').toLowerCase().trim()] = true;
+      existing[(u.name || '').toLowerCase().trim()] = u.id;
     });
     const base = Date.now();
     const newUsers = [];
-    const doneIds = [];
+    const links = {};
     let skipped = 0;
     list.forEach((d, idx) => {
       const fullName = ((d.prenom || '') + ' ' + (d.nom || '')).trim() || d.name || '(sans nom)';
-      doneIds.push(d.id);
-      if (existing[fullName.toLowerCase().trim()]) {
+      const key = fullName.toLowerCase().trim();
+      if (existing[key]) {
+        links[d.id] = existing[key];
         skipped++;
         return;
       }
-      existing[fullName.toLowerCase().trim()] = true;
       const parts = fullName.split(' ');
       const initials = ((parts[0] || '')[0] || '') + ((parts[parts.length - 1] || '')[0] || '');
       const mat = d.matieres && d.matieres.join ? d.matieres.join(' - ') : d.matiere || '';
       const id = 'u' + base + '_' + idx;
+      existing[key] = id;
+      links[d.id] = id;
       newUsers.push({
         id,
         name: fullName,
@@ -6214,33 +6235,41 @@ function AttributionExpress({
         parentTel: d.parent_tel || d.parentTel || '',
         parentEmail: d.parent_email || d.parentEmail || '',
         dateNaissance: d.dateNaissance || '',
-        adresse: d.adresse || ''
+        adresse: d.adresse || '',
+        webId: d.id
       });
     });
     if (newUsers.length) setUsers(p => [...p, ...newUsers]);
-    const mark = p => p.map(d => doneIds.indexOf(d.id) >= 0 ? {
+    const mark = p => p.map(d => links[d.id] ? {
       ...d,
+      eleveId: links[d.id],
       details: {
         ...(d.details || {}),
-        transfere: true
+        transfere: true,
+        eleveId: links[d.id]
       }
     } : d);
     setDw(mark);
     if (setDemandes) setDemandes(mark);
     try {
-      doneIds.forEach(id => {
+      Object.keys(links).forEach(id => {
         const src = (dw || []).find(x => x.id === id);
+        const det = {
+          ...(src && src.details || {}),
+          transfere: true,
+          eleveId: links[id]
+        };
         sb.from('inscriptions_web').update({
-          details: {
-            ...(src && src.details || {}),
-            transfere: true
-          }
+          details: det
         }).eq('id', id);
+        sb.from('inscriptions_web').update({
+          eleveId: links[id]
+        }).eq('id', id).then(() => {}, () => {});
       });
     } catch (_) {}
     setBusy(false);
     setPSel({});
-    alert(newUsers.length + ' compte(s) élève(s) créé(s)' + (skipped ? ' · ' + skipped + ' ignoré(s) car déjà présents' : '') + ' ✓ Attribue-les maintenant aux créneaux ci-dessous.');
+    alert(newUsers.length + ' compte(s) élève(s) créé(s)' + (skipped ? ' · ' + skipped + ' déjà existant(s), rattaché(s)' : '') + '. Ils sortent de la file. ➜ Attribue-les à un créneau pour confirmer l\'inscription.');
   };
   const validerTout = () => validerIds(pending.map(i => i.id));
   const validerSelection = () => validerIds(Object.keys(pSel).filter(k => pSel[k]));
@@ -6250,6 +6279,7 @@ function AttributionExpress({
   const inCr = id => cr && (cr.eleveIds || []).includes(id);
   const toggle = id => {
     if (!cr) return;
+    const willAdd = !(cr.eleveIds || []).includes(id);
     setCours(p => p.map(c => {
       if (c.id !== cr.id) return c;
       const ids = c.eleveIds || [];
@@ -6258,6 +6288,7 @@ function AttributionExpress({
         eleveIds: ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id]
       };
     }));
+    if (willAdd) confirmInscription(id);
   };
   const visible = eleves.filter(e => (fniv === 'tous' || e.niveau === fniv) && (!q || norm(e.name).includes(norm(q)))).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
   const addAllVisible = () => {
@@ -6267,12 +6298,15 @@ function AttributionExpress({
       ...c,
       eleveIds: [...new Set([...(c.eleveIds || []), ...ids])]
     }));
+    ids.forEach(confirmInscription);
   };
   // mode "par élève" : corriger les créneaux d'un élève précis
   const el = eleves.find(e => e.id === selEl) || null;
   const elInCr = c => el && (c.eleveIds || []).includes(el.id);
   const toggleElCr = c => {
     if (!el) return;
+    const willAdd = !(c.eleveIds || []).includes(el.id);
+    if (willAdd) confirmInscription(el.id);
     setCours(p => p.map(x => {
       if (x.id !== c.id) return x;
       const ids = x.eleveIds || [];
