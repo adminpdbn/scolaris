@@ -763,7 +763,7 @@ function Modal({title,onClose,children,width}){return/*#__PURE__*/React.createEl
 function Login({onLogin,onBack}){const[email,setEmail]=useState('');const[password,setPassword]=useState('');const[error,setError]=useState('');const[loading,setLoading]=useState(false);const[showPwd,setShowPwd]=useState(false);const handleLogin=async e=>{if(e&&e.preventDefault)e.preventDefault();setError('');setLoading(true);try{// 1. Authentification Supabase
 const{data:authData,error:authErr}=await sb.auth.signInWithPassword({email:(function(_x){_x=(_x||'').toLowerCase().trim();return _x.indexOf('@')>=0?_x:(_x.replace(/[^a-z0-9._-]/g,'')+'@eleve.plusdebonnesnotes.com');})(email),password});if(authErr){setError(authErr.message==='Invalid login credentials'?'Email ou mot de passe incorrect.':authErr.message);setLoading(false);return;}// 2. Récupérer le profil dans la table users
 const{data:profile,error:profErr}=await sb.from('users').select('*').eq('auth_id',authData.user.id).single();if(profErr||!profile){setError('Profil introuvable. Contactez l\'administration.');await sb.auth.signOut();setLoading(false);return;}setLoading(false);onLogin(profile);}catch(err){setError('Erreur de connexion. Vérifiez votre connexion internet.');setLoading(false);}};return/*#__PURE__*/React.createElement("div",{className:"ls"},/*#__PURE__*/React.createElement("div",{className:"ls-left"},/*#__PURE__*/React.createElement("div",{className:"ls-brand-top"},/*#__PURE__*/React.createElement("svg",{width:"28",height:"28",viewBox:"0 0 52 52",fill:"none"},/*#__PURE__*/React.createElement("circle",{cx:"26",cy:"26",r:"24",fill:"var(--gold2)",opacity:"0.2"}),/*#__PURE__*/React.createElement("path",{d:"M26 8 L38 18 L38 34 L26 42 L14 34 L14 18 Z",fill:"var(--gold2)",opacity:"0.9"}),/*#__PURE__*/React.createElement("path",{d:"M20 24 L26 18 L32 24 L26 30 Z",fill:"white"})),/*#__PURE__*/React.createElement("span",{className:"ls-brand-top-name"},"Plus de bonnes notes")),/*#__PURE__*/React.createElement("div",{className:"ls-inner"},/*#__PURE__*/React.createElement("div",{className:"ls-badge"},/*#__PURE__*/React.createElement("span",{className:"ls-badge-dot"}),/*#__PURE__*/React.createElement("span",{className:"ls-badge-txt"},"Soutien scolaire — La Courneuve")),/*#__PURE__*/React.createElement("div",{className:"ls-tag"},"Apprendre,",/*#__PURE__*/React.createElement("br",null),/*#__PURE__*/React.createElement("em",null,"progresser"),",",/*#__PURE__*/React.createElement("br",null),/*#__PURE__*/React.createElement("strong",null,"réussir.")),/*#__PURE__*/React.createElement("p",{className:"ls-desc"},"Bibliothèque de ressources, emploi du temps, appel, suivi des notes et trophées — tout en un seul endroit."),/*#__PURE__*/React.createElement("div",{className:"ls-stats"},[{n:'12+',l:'Professeurs'},{n:'4',l:'Niveaux'},{n:'8',l:'Cours / semaine'}].map((s,i)=>/*#__PURE__*/React.createElement("div",{key:i,className:"ls-stat"},/*#__PURE__*/React.createElement("div",{className:"ls-stat-n"},s.n),/*#__PURE__*/React.createElement("div",{className:"ls-stat-l"},s.l)))))),/*#__PURE__*/React.createElement("div",{className:"ls-right"},onBack?/*#__PURE__*/React.createElement("button",{className:"lp-back",onClick:onBack},"← Accueil"):null,/*#__PURE__*/React.createElement("div",{className:"ls-right-head"},/*#__PURE__*/React.createElement("h2",null,"Connexion"),/*#__PURE__*/React.createElement("p",null,"Entrez vos identifiants pour accéder à votre espace")),/*#__PURE__*/React.createElement("div",{className:"fg",style:{marginBottom:14}},/*#__PURE__*/React.createElement("label",{className:"fl",style:{color:'#888'}},"Adresse email"),/*#__PURE__*/React.createElement("input",{className:"fi",type:"email",placeholder:"prenom@edu.fr",value:email,onChange:e=>setEmail(e.target.value),onKeyDown:e=>e.key==='Enter'&&handleLogin(e),autoFocus:true,style:{fontSize:13,padding:'10px 12px'}})),/*#__PURE__*/React.createElement("div",{className:"fg",style:{marginBottom:6,position:'relative'}},/*#__PURE__*/React.createElement("label",{className:"fl",style:{color:'#888'}},"Mot de passe"),/*#__PURE__*/React.createElement("div",{style:{position:'relative'}},/*#__PURE__*/React.createElement("input",{className:"fi",type:showPwd?'text':'password',placeholder:"••••••••",value:password,onChange:e=>setPassword(e.target.value),onKeyDown:e=>e.key==='Enter'&&handleLogin(e),style:{fontSize:13,padding:'10px 38px 10px 12px',paddingRight:38}}),/*#__PURE__*/React.createElement("button",{onClick:()=>setShowPwd(p=>!p),style:{position:'absolute',right:10,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:14,color:'#999',padding:2}},showPwd?'🙈':'👁'))),error&&/*#__PURE__*/React.createElement("div",{style:{background:'#FFF0F0',border:'1px solid #f5b8b8',borderRadius:2,padding:'8px 12px',fontSize:12,color:'#c0392b',marginBottom:10}},"⚠️ ",error),/*#__PURE__*/React.createElement("button",{className:"ls-btn",disabled:loading||!email||!password,onClick:handleLogin,style:{marginTop:18}},loading?/*#__PURE__*/React.createElement(React.Fragment,null,/*#__PURE__*/React.createElement("span",{style:{fontSize:12,letterSpacing:1}},"Connexion…")):/*#__PURE__*/React.createElement(React.Fragment,null,/*#__PURE__*/React.createElement("span",null,"Accéder à mon espace"),/*#__PURE__*/React.createElement("span",{className:"ls-btn-arrow"},"→"))),/*#__PURE__*/React.createElement("div",{style:{margin:'22px 0 10px',borderTop:'1px solid #e0dcd4'}}),/*#__PURE__*/React.createElement("div",{style:{fontSize:10,color:'#bbb',textAlign:'center',letterSpacing:.5,lineHeight:1.7}},"Mot de passe oublié ? Contactez l'administration.",/*#__PURE__*/React.createElement("br",null),/*#__PURE__*/React.createElement("span",{style:{color:'#ccc'}},"admin@educenter.fr"),/*#__PURE__*/React.createElement("br",null),/*#__PURE__*/React.createElement("a",{href:"reservation.html",style:{color:'#4a7fd4',textDecoration:'none',fontWeight:700}},"📅 Réserver un cours particulier")),/*#__PURE__*/React.createElement("div",{className:"ls-right-footer"},/*#__PURE__*/React.createElement("span",{className:"ls-right-footer-txt"},"© 2025 Plus de bonnes notes · La Courneuve"))));}// ─── SIDEBAR ───
-function Sidebar({user,page,setPage,onLogout,pinned,setPinned}){const items=[{id:'dashboard',icon:'🏠',label:'Tableau de bord',roles:['admin','prof','eleve']},{id:'programme',icon:'📖',label:'Mon Programme',roles:['eleve']},{id:'bibliotheque',icon:'📚',label:'Bibliothèque',roles:['admin','prof']},{id:'emploidutemps',icon:'📅',label:'Emploi du temps',roles:['admin','prof','eleve']},{id:'modules',icon:'🗓️',label:'Modules & Activités',roles:['admin','prof','eleve']},{id:'monespace',icon:'🎓',label:'Mon Espace',roles:['eleve']},{id:'meseleves',icon:'👥',label:'Élèves & Appel',roles:['prof']},{id:'statistiques',icon:'📊',label:'Statistiques',roles:['admin']},{id:'facturation',icon:'🧾',label:'Facturation',roles:['admin']},{id:'inscriptions',icon:'👥',label:'Élèves',roles:['admin']},{id:'suivi',icon:'📋',label:'Suivi Compétences',roles:['admin']},{id:'coursparticuliers',icon:'🎯',label:'Cours particuliers',roles:['prof']},{id:'reservations',icon:'🗓️',label:'Réservations',roles:['admin']},{id:'attribexpress',icon:'⚡',label:'Attribution express',roles:['admin']},{id:'reserver',icon:'🎯',label:'Réserver un cours',roles:['eleve']},{id:'live',icon:'🎥',label:'Lives',roles:['prof']},{id:'messages',icon:'✉️',label:'Messages',roles:['prof']},{id:'carnet',icon:'📝',label:'Carnet de notes',roles:['prof']},{id:'sorties',icon:'🚌',label:'Sorties scolaires',roles:['admin']},{id:'paiement',icon:'💳',label:'Paiement',roles:['admin']},{id:'pages',icon:'📄',label:'Pages',roles:['admin']},{id:'annonces',icon:'📢',label:'Annonces',roles:['admin']},{id:'vitrine',icon:'🌐',label:'Site vitrine',roles:['admin']},{id:'admin',icon:'⚙️',label:'Administration',roles:['admin']}].filter(i=>i.roles.includes(user.role));return/*#__PURE__*/React.createElement("div",{className:`sidebar ${pinned?'pinned':''}`},/*#__PURE__*/React.createElement("div",{className:"sb-brand"},/*#__PURE__*/React.createElement("div",{className:"sb-logo",style:{fontSize:22,marginBottom:2}},/*#__PURE__*/React.createElement("svg",{width:"28",height:"28",viewBox:"0 0 28 28",fill:"none",xmlns:"http://www.w3.org/2000/svg"},/*#__PURE__*/React.createElement("circle",{cx:"14",cy:"14",r:"13",fill:"var(--gold2)",opacity:"0.15"}),/*#__PURE__*/React.createElement("path",{d:"M14 4 L20 10 L20 18 L14 22 L8 18 L8 10 Z",fill:"var(--gold2)",opacity:"0.9"}),/*#__PURE__*/React.createElement("path",{d:"M11 13 L14 10 L17 13 L14 16 Z",fill:"white"}))),/*#__PURE__*/React.createElement("div",{className:"sb-title",style:{fontSize:13,lineHeight:1.2}},"Plus de bonnes",/*#__PURE__*/React.createElement("br",null),"notes"),/*#__PURE__*/React.createElement("div",{className:"sb-sub"},"Soutien scolaire connecté"),/*#__PURE__*/React.createElement("button",{className:`sb-pin ${pinned?'on':''}`,onClick:()=>setPinned(!pinned),title:pinned?'Détacher (auto-réduire)':'Épingler le menu (rester ouvert)'},pinned?'📌':'📍')),/*#__PURE__*/React.createElement("nav",{className:"sb-nav"},/*#__PURE__*/React.createElement("div",{className:"sb-sec"},"Navigation"),items.map(it=>/*#__PURE__*/React.createElement("div",{key:it.id,className:`ni ${page===it.id?'on':''}`,onClick:()=>setPage(it.id),title:it.label},/*#__PURE__*/React.createElement("span",{className:"ni-ic"},it.icon),/*#__PURE__*/React.createElement("span",{className:"ni-lbl"},it.label)))),/*#__PURE__*/React.createElement("div",{className:"sb-user"},/*#__PURE__*/React.createElement("div",{className:"sb-av"},RI[user.role]),/*#__PURE__*/React.createElement("div",{className:"sb-uinfo"},/*#__PURE__*/React.createElement("div",{className:"sb-uname"},user.name.split(' ').slice(-1)[0]),/*#__PURE__*/React.createElement("div",{className:"sb-urole"},RL[user.role])),/*#__PURE__*/React.createElement("button",{className:"sb-out",onClick:onLogout,title:"Déconnexion"},"⏻")));}// ─── TOPBAR ───
+function Sidebar({user,page,setPage,onLogout,pinned,setPinned}){const items=[{id:'dashboard',icon:'🏠',label:'Tableau de bord',roles:['admin','prof','eleve']},{id:'programme',icon:'📖',label:'Mon Programme',roles:['eleve']},{id:'bibliotheque',icon:'📚',label:'Bibliothèque',roles:['admin','prof']},{id:'emploidutemps',icon:'📅',label:'Emploi du temps',roles:['admin','prof','eleve']},{id:'modules',icon:'🗓️',label:'Modules & Activités',roles:['admin','prof','eleve']},{id:'monespace',icon:'🎓',label:'Mon Espace',roles:['eleve']},{id:'meseleves',icon:'👥',label:'Élèves & Appel',roles:['prof']},{id:'statistiques',icon:'📊',label:'Statistiques',roles:['admin']},{id:'facturation',icon:'🧾',label:'Facturation',roles:['admin']},{id:'inscriptions',icon:'👥',label:'Élèves',roles:['admin']},{id:'suivi',icon:'📋',label:'Suivi Compétences',roles:['admin']},{id:'coursparticuliers',icon:'🎯',label:'Cours particuliers',roles:['prof']},{id:'reservations',icon:'🗓️',label:'Réservations',roles:['admin']},{id:'attribexpress',icon:'⚡',label:'Attribution express',roles:['admin']},{id:'reserver',icon:'🎯',label:'Réserver un cours',roles:['eleve']},{id:'live',icon:'🎥',label:'Lives',roles:['prof']},{id:'messages',icon:'✉️',label:'Messages',roles:['prof','admin']},{id:'carnet',icon:'📝',label:'Carnet de notes',roles:['prof']},{id:'sorties',icon:'🚌',label:'Sorties scolaires',roles:['admin']},{id:'paiement',icon:'💳',label:'Paiement',roles:['admin']},{id:'pages',icon:'📄',label:'Pages',roles:['admin']},{id:'annonces',icon:'📢',label:'Annonces',roles:['admin']},{id:'vitrine',icon:'🌐',label:'Site vitrine',roles:['admin']},{id:'admin',icon:'⚙️',label:'Administration',roles:['admin']}].filter(i=>i.roles.includes(user.role));return/*#__PURE__*/React.createElement("div",{className:`sidebar ${pinned?'pinned':''}`},/*#__PURE__*/React.createElement("div",{className:"sb-brand"},/*#__PURE__*/React.createElement("div",{className:"sb-logo",style:{fontSize:22,marginBottom:2}},/*#__PURE__*/React.createElement("svg",{width:"28",height:"28",viewBox:"0 0 28 28",fill:"none",xmlns:"http://www.w3.org/2000/svg"},/*#__PURE__*/React.createElement("circle",{cx:"14",cy:"14",r:"13",fill:"var(--gold2)",opacity:"0.15"}),/*#__PURE__*/React.createElement("path",{d:"M14 4 L20 10 L20 18 L14 22 L8 18 L8 10 Z",fill:"var(--gold2)",opacity:"0.9"}),/*#__PURE__*/React.createElement("path",{d:"M11 13 L14 10 L17 13 L14 16 Z",fill:"white"}))),/*#__PURE__*/React.createElement("div",{className:"sb-title",style:{fontSize:13,lineHeight:1.2}},"Plus de bonnes",/*#__PURE__*/React.createElement("br",null),"notes"),/*#__PURE__*/React.createElement("div",{className:"sb-sub"},"Soutien scolaire connecté"),/*#__PURE__*/React.createElement("button",{className:`sb-pin ${pinned?'on':''}`,onClick:()=>setPinned(!pinned),title:pinned?'Détacher (auto-réduire)':'Épingler le menu (rester ouvert)'},pinned?'📌':'📍')),/*#__PURE__*/React.createElement("nav",{className:"sb-nav"},/*#__PURE__*/React.createElement("div",{className:"sb-sec"},"Navigation"),items.map(it=>/*#__PURE__*/React.createElement("div",{key:it.id,className:`ni ${page===it.id?'on':''}`,onClick:()=>setPage(it.id),title:it.label},/*#__PURE__*/React.createElement("span",{className:"ni-ic"},it.icon),/*#__PURE__*/React.createElement("span",{className:"ni-lbl"},it.label)))),/*#__PURE__*/React.createElement("div",{className:"sb-user"},/*#__PURE__*/React.createElement("div",{className:"sb-av"},RI[user.role]),/*#__PURE__*/React.createElement("div",{className:"sb-uinfo"},/*#__PURE__*/React.createElement("div",{className:"sb-uname"},user.name.split(' ').slice(-1)[0]),/*#__PURE__*/React.createElement("div",{className:"sb-urole"},RL[user.role])),/*#__PURE__*/React.createElement("button",{className:"sb-out",onClick:onLogout,title:"Déconnexion"},"⏻")));}// ─── TOPBAR ───
 function TB({title,children}){return/*#__PURE__*/React.createElement("div",{className:"topbar"},/*#__PURE__*/React.createElement("h1",{className:"tb-ttl"},title),/*#__PURE__*/React.createElement("div",{className:"tb-act"},children));}// ─── TIMETABLE COMPONENT ───
 function generatePlanningPDF(cours,users,filtres){
   const {jsPDF}=window.jspdf;
@@ -4681,6 +4681,424 @@ function ProfMessagerie({
     }
   }, "Les élèves concernés verront l'annonce sur leur tableau de bord et dans leur onglet Messages."))));
 }
+function AdminMessagerie({
+  user,
+  users,
+  cours
+}) {
+  const eleves = (users || []).filter(u => u.role === 'eleve').sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  const classes = (cours || []).slice().sort((a, b) => ((a.matiere || '') + (a.jour || '')).localeCompare((b.matiere || '') + (b.jour || '')));
+  const [tab, setTab] = useState('groupe');
+  // --- messages privés (1:1) ---
+  const [sel, setSel] = useState(null);
+  const [thread, setThread] = useState([]);
+  const [txt, setTxt] = useState('');
+  const [q, setQ] = useState('');
+  const norm = s => (s || '').toLowerCase();
+  const loadThread = async e => {
+    setThread(await R_msgThread(user.id, e.id));
+  };
+  const openE = e => {
+    setSel(e);
+    setTxt('');
+    loadThread(e);
+  };
+  const send = async () => {
+    if (!sel || !txt.trim()) return;
+    const ok = await R_sendMsg(user.id, user.name, sel.id, sel.name, txt.trim());
+    if (ok) {
+      setTxt('');
+      loadThread(sel);
+    } else alert("Échec de l'envoi. La table « messages » n'existe peut-être pas (exécute le SQL fourni).");
+  };
+  // --- message groupé ---
+  const [gMode, setGMode] = useState('classes');
+  const [gEl, setGEl] = useState({});
+  const [gCl, setGCl] = useState({});
+  const [gq, setGq] = useState('');
+  const [gTxt, setGTxt] = useState('');
+  const [gBusy, setGBusy] = useState(false);
+  const [gMsg, setGMsg] = useState('');
+  const clabel = c => (c.matiere || 'Créneau') + ' ' + (c.niveau || '') + (c.jour ? ' · ' + c.jour : '') + (c.debut != null ? ' ' + hs(c.debut) : '');
+  const resolveIds = () => {
+    const set = {};
+    Object.keys(gEl).forEach(id => {
+      if (gEl[id]) set[id] = 1;
+    });
+    Object.keys(gCl).forEach(cid => {
+      if (!gCl[cid]) return;
+      const c = (cours || []).find(x => x.id === cid);
+      (c && c.eleveIds || []).forEach(id => set[id] = 1);
+    });
+    return Object.keys(set);
+  };
+  const ids = resolveIds();
+  const toggleEl = id => setGEl(p => ({
+    ...p,
+    [id]: !p[id]
+  }));
+  const toggleCl = id => setGCl(p => ({
+    ...p,
+    [id]: !p[id]
+  }));
+  const allElVisible = () => {
+    const vis = eleves.filter(e => !gq || norm(e.name).includes(norm(gq)));
+    const every = vis.every(e => gEl[e.id]);
+    setGEl(p => {
+      const n = {
+        ...p
+      };
+      vis.forEach(e => n[e.id] = !every);
+      return n;
+    });
+  };
+  const clearSel = () => {
+    setGEl({});
+    setGCl({});
+  };
+  const sendGroup = async () => {
+    const list = resolveIds();
+    if (list.length === 0) {
+      setGMsg('Sélectionne au moins un élève ou une classe.');
+      return;
+    }
+    if (!gTxt.trim()) {
+      setGMsg('Écris un message.');
+      return;
+    }
+    if (!confirm('Envoyer ce message à ' + list.length + ' élève(s) ?')) return;
+    setGBusy(true);
+    setGMsg('');
+    const rows = list.map(id => {
+      const e = (users || []).find(u => u.id === id);
+      return e ? {
+        id: R_genId('m_'),
+        from_id: user.id,
+        from_name: user.name,
+        to_id: e.id,
+        to_name: e.name,
+        body: gTxt.trim(),
+        lu: false
+      } : null;
+    }).filter(Boolean);
+    let ok = false;
+    try {
+      const {
+        error
+      } = await sb.from('messages').insert(rows);
+      ok = !error;
+    } catch (_) {
+      ok = false;
+    }
+    setGBusy(false);
+    if (ok) {
+      setGMsg('✓ Message envoyé à ' + rows.length + ' élève(s)');
+      setGTxt('');
+    } else setGMsg("Échec de l'envoi. La table « messages » n'existe peut-être pas (exécute le SQL fourni).");
+    setTimeout(() => setGMsg(''), 5000);
+  };
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(TB, {
+    title: "Messagerie"
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: 'var(--muted)'
+    }
+  }, "Messages privés & messages groupés aux élèves")), /*#__PURE__*/React.createElement("div", {
+    className: "pg"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 8,
+      marginBottom: 14,
+      flexWrap: 'wrap'
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: 'btn btn-sm ' + (tab === 'groupe' ? 'btn-p' : 'btn-o'),
+    onClick: () => setTab('groupe')
+  }, "📣 Message groupé"), /*#__PURE__*/React.createElement("button", {
+    className: 'btn btn-sm ' + (tab === 'msg' ? 'btn-p' : 'btn-o'),
+    onClick: () => setTab('msg')
+  }, "✉️ Message privé")), tab === 'groupe' ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      maxWidth: 760
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "fl"
+  }, "Destinataires"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 8,
+      marginBottom: 8,
+      flexWrap: 'wrap'
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: 'btn btn-sm ' + (gMode === 'classes' ? 'btn-p' : 'btn-o'),
+    onClick: () => setGMode('classes')
+  }, "🏫 Par classes"), /*#__PURE__*/React.createElement("button", {
+    className: 'btn btn-sm ' + (gMode === 'eleves' ? 'btn-p' : 'btn-o'),
+    onClick: () => setGMode('eleves')
+  }, "👤 Par élèves"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      marginLeft: 'auto',
+      fontSize: 12,
+      fontWeight: 700,
+      color: ids.length ? 'var(--ok)' : 'var(--muted)'
+    }
+  }, ids.length, " destinataire(s)"), Object.keys(gEl).some(k => gEl[k]) || Object.keys(gCl).some(k => gCl[k]) ? /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-o btn-sm",
+    onClick: clearSel
+  }, "Tout décocher") : null), gMode === 'eleves' ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      border: '1.5px solid var(--cream2)',
+      borderRadius: 8,
+      padding: 10,
+      background: 'var(--white)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 8,
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "fi",
+    style: {
+      flex: 1
+    },
+    placeholder: "🔍 Élève…",
+    value: gq,
+    onChange: e => setGq(e.target.value)
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-o btn-sm",
+    onClick: allElVisible
+  }, "Tout cocher")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 4,
+      maxHeight: '44vh',
+      overflowY: 'auto'
+    }
+  }, eleves.filter(e => !gq || norm(e.name).includes(norm(gq))).map(e => /*#__PURE__*/React.createElement("label", {
+    key: e.id,
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 9,
+      padding: '7px 9px',
+      border: '1px solid var(--cream2)',
+      borderRadius: 7,
+      cursor: 'pointer',
+      background: gEl[e.id] ? '#eef7ff' : 'transparent'
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: !!gEl[e.id],
+    onChange: () => toggleEl(e.id)
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 600
+    }
+  }, e.name), e.niveau ? /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: 'var(--muted)'
+    }
+  }, "· ", e.niveau) : null)), eleves.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--muted)'
+    }
+  }, "Aucun élève.") : null)) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      border: '1.5px solid var(--cream2)',
+      borderRadius: 8,
+      padding: 10,
+      background: 'var(--white)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 4,
+      maxHeight: '44vh',
+      overflowY: 'auto'
+    }
+  }, classes.map(c => {
+    const n = (c.eleveIds || []).length;
+    return /*#__PURE__*/React.createElement("label", {
+      key: c.id,
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 9,
+        padding: '7px 9px',
+        border: '1px solid var(--cream2)',
+        borderRadius: 7,
+        cursor: 'pointer',
+        background: gCl[c.id] ? '#eef7ff' : 'transparent'
+      }
+    }, /*#__PURE__*/React.createElement("input", {
+      type: "checkbox",
+      checked: !!gCl[c.id],
+      onChange: () => toggleCl(c.id)
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontWeight: 600,
+        flex: 1
+      }
+    }, clabel(c)), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        color: 'var(--muted)'
+      }
+    }, n, " élève(s)"));
+  }), classes.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--muted)'
+    }
+  }, "Aucune classe.") : null)), /*#__PURE__*/React.createElement("div", {
+    className: "fl",
+    style: {
+      marginTop: 12
+    }
+  }, "Message"), /*#__PURE__*/React.createElement("textarea", {
+    className: "fi",
+    rows: 5,
+    value: gTxt,
+    onChange: e => setGTxt(e.target.value),
+    placeholder: "Ton message aux élèves sélectionnés…"
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 10,
+      display: 'flex',
+      gap: 10,
+      alignItems: 'center',
+      flexWrap: 'wrap'
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-p",
+    onClick: sendGroup,
+    disabled: gBusy
+  }, gBusy ? 'Envoi…' : '📣 Envoyer à ' + ids.length + ' élève(s)'), gMsg ? /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: gMsg.charAt(0) === '✓' ? 'var(--ok)' : 'var(--err)'
+    }
+  }, gMsg) : null), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 11,
+      color: 'var(--muted)',
+      marginTop: 10
+    }
+  }, "Chaque élève reçoit le message dans sa boîte « Messages » et peut te répondre individuellement.")) : /*#__PURE__*/React.createElement("div", {
+    className: "attrib-grid"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
+    className: "fi",
+    placeholder: "🔍 Élève…",
+    value: q,
+    onChange: e => setQ(e.target.value)
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 5,
+      marginTop: 8,
+      maxHeight: '62vh',
+      overflowY: 'auto'
+    }
+  }, eleves.filter(e => !q || norm(e.name).includes(norm(q))).map(e => /*#__PURE__*/React.createElement("button", {
+    key: e.id,
+    className: 'grp-card' + (sel && sel.id === e.id ? ' on' : ''),
+    onClick: () => openE(e)
+  }, /*#__PURE__*/React.createElement("b", null, e.name), e.niveau ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: 'var(--muted)'
+    }
+  }, e.niveau) : null)), eleves.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--muted)'
+    }
+  }, "Aucun élève.") : null)), /*#__PURE__*/React.createElement("div", null, !sel ? /*#__PURE__*/React.createElement("div", {
+    className: "emp"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "emp-icon"
+  }, "👈"), /*#__PURE__*/React.createElement("p", null, "Choisis un élève pour lui écrire.")) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      height: '70vh'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'var(--ff-serif)',
+      fontSize: 17,
+      marginBottom: 8
+    }
+  }, sel.name), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      overflowY: 'auto',
+      border: '1.5px solid var(--cream2)',
+      borderRadius: 8,
+      padding: 12,
+      background: 'var(--white)',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 8
+    }
+  }, thread.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--muted)',
+      margin: 'auto'
+    }
+  }, "Aucun message. Écris le premier.") : thread.map(m => {
+    const mine = m.from_id === user.id;
+    return /*#__PURE__*/React.createElement("div", {
+      key: m.id,
+      style: {
+        alignSelf: mine ? 'flex-end' : 'flex-start',
+        maxWidth: '75%',
+        background: mine ? 'var(--navy)' : 'var(--cream)',
+        color: mine ? 'var(--cream)' : '#1a1a1a',
+        borderRadius: 10,
+        padding: '7px 11px',
+        fontSize: 13
+      }
+    }, m.body, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 9,
+        opacity: .6,
+        marginTop: 3
+      }
+    }, (m.created_at || '').slice(0, 16).replace('T', ' ')));
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 8,
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "fi",
+    style: {
+      flex: 1
+    },
+    placeholder: "Ton message…",
+    value: txt,
+    onChange: e => setTxt(e.target.value),
+    onKeyDown: e => {
+      if (e.key === 'Enter') send();
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-p",
+    onClick: send
+  }, "Envoyer")))))));
+}
 function EleveMessages({
   user,
   cours
@@ -6300,6 +6718,30 @@ function AttributionExpress({
     }));
     ids.forEach(confirmInscription);
   };
+  const userById = {};
+  (users || []).forEach(u => {
+    userById[u.id] = u;
+  });
+  const crEnrolled = cr ? (cr.eleveIds || []).map(id => ({
+    id,
+    u: userById[id]
+  })) : [];
+  const crOrphans = crEnrolled.filter(x => !x.u);
+  const removeFromCr = id => {
+    if (!cr) return;
+    setCours(p => p.map(c => c.id !== cr.id ? c : {
+      ...c,
+      eleveIds: (c.eleveIds || []).filter(x => x !== id)
+    }));
+  };
+  const cleanOrphansCr = () => {
+    if (!cr || crOrphans.length === 0) return;
+    if (!confirm('Retirer ' + crOrphans.length + ' id(s) sans compte de ce créneau ?')) return;
+    setCours(p => p.map(c => c.id !== cr.id ? c : {
+      ...c,
+      eleveIds: (c.eleveIds || []).filter(x => userById[x])
+    }));
+  };
   // mode "par élève" : corriger les créneaux d'un élève précis
   const el = eleves.find(e => e.id === selEl) || null;
   const elInCr = c => el && (c.eleveIds || []).includes(el.id);
@@ -6483,20 +6925,89 @@ function AttributionExpress({
     onChange: e => setSelCr(e.target.value)
   }, /*#__PURE__*/React.createElement("option", {
     value: ""
-  }, "— Choisir un créneau —"), (cours || []).slice().sort((a, b) => (a.matiere || '').localeCompare(b.matiere || '')).map(c => /*#__PURE__*/React.createElement("option", {
-    key: c.id,
-    value: c.id
-  }, (c.matiere || 'Créneau') + ' · ' + (c.niveau || '') + (c.jour ? ' · ' + c.jour : '') + (c.debut != null ? ' ' + hs(c.debut) : '') + ' (' + (c.eleveIds || []).length + ')'))), cr ? /*#__PURE__*/React.createElement("div", {
+  }, "— Choisir un créneau —"), (cours || []).slice().sort((a, b) => (a.matiere || '').localeCompare(b.matiere || '')).map(c => {
+    const real = (c.eleveIds || []).filter(id => userById[id]).length;
+    return /*#__PURE__*/React.createElement("option", {
+      key: c.id,
+      value: c.id
+    }, (c.matiere || 'Créneau') + ' · ' + (c.niveau || '') + (c.jour ? ' · ' + c.jour : '') + (c.debut != null ? ' ' + hs(c.debut) : '') + ' (' + real + ')');
+  })), cr ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11.5,
       color: 'var(--muted)',
       marginTop: 8
     }
-  }, (cr.eleveIds || []).length, " élève(s) dans ce créneau.") : null), /*#__PURE__*/React.createElement("div", null, !cr ? /*#__PURE__*/React.createElement("div", {
+  }, crEnrolled.length - crOrphans.length, " élève(s) dans ce créneau", crOrphans.length > 0 ? ' · ' + crOrphans.length + ' id(s) sans compte (à nettoyer)' : '', ".") : null), /*#__PURE__*/React.createElement("div", null, !cr ? /*#__PURE__*/React.createElement("div", {
     className: "emp"
   }, /*#__PURE__*/React.createElement("div", {
     className: "emp-icon"
   }, "👈"), /*#__PURE__*/React.createElement("p", null, "Choisis un créneau, puis coche les élèves qui y vont.")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      border: '1.5px solid var(--cream2)',
+      borderRadius: 8,
+      padding: '10px 12px',
+      marginBottom: 12,
+      background: 'var(--white)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+      gap: 8,
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("b", {
+    style: {
+      fontSize: 13
+    }
+  }, "👥 Dans ce créneau : ", crEnrolled.length - crOrphans.length, " élève(s)"), crOrphans.length > 0 ? /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-o btn-sm",
+    onClick: cleanOrphansCr,
+    title: "Retirer les identifiants qui ne correspondent à aucun compte"
+  }, "🧹 Nettoyer ", crOrphans.length, " orphelin(s)") : null), crEnrolled.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--muted)'
+    }
+  }, "Personne pour l'instant. Coche des élèves ci-dessous.") : /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: 6
+    }
+  }, crEnrolled.map(x => /*#__PURE__*/React.createElement("span", {
+    key: x.id,
+    style: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 6,
+      fontSize: 12,
+      padding: '4px 9px',
+      borderRadius: 14,
+      background: x.u ? 'var(--cream)' : '#fdecef',
+      color: x.u ? '#1a1a1a' : '#b3243b',
+      border: '1px solid ' + (x.u ? 'var(--cream2)' : '#f3b8c2')
+    }
+  }, x.u ? x.u.name : '⚠️ id inconnu : ' + x.id, /*#__PURE__*/React.createElement("button", {
+    onClick: () => removeFromCr(x.id),
+    title: "Retirer de ce créneau",
+    style: {
+      border: 'none',
+      background: 'transparent',
+      cursor: 'pointer',
+      color: 'inherit',
+      fontWeight: 700,
+      lineHeight: 1
+    }
+  }, "✕")))), crOrphans.length > 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: 'var(--muted)',
+      marginTop: 8
+    }
+  }, "Les « id inconnu » sont d'anciens comptes supprimés/recréés : ils gonflent le compteur sans être de vrais élèves. « Nettoyer » les retire proprement.") : null), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       gap: 8,
@@ -6684,7 +7195,7 @@ let so=[];try{so=await sbLoadKV('sorties','global',[]);}catch(_){so=[];}let ents
 try{ch=await sbLoadKV('charges','global',charges);}catch(_){}let dw=[];try{dw=await sbLoad('inscriptions_web',[]);}catch(_){dw=[];}setUsers(u);setResources(r);setModules(mo);setFactures(fa);setDispos(di);setDemandes(de);setCustomTrophies(Array.isArray(ct)?ct:[]);setAppel(ap);setGrades(g);setEnrollments(en);setSalaires(sa);setAwardedTrophies(at);setCompEtats(ce);setCustomComps(Array.isArray(cc)?cc:[]);setCours(co);setInscriptions(ins_data);setSorties(so);setCharges(ch);setDemandesWeb(dw);setEntreprises(ents);setStages(stgs);setDataReady(true);}catch(loadErr){console.error('[App] Erreur chargement données:',loadErr);// Charger les données seed en cas d'erreur pour ne pas bloquer
 setUsers(SEED_USERS);setCours(SEED_COURS);setFactures(SEED_FACTURES);setDataReady(true);}})();},[cu?.id]);// ── Sync retour vers Supabase ──
 // ── Sync Supabase avec debounce 1.5s ──
-useEffect(()=>{if(dataReady)sbDebounce('sv_users',()=>sbSave('users',users));},[users]);useEffect(()=>{if(dataReady)sbDebounce('sv_res',()=>sbSave('ressources',resources));},[resources]);useEffect(()=>{if(dataReady)sbDebounce('sv_mod',()=>sbSave('modules',modules));},[modules]);useEffect(()=>{if(dataReady)sbDebounce('sv_fact',()=>sbSave('factures',factures));},[factures]);useEffect(()=>{if(dataReady)sbDebounce('sv_dispo',()=>sbSave('dispos',dispos));},[dispos]);useEffect(()=>{if(dataReady)sbDebounce('sv_dem',()=>sbSave('demandes',demandes));},[demandes]);useEffect(()=>{if(dataReady)sbDebounce('sv_troph',()=>sbSave('trophees_custom',customTrophies));},[customTrophies]);useEffect(()=>{if(dataReady)sbDebounce('sv_cours',()=>sbSaveKV('cours',cours,'global'));},[cours]);useEffect(()=>{if(dataReady)sbDebounce('sv_appel',()=>sbSaveKV('appel',appel,'global'));},[appel]);useEffect(()=>{if(dataReady)sbDebounce('sv_grd',()=>sbSaveKV('grades',grades,'global'));},[grades]);useEffect(()=>{if(dataReady)sbDebounce('sv_enr',()=>sbSaveKV('enrollments',enrollments,'global'));},[enrollments]);useEffect(()=>{if(dataReady)sbDebounce('sv_sal',()=>sbSaveKV('salaires',salaires,'global'));},[salaires]);useEffect(()=>{if(dataReady)sbDebounce('sv_traw',()=>sbSaveKV('trophees_awarded',awardedTrophies,'global'));},[awardedTrophies]);useEffect(()=>{if(dataReady&&cu)sbDebounce('sv_ce',()=>sbSaveKV('comp_etats',compEtats,cu.id));},[compEtats]);useEffect(()=>{if(dataReady&&cu)sbDebounce('sv_cc',()=>sbSaveKV('custom_comps',customComps,cu.id));},[customComps]);useEffect(()=>{if(dataReady)sbDebounce('sv_sor',()=>sbSaveKV('sorties',sorties,'global'));},[sorties]);useEffect(()=>{if(dataReady)sbDebounce('sv_ent',()=>sbSaveKV('entreprises',entreprises,'global'));},[entreprises]);useEffect(()=>{if(dataReady)sbDebounce('sv_stg',()=>sbSaveKV('stages',stages,'global'));},[stages]);useEffect(()=>{if(dataReady)sbDebounce('sv_ins',()=>sbSaveKV('inscriptions',inscriptions,'global'));},[inscriptions]);useEffect(()=>{if(dataReady)sbDebounce('sv_chg',()=>sbSaveKV('charges',charges,'global'));},[charges]);const login=u=>{setCu(u);setPage('dashboard');};const logout=async()=>{try{await sb.auth.signOut();}catch(_){}try{window.location.href='./';}catch(_){setCu(null);}};if(!appReady)return/*#__PURE__*/React.createElement("div",{style:{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',background:'#111',color:'var(--gold)',fontFamily:'var(--ff-mono)',fontSize:14,letterSpacing:1}},"⟳ Chargement…");if(!cu){const toSite=()=>{try{window.location.href='./';}catch(_){}};if(pub==='inscription')return/*#__PURE__*/React.createElement(Inscription,{onBack:toSite,onLogin:()=>openPub('login')});if(pub==='paiement')return/*#__PURE__*/React.createElement(Abonnement,{onBack:toSite,onInscription:()=>openPub('inscription')});return/*#__PURE__*/React.createElement(Login,{onLogin:login,onBack:toSite});}if(!dataReady)return/*#__PURE__*/React.createElement("div",{style:{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',background:'var(--cream2)',color:'var(--navy)',fontFamily:'var(--ff-mono)',fontSize:13,letterSpacing:.5}},/*#__PURE__*/React.createElement("div",{style:{textAlign:'center'}},/*#__PURE__*/React.createElement("div",{style:{fontSize:28,marginBottom:12}},"📚"),/*#__PURE__*/React.createElement("div",null,"Chargement des données…")));const props={user:cu,users,setUsers,resources,setResources,modules,setModules,grades,setGrades,enrollments,setEnrollments,cours,setCours,appel,setAppel,factures,setFactures,salaires,setSalaires,dispos,setDispos,demandes,setDemandes,compEtats,setCompEtats,customComps,setCustomComps,customTrophies,setCustomTrophies,awardedTrophies,setAwardedTrophies,inscriptions,setInscriptions,sorties,setSorties,charges,setCharges};const renderPage=()=>{switch(page){case'dashboard':return cu&&cu.role==='eleve'?/*#__PURE__*/React.createElement(React.Fragment,null,/*#__PURE__*/React.createElement(EleveAnnoncesBanner,{user:cu,cours:props.cours}),/*#__PURE__*/React.createElement(EleveStats,{user:cu,grades:props.grades,cours:props.cours}),/*#__PURE__*/React.createElement(Dashboard,props)):/*#__PURE__*/React.createElement(Dashboard,props);case'programme':return cu&&cu.role==='eleve'?/*#__PURE__*/React.createElement(React.Fragment,null,/*#__PURE__*/React.createElement(EleveResultats,{user:cu,grades:props.grades}),/*#__PURE__*/React.createElement(EleveCarnet,{user:cu,grades:props.grades}),/*#__PURE__*/React.createElement(MonProgramme,{...props,customComps:props.customComps})):/*#__PURE__*/React.createElement(MonProgramme,{...props,customComps:props.customComps});case'bibliotheque':return/*#__PURE__*/React.createElement(Bibliotheque,{...props,cours:props.cours,compEtats:props.compEtats});case'emploidutemps':return/*#__PURE__*/React.createElement(EmploiDuTemps,{...props,setCours:props.setCours,dispos:props.dispos});case'modules':return/*#__PURE__*/React.createElement(Modules,props);case'monespace':return/*#__PURE__*/React.createElement(MonEspace,props);case'meseleves':return/*#__PURE__*/React.createElement(MesEleves,{...props,compEtats:props.compEtats,setCompEtats:props.setCompEtats,customComps:props.customComps});case'statistiques':return/*#__PURE__*/React.createElement(Statistiques,props);case'facturation':return/*#__PURE__*/React.createElement(Facturation,{...props,cours:props.cours});case'inscriptions':return/*#__PURE__*/React.createElement(Inscriptions,{...props,setFactures:props.setFactures,demandesWeb:demandesWeb,setDemandesWeb:setDemandesWeb});case'suivi':return/*#__PURE__*/React.createElement(SuiviCompetences,{...props,customComps:props.customComps,setCustomComps:props.setCustomComps,awardedTrophies:props.awardedTrophies,setAwardedTrophies:props.setAwardedTrophies});case'coursparticuliers':return/*#__PURE__*/React.createElement(CoursParticuliers,props);case'reservations':return/*#__PURE__*/React.createElement(GestionReservations,{user:cu,users:props.users});case'reserver':return/*#__PURE__*/React.createElement(EleveReservations,{user:cu,users:props.users});case'groupes':return/*#__PURE__*/React.createElement(GroupesAdmin,{cours:cours,setCours:setCours,users:users,setUsers:setUsers});case'chat':return/*#__PURE__*/React.createElement(EleveChat,{user:cu});case'monplanning':return/*#__PURE__*/React.createElement(EleveePlanning,{user:cu,users:props.users,cours:props.cours});case'live':return/*#__PURE__*/React.createElement(LivePage,{user:cu});case'liveadmin':return/*#__PURE__*/React.createElement(LivesAdmin,{user:cu});case'credits':return/*#__PURE__*/React.createElement(CreditsAdmin,{user:cu});case'attribexpress':return/*#__PURE__*/React.createElement(AttributionExpress,{users:users,setUsers:setUsers,cours:cours,setCours:setCours,demandes:demandesWeb,setDemandes:setDemandesWeb});case'carnet':return/*#__PURE__*/React.createElement(CarnetNotes,{...props,grades:props.grades,setGrades:props.setGrades,compEtats:props.compEtats,setCompEtats:props.setCompEtats,customComps:props.customComps,setCustomComps:props.setCustomComps,awardedTrophies:props.awardedTrophies,setAwardedTrophies:props.setAwardedTrophies});case'messages':return cu&&cu.role==='prof'?/*#__PURE__*/React.createElement(ProfMessagerie,{user:cu,users:props.users,cours:props.cours}):/*#__PURE__*/React.createElement(EleveMessages,{user:cu,cours:props.cours});case'accueil':return/*#__PURE__*/React.createElement(AdminLauncher,{setPage:setPage,user:cu,onLogout:logout});case'paiement':return/*#__PURE__*/React.createElement(Paiement,null);case'pages':return/*#__PURE__*/React.createElement(Pages,null);case'annonces':return/*#__PURE__*/React.createElement(Annonces,null);case'vitrine':return/*#__PURE__*/React.createElement(Vitrine,null);case'admin':return/*#__PURE__*/React.createElement(Admin,{...props,factures:props.factures,setFactures:props.setFactures,customTrophies:props.customTrophies,setCustomTrophies:props.setCustomTrophies,awardedTrophies:props.awardedTrophies,setAwardedTrophies:props.setAwardedTrophies,inscriptions:props.inscriptions,setInscriptions:props.setInscriptions});case'sorties':return/*#__PURE__*/React.createElement(Sorties,{sorties:props.sorties,setSorties:props.setSorties,users:props.users,cours:props.cours});default:return/*#__PURE__*/React.createElement(Dashboard,props);}};const _isAdmin=cu&&cu.role==='admin';const _isEleve=cu&&cu.role==='eleve';return/*#__PURE__*/React.createElement("div",{className:`app ${_isAdmin?'launcher-mode':''} ${_isEleve?'stud-mode':''} ${sidebarPinned?'sidebar-pinned':''}`},_isAdmin?(page!=='accueil'?/*#__PURE__*/React.createElement(HomeButton,{setPage:setPage}):null):_isEleve?/*#__PURE__*/React.createElement(StudentTopBar,{page:page,onLogout:logout}):/*#__PURE__*/React.createElement(React.Fragment,null,/*#__PURE__*/React.createElement(Sidebar,{user:cu,page:page,setPage:setPage,onLogout:logout,pinned:sidebarPinned,setPinned:setSidebarPinned}),/*#__PURE__*/React.createElement(MobileBurger,{pinned:sidebarPinned,setPinned:setSidebarPinned})),/*#__PURE__*/React.createElement("div",{className:"main"},renderPage()),_isEleve?/*#__PURE__*/React.createElement(StudentTabBar,{page:page,setPage:setPage}):null);}class ErrorBoundary extends React.Component{constructor(p){super(p);this.state={err:null};}static getDerivedStateFromError(err){return{err};}componentDidCatch(err,info){try{console.error('App error:',err,info);}catch(_){}}render(){if(this.state.err){return/*#__PURE__*/React.createElement("div",{style:{padding:'28px',fontFamily:'monospace',color:'#8b2222',whiteSpace:'pre-wrap',fontSize:13,lineHeight:1.5}},"⚠️ Une erreur est survenue :","\n\n",String(this.state.err&&this.state.err.message||this.state.err),"\n\n",String(this.state.err&&this.state.err.stack||''));}return this.props.children;}}ReactDOM.createRoot(document.getElementById('root')).render(/*#__PURE__*/React.createElement(ErrorBoundary,null,/*#__PURE__*/React.createElement(App,null)));
+useEffect(()=>{if(dataReady)sbDebounce('sv_users',()=>sbSave('users',users));},[users]);useEffect(()=>{if(dataReady)sbDebounce('sv_res',()=>sbSave('ressources',resources));},[resources]);useEffect(()=>{if(dataReady)sbDebounce('sv_mod',()=>sbSave('modules',modules));},[modules]);useEffect(()=>{if(dataReady)sbDebounce('sv_fact',()=>sbSave('factures',factures));},[factures]);useEffect(()=>{if(dataReady)sbDebounce('sv_dispo',()=>sbSave('dispos',dispos));},[dispos]);useEffect(()=>{if(dataReady)sbDebounce('sv_dem',()=>sbSave('demandes',demandes));},[demandes]);useEffect(()=>{if(dataReady)sbDebounce('sv_troph',()=>sbSave('trophees_custom',customTrophies));},[customTrophies]);useEffect(()=>{if(dataReady)sbDebounce('sv_cours',()=>sbSaveKV('cours',cours,'global'));},[cours]);useEffect(()=>{if(dataReady)sbDebounce('sv_appel',()=>sbSaveKV('appel',appel,'global'));},[appel]);useEffect(()=>{if(dataReady)sbDebounce('sv_grd',()=>sbSaveKV('grades',grades,'global'));},[grades]);useEffect(()=>{if(dataReady)sbDebounce('sv_enr',()=>sbSaveKV('enrollments',enrollments,'global'));},[enrollments]);useEffect(()=>{if(dataReady)sbDebounce('sv_sal',()=>sbSaveKV('salaires',salaires,'global'));},[salaires]);useEffect(()=>{if(dataReady)sbDebounce('sv_traw',()=>sbSaveKV('trophees_awarded',awardedTrophies,'global'));},[awardedTrophies]);useEffect(()=>{if(dataReady&&cu)sbDebounce('sv_ce',()=>sbSaveKV('comp_etats',compEtats,cu.id));},[compEtats]);useEffect(()=>{if(dataReady&&cu)sbDebounce('sv_cc',()=>sbSaveKV('custom_comps',customComps,cu.id));},[customComps]);useEffect(()=>{if(dataReady)sbDebounce('sv_sor',()=>sbSaveKV('sorties',sorties,'global'));},[sorties]);useEffect(()=>{if(dataReady)sbDebounce('sv_ent',()=>sbSaveKV('entreprises',entreprises,'global'));},[entreprises]);useEffect(()=>{if(dataReady)sbDebounce('sv_stg',()=>sbSaveKV('stages',stages,'global'));},[stages]);useEffect(()=>{if(dataReady)sbDebounce('sv_ins',()=>sbSaveKV('inscriptions',inscriptions,'global'));},[inscriptions]);useEffect(()=>{if(dataReady)sbDebounce('sv_chg',()=>sbSaveKV('charges',charges,'global'));},[charges]);const login=u=>{setCu(u);setPage('dashboard');};const logout=async()=>{try{await sb.auth.signOut();}catch(_){}try{window.location.href='./';}catch(_){setCu(null);}};if(!appReady)return/*#__PURE__*/React.createElement("div",{style:{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',background:'#111',color:'var(--gold)',fontFamily:'var(--ff-mono)',fontSize:14,letterSpacing:1}},"⟳ Chargement…");if(!cu){const toSite=()=>{try{window.location.href='./';}catch(_){}};if(pub==='inscription')return/*#__PURE__*/React.createElement(Inscription,{onBack:toSite,onLogin:()=>openPub('login')});if(pub==='paiement')return/*#__PURE__*/React.createElement(Abonnement,{onBack:toSite,onInscription:()=>openPub('inscription')});return/*#__PURE__*/React.createElement(Login,{onLogin:login,onBack:toSite});}if(!dataReady)return/*#__PURE__*/React.createElement("div",{style:{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',background:'var(--cream2)',color:'var(--navy)',fontFamily:'var(--ff-mono)',fontSize:13,letterSpacing:.5}},/*#__PURE__*/React.createElement("div",{style:{textAlign:'center'}},/*#__PURE__*/React.createElement("div",{style:{fontSize:28,marginBottom:12}},"📚"),/*#__PURE__*/React.createElement("div",null,"Chargement des données…")));const props={user:cu,users,setUsers,resources,setResources,modules,setModules,grades,setGrades,enrollments,setEnrollments,cours,setCours,appel,setAppel,factures,setFactures,salaires,setSalaires,dispos,setDispos,demandes,setDemandes,compEtats,setCompEtats,customComps,setCustomComps,customTrophies,setCustomTrophies,awardedTrophies,setAwardedTrophies,inscriptions,setInscriptions,sorties,setSorties,charges,setCharges};const renderPage=()=>{switch(page){case'dashboard':return cu&&cu.role==='eleve'?/*#__PURE__*/React.createElement(React.Fragment,null,/*#__PURE__*/React.createElement(EleveAnnoncesBanner,{user:cu,cours:props.cours}),/*#__PURE__*/React.createElement(EleveStats,{user:cu,grades:props.grades,cours:props.cours}),/*#__PURE__*/React.createElement(Dashboard,props)):/*#__PURE__*/React.createElement(Dashboard,props);case'programme':return cu&&cu.role==='eleve'?/*#__PURE__*/React.createElement(React.Fragment,null,/*#__PURE__*/React.createElement(EleveResultats,{user:cu,grades:props.grades}),/*#__PURE__*/React.createElement(EleveCarnet,{user:cu,grades:props.grades}),/*#__PURE__*/React.createElement(MonProgramme,{...props,customComps:props.customComps})):/*#__PURE__*/React.createElement(MonProgramme,{...props,customComps:props.customComps});case'bibliotheque':return/*#__PURE__*/React.createElement(Bibliotheque,{...props,cours:props.cours,compEtats:props.compEtats});case'emploidutemps':return/*#__PURE__*/React.createElement(EmploiDuTemps,{...props,setCours:props.setCours,dispos:props.dispos});case'modules':return/*#__PURE__*/React.createElement(Modules,props);case'monespace':return/*#__PURE__*/React.createElement(MonEspace,props);case'meseleves':return/*#__PURE__*/React.createElement(MesEleves,{...props,compEtats:props.compEtats,setCompEtats:props.setCompEtats,customComps:props.customComps});case'statistiques':return/*#__PURE__*/React.createElement(Statistiques,props);case'facturation':return/*#__PURE__*/React.createElement(Facturation,{...props,cours:props.cours});case'inscriptions':return/*#__PURE__*/React.createElement(Inscriptions,{...props,setFactures:props.setFactures,demandesWeb:demandesWeb,setDemandesWeb:setDemandesWeb});case'suivi':return/*#__PURE__*/React.createElement(SuiviCompetences,{...props,customComps:props.customComps,setCustomComps:props.setCustomComps,awardedTrophies:props.awardedTrophies,setAwardedTrophies:props.setAwardedTrophies});case'coursparticuliers':return/*#__PURE__*/React.createElement(CoursParticuliers,props);case'reservations':return/*#__PURE__*/React.createElement(GestionReservations,{user:cu,users:props.users});case'reserver':return/*#__PURE__*/React.createElement(EleveReservations,{user:cu,users:props.users});case'groupes':return/*#__PURE__*/React.createElement(GroupesAdmin,{cours:cours,setCours:setCours,users:users,setUsers:setUsers});case'chat':return/*#__PURE__*/React.createElement(EleveChat,{user:cu});case'monplanning':return/*#__PURE__*/React.createElement(EleveePlanning,{user:cu,users:props.users,cours:props.cours});case'live':return/*#__PURE__*/React.createElement(LivePage,{user:cu});case'liveadmin':return/*#__PURE__*/React.createElement(LivesAdmin,{user:cu});case'credits':return/*#__PURE__*/React.createElement(CreditsAdmin,{user:cu});case'attribexpress':return/*#__PURE__*/React.createElement(AttributionExpress,{users:users,setUsers:setUsers,cours:cours,setCours:setCours,demandes:demandesWeb,setDemandes:setDemandesWeb});case'carnet':return/*#__PURE__*/React.createElement(CarnetNotes,{...props,grades:props.grades,setGrades:props.setGrades,compEtats:props.compEtats,setCompEtats:props.setCompEtats,customComps:props.customComps,setCustomComps:props.setCustomComps,awardedTrophies:props.awardedTrophies,setAwardedTrophies:props.setAwardedTrophies});case'messages':return cu&&cu.role==='prof'?/*#__PURE__*/React.createElement(ProfMessagerie,{user:cu,users:props.users,cours:props.cours}):(cu&&cu.role==='admin'?/*#__PURE__*/React.createElement(AdminMessagerie,{user:cu,users:props.users,cours:props.cours}):/*#__PURE__*/React.createElement(EleveMessages,{user:cu,cours:props.cours}));case'accueil':return/*#__PURE__*/React.createElement(AdminLauncher,{setPage:setPage,user:cu,onLogout:logout});case'paiement':return/*#__PURE__*/React.createElement(Paiement,null);case'pages':return/*#__PURE__*/React.createElement(Pages,null);case'annonces':return/*#__PURE__*/React.createElement(Annonces,null);case'vitrine':return/*#__PURE__*/React.createElement(Vitrine,null);case'admin':return/*#__PURE__*/React.createElement(Admin,{...props,factures:props.factures,setFactures:props.setFactures,customTrophies:props.customTrophies,setCustomTrophies:props.setCustomTrophies,awardedTrophies:props.awardedTrophies,setAwardedTrophies:props.setAwardedTrophies,inscriptions:props.inscriptions,setInscriptions:props.setInscriptions});case'sorties':return/*#__PURE__*/React.createElement(Sorties,{sorties:props.sorties,setSorties:props.setSorties,users:props.users,cours:props.cours});default:return/*#__PURE__*/React.createElement(Dashboard,props);}};const _isAdmin=cu&&cu.role==='admin';const _isEleve=cu&&cu.role==='eleve';return/*#__PURE__*/React.createElement("div",{className:`app ${_isAdmin?'launcher-mode':''} ${_isEleve?'stud-mode':''} ${sidebarPinned?'sidebar-pinned':''}`},_isAdmin?(page!=='accueil'?/*#__PURE__*/React.createElement(HomeButton,{setPage:setPage}):null):_isEleve?/*#__PURE__*/React.createElement(StudentTopBar,{page:page,onLogout:logout}):/*#__PURE__*/React.createElement(React.Fragment,null,/*#__PURE__*/React.createElement(Sidebar,{user:cu,page:page,setPage:setPage,onLogout:logout,pinned:sidebarPinned,setPinned:setSidebarPinned}),/*#__PURE__*/React.createElement(MobileBurger,{pinned:sidebarPinned,setPinned:setSidebarPinned})),/*#__PURE__*/React.createElement("div",{className:"main"},renderPage()),_isEleve?/*#__PURE__*/React.createElement(StudentTabBar,{page:page,setPage:setPage}):null);}class ErrorBoundary extends React.Component{constructor(p){super(p);this.state={err:null};}static getDerivedStateFromError(err){return{err};}componentDidCatch(err,info){try{console.error('App error:',err,info);}catch(_){}}render(){if(this.state.err){return/*#__PURE__*/React.createElement("div",{style:{padding:'28px',fontFamily:'monospace',color:'#8b2222',whiteSpace:'pre-wrap',fontSize:13,lineHeight:1.5}},"⚠️ Une erreur est survenue :","\n\n",String(this.state.err&&this.state.err.message||this.state.err),"\n\n",String(this.state.err&&this.state.err.stack||''));}return this.props.children;}}ReactDOM.createRoot(document.getElementById('root')).render(/*#__PURE__*/React.createElement(ErrorBoundary,null,/*#__PURE__*/React.createElement(App,null)));
 </script>
 
 
